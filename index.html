@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>🛡️ Vibe Analytics V6.3</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Noto+Sans+JP:wght@400;500;700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #08090d; --surface: #0f1117; --border: rgba(255,255,255,0.08);
+      --text: #f0f0f0; --muted: rgba(255,255,255,0.38);
+      --accent: #ff5c1a; --accent2: #e91e8c; --green: #00e676; --yellow: #ffd600;
+      --font-head: 'Bebas Neue', sans-serif; --font-body: 'Noto Sans JP', sans-serif; --font-mono: 'Space Mono', monospace;
+      --radius: 14px; --radius-sm: 9px;
+    }
+    html, body { height: 100%; background: var(--bg); color: var(--text); font-family: var(--font-body); }
+    body { background-image: radial-gradient(ellipse 60% 40% at 15% 10%, rgba(255,92,26,0.10) 0%, transparent 55%); min-height: 100vh; }
+    #root { max-width: 540px; margin: 0 auto; padding: 0 0 100px; }
+    .header { position: sticky; top: 0; z-index: 200; background: rgba(8,9,13,0.85); backdrop-filter: blur(18px); border-bottom: 1px solid var(--border); padding: 14px 18px; display: flex; align-items: center; gap: 12px; }
+    .header-logo { width: 40px; height: 40px; border-radius: 11px; background: linear-gradient(135deg, var(--accent), var(--accent2)); display: flex; align-items: center; justify-content: center; font-size: 20px; }
+    .header-title { font-family: var(--font-head); font-size: 22px; letter-spacing: 0.04em; }
+    .section { padding: 20px 16px 0; }
+    .section-label { font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; margin-bottom: 10px; }
+    .set-card { background: rgba(255,255,255,0.025); border: 1.5px solid var(--border); border-radius: var(--radius); margin-bottom: 12px; overflow: hidden; }
+    .set-header { padding: 15px 16px; display: flex; align-items: center; justify-content: space-between; }
+    .set-body { padding: 0 16px 16px; border-top: 1px solid var(--border); }
+    .field-label { font-size: 11px; color: var(--muted); display: block; margin-bottom: 5px; }
+    .input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+    input { width: 100%; padding: 12px; background: rgba(255,255,255,0.05); border: 1.5px solid var(--border); border-radius: var(--radius-sm); color: #fff; font-size: 15px; }
+    input:focus { border-color: var(--accent); outline: none; }
+    .stamp-btn { background: var(--accent); color: #fff; padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: 900; border: none; cursor: pointer; }
+    .stamp-btn.secondary { background: rgba(255,255,255,0.15); }
+    .platform-block { border-radius: 11px; padding: 12px; margin-top: 10px; border: 1px solid var(--border); }
+    .platform-title { font-size: 12px; font-weight: 900; margin-bottom: 8px; display: flex; justify-content: space-between; }
+    .diff-badge { font-size: 10px; padding: 2px 6px; border-radius: 4px; background: rgba(0,230,118,0.15); color: var(--green); }
+    .add-btn { width: 100%; padding: 18px; background: rgba(255,255,255,0.04); border: 2px dashed var(--border); color: #fff; font-weight: bold; border-radius: var(--radius); margin-top: 10px; }
+    .gen-btn { width: 100%; padding: 18px; background: linear-gradient(135deg, var(--accent), var(--accent2)); border-radius: var(--radius); color: #fff; font-size: 17px; font-weight: 900; margin-top: 30px; border:none; }
+    .log-box { background: #000; border: 1px solid var(--border); border-radius: var(--radius); margin-top: 15px; padding: 15px; font-family: var(--font-mono); font-size: 12px; white-space: pre-wrap; }
+    .copy-btn { width: 100%; margin-top: 10px; padding: 10px; background: var(--green); color: #000; font-weight: bold; border-radius: 8px; border:none; }
+    .reset-btn { width: 100%; margin-top: 20px; padding: 12px; background: rgba(255,60,60,0.1); color: #ff6e6e; border: 1px solid rgba(255,60,60,0.2); border-radius: 10px; font-size: 12px; }
+  </style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel">
+const { useState, useMemo, useEffect } = React;
+
+const PLATFORMS = [
+  { key: 'd', label: '出前館', color: '#ff5c1a' },
+  { key: 'u', label: 'Uber',   color: '#06C167' },
+  { key: 'm', label: 'menu',   color: '#e91e8c' },
+];
+
+function getNow() {
+  const d = new Date();
+  return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+}
+
+const INITIAL_SETS = [{ 
+  start: '', end: '', 
+  d_cum: '', u_cum: '', m_cum: '', 
+  d_cnt_cum: '', u_cnt_cum: '', m_cnt_cum: '',
+  km: '', memo: '', quest: '' 
+}];
+
+function App() {
+  // LocalStorageから復元、なければ初期値
+  const savedDate = localStorage.getItem('vibe_date') || new Date().toISOString().split('T')[0];
+  const savedWeather = localStorage.getItem('vibe_weather') || '晴';
+  const savedSets = JSON.parse(localStorage.getItem('vibe_sets')) || INITIAL_SETS;
+
+  const [date, setDate] = useState(savedDate);
+  const [weather, setWeather] = useState(savedWeather);
+  const [sets, setSets] = useState(savedSets);
+  const [showLog, setShowLog] = useState(false);
+
+  // 状態が変化するたびに保存
+  useEffect(() => {
+    localStorage.setItem('vibe_date', date);
+    localStorage.setItem('vibe_weather', weather);
+    localStorage.setItem('vibe_sets', JSON.stringify(sets));
+  }, [date, weather, sets]);
+
+  const calculatedSets = useMemo(() => {
+    return sets.map((s, i) => {
+      const prev = sets[i-1] || { d_cum:0, u_cum:0, m_cum:0, d_cnt_cum:0, u_cnt_cum:0, m_cnt_cum:0 };
+      const n = (v) => parseFloat(v) || 0;
+      return { 
+        ...s, 
+        d_p: n(s.d_cum) - n(prev.d_cum), 
+        u_p: n(s.u_cum) - n(prev.u_cum), 
+        m_p: n(s.m_cum) - n(prev.m_cum),
+        d_c: n(s.d_cnt_cum) - n(prev.d_cnt_cum),
+        u_c: n(s.u_cnt_cum) - n(prev.u_cnt_cum),
+        m_c: n(s.m_cnt_cum) - n(prev.m_cnt_cum)
+      };
+    });
+  }, [sets]);
+
+  const updateSet = (i, key, val) => {
+    const newSets = [...sets];
+    newSets[i][key] = val;
+    setSets(newSets);
+  };
+
+  const addSet = () => {
+    const last = sets[sets.length-1];
+    setSets([...sets, { 
+      start: '', end: '', 
+      d_cum: last.d_cum, u_cum: last.u_cum, m_cum: last.m_cum, 
+      d_cnt_cum: last.d_cnt_cum, u_cnt_cum: last.u_cnt_cum, m_cnt_cum: last.m_cnt_cum,
+      km: '', memo: '', quest: '' 
+    }]);
+  };
+
+  const resetData = () => {
+    if(window.confirm('本日のデータをリセットして新しい1日を開始しますか？')) {
+      setSets(INITIAL_SETS);
+      setDate(new Date().toISOString().split('T')[0]);
+      setShowLog(false);
+    }
+  };
+
+  const generateV5Log = () => {
+    let all_p=0, all_c=0, all_km=0, all_q=0;
+    calculatedSets.forEach(s => {
+      all_p += (s.d_p + s.u_p + s.m_p);
+      all_c += (s.d_c + s.u_c + s.m_c);
+      all_km += parseFloat(s.km) || 0;
+      all_q += parseFloat(s.quest) || 0;
+    });
+    const total = all_p + all_q;
+    const dayJa = ['日','月','火','水','木','金','土'][new Date(date).getDay()];
+    let log = `${date.replace(/-/g,'/')} (${dayJa})\n📊 本日累計リザルト\n\n`;
+    log += `| 項目 | 内容 | 備考 |\n|:--|--:|:--|\n`;
+    log += `| **天気** | ${weather} | |\n`;
+    log += `| **総売上** | **${total.toLocaleString()} 円** | |\n`;
+    log += `| **総完了件数** | **${all_c} 件** | |\n`;
+    log += `| **総走行距離** | **${all_km} km** | |\n\n🕒 各セット詳細\n`;
+    calculatedSets.forEach((s, i) => {
+      log += `第${i+1}セット ${s.start} 〜 ${s.end}\n`;
+      log += `実績 ：${s.d_c+s.u_c+s.m_c}件 / ${(s.d_p+s.u_p+s.m_p).toLocaleString()}円\n`;
+      if(s.memo) log += `戦術 ：${s.memo}\n`;
+    });
+    return log;
+  };
+
+  return (
+    <div>
+      <div className="header">
+        <div className="header-logo">🛡️</div>
+        <div>
+          <div className="header-title">VIBE ANALYTICS V6.3</div>
+          <div className="header-sub">不揮発メモリ実装・BOSS専用</div>
+        </div>
+      </div>
+
+      <div className="section">
+        <div className="input-row">
+          <input type="date" value={date} onChange={e => setDate(e.target.value)} />
+          <input type="text" value={weather} onChange={e => setWeather(e.target.value)} />
+        </div>
+      </div>
+
+      <div className="section">
+        <div className="section-label">稼働セット (自動保存中)</div>
+        {calculatedSets.map((s, i) => (
+          <div key={i} className="set-card">
+            <div className="set-header">
+              <span style={{fontWeight:'900'}}>SET {i+1}</span>
+              {s.start && !s.end && <span style={{fontSize:'10px', color: 'var(--accent)'}}>● 稼働中...</span>}
+            </div>
+            <div className="set-body">
+              <div className="input-row">
+                <div>
+                  <label className="field-label">開始</label>
+                  <div style={{display:'flex', gap:'5px'}}>
+                    <input type="time" value={s.start} onChange={e=>updateSet(i,'start',e.target.value)} />
+                    <button className="stamp-btn" onClick={()=>updateSet(i,'start',getNow())}>START</button>
+                  </div>
+                </div>
+                <div>
+                  <label className="field-label">終了</label>
+                  <div style={{display:'flex', gap:'5px'}}>
+                    <input type="time" value={s.end} onChange={e=>updateSet(i,'end',e.target.value)} />
+                    <button className="stamp-btn secondary" onClick={()=>updateSet(i,'end',getNow())}>FIN</button>
+                  </div>
+                </div>
+              </div>
+
+              {PLATFORMS.map(p => (
+                <div key={p.key} className="platform-block" style={{background: p.color+'08'}}>
+                  <div className="platform-title" style={{color:p.color}}>
+                    {p.label} <span className="diff-badge">+{s[p.key+'_p'].toLocaleString()}円 / {s[p.key+'_c']}件</span>
+                  </div>
+                  <div className="input-row">
+                    <input type="number" placeholder="総売上(累積)" value={sets[i][p.key+'_cum']} onChange={e=>updateSet(i, p.key+'_cum', e.target.value)} />
+                    <input type="number" placeholder="総件数(累積)" value={sets[i][p.key+'_cnt_cum']} onChange={e=>updateSet(i, p.key+'_cnt_cum', e.target.value)} />
+                  </div>
+                </div>
+              ))}
+              
+              <div className="input-row" style={{marginTop:'10px'}}>
+                <div>
+                  <label className="field-label">セット内走行(km)</label>
+                  <input type="number" value={s.km} onChange={e=>updateSet(i,'km',e.target.value)} />
+                </div>
+                <div>
+                  <label className="field-label">セット内クエ(円)</label>
+                  <input type="number" value={s.quest} onChange={e=>updateSet(i,'quest',e.target.value)} />
+                </div>
+              </div>
+              <textarea style={{width:'100%', marginTop:'10px', padding:'10px', background:'rgba(255,255,255,0.05)', color:'#fff', border:'1px solid var(--border)', borderRadius:'8px'}} 
+                placeholder="戦術メモ" value={s.memo} onChange={e=>updateSet(i,'memo',e.target.value)} />
+            </div>
+          </div>
+        ))}
+        <button className="add-btn" onClick={addSet}>+ 次のセットを追加</button>
+      </div>
+
+      <div className="section">
+        <button className="gen-btn" onClick={() => setShowLog(!showLog)}>
+          {showLog ? '入力を続ける' : 'V5ログを生成'}
+        </button>
+        {showLog && (
+          <div className="log-box">
+            <pre style={{whiteSpace:'pre-wrap'}}>{generateV5Log()}</pre>
+            <button className="copy-btn" onClick={() => {
+              navigator.clipboard.writeText(generateV5Log());
+              alert('コピーしました！');
+            }}>クリップボードにコピー</button>
+          </div>
+        )}
+        
+        <button className="reset-btn" onClick={resetData}>今日のリザルトをリセット</button>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>

@@ -8,7 +8,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Noto+Sans+JP:wght@400;500;700;900&swap" rel="stylesheet" />
   <style>
     :root {
       --bg: #0f1117; --surface: #1a1c24; --accent: #2979ff; --green: #00e676; --text: #f0f0f0;
@@ -20,25 +20,16 @@
     .header { padding: 20px 0; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border); margin-bottom: 20px; }
     .logo { width: 40px; height: 40px; background: var(--accent); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
     .title { font-family: 'Bebas Neue', sans-serif; font-size: 24px; letter-spacing: 1px; }
-    
-    .upload-zone {
-      background: var(--surface); border: 2px dashed var(--border); border-radius: var(--radius);
-      padding: 30px; text-align: center; margin-bottom: 20px; cursor: pointer;
-    }
-    .upload-zone:hover { border-color: var(--accent); }
-    
-    .loading { color: var(--accent); font-weight: bold; margin: 10px 0; display: none; }
-    
+    .upload-zone { background: var(--surface); border: 2px dashed var(--border); border-radius: var(--radius); padding: 30px; text-align: center; margin-bottom: 20px; cursor: pointer; display: block; }
+    .loading { color: var(--accent); font-weight: bold; margin: 20px 0; text-align: center; }
     .card { background: var(--surface); border-radius: var(--radius); padding: 15px; margin-bottom: 10px; border: 1px solid var(--border); }
     .field { margin-bottom: 12px; }
     .label { font-size: 11px; color: rgba(255,255,255,0.5); margin-bottom: 4px; display: block; }
     input, select { width: 100%; background: rgba(0,0,0,0.2); border: 1px solid var(--border); padding: 10px; color: #fff; border-radius: 6px; font-size: 14px; }
-    
-    .btn { width: 100%; padding: 15px; border-radius: var(--radius); border: none; font-weight: bold; cursor: pointer; font-size: 16px; transition: 0.2s; }
+    .btn { width: 100%; padding: 15px; border-radius: var(--radius); border: none; font-weight: bold; cursor: pointer; font-size: 16px; }
     .btn-primary { background: var(--accent); color: #fff; margin-top: 10px; }
     .btn-success { background: var(--green); color: #000; margin-top: 20px; }
     .btn-ghost { background: transparent; color: #ff5252; border: 1px solid #ff5252; margin-top: 10px; font-size: 12px; padding: 8px; }
-
     .list-item { background: rgba(255,255,255,0.03); padding: 10px; border-radius: 8px; margin-bottom: 8px; font-size: 13px; display: flex; justify-content: space-between; align-items: center; }
   </style>
 </head>
@@ -48,7 +39,7 @@
 <script type="text/babel">
 const { useState, useEffect } = React;
 
-// 🛡️ ここにAPIキーを入力してください
+// 🛡️ APIキーをここに貼り付けてください
 const API_KEY = "AIzaSyAwCtBMsgaBo4OCWqQphS0d6BvQ9tUfA_Y"; 
 const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
 
@@ -63,7 +54,6 @@ function App() {
     localStorage.setItem('exp_items', JSON.stringify(items));
   }, [items]);
 
-  // 📸 画像をGeminiに送って解析
   const handleFileUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -73,10 +63,12 @@ function App() {
     reader.onloadend = async () => {
       const base64Data = reader.result.split(',')[1];
       
+      const promptText = `レシート画像から「日付(YYYY-MM-DD)」「金額(数値のみ)」「店名」「勘定科目」を抽出し、以下のJSON形式で返してください。勘定科目は[旅費交通費, 通信費, 消耗品費, 接待交際費, 雑費]から最も適切なものを選んでください。JSON以外は何も書かないでください。 {"date":"", "amount":0, "store":"", "category":""}`;
+
       const payload = {
         contents: [{
           parts: [
-            { text: "レシート画像から「日付(YYYY-MM-DD)」「金額(数値のみ)」「店名」「勘定科目」を抽出し、以下のJSON形式で返してください。勘定科目は[旅費交通費, 通信費, 消耗品費, 接待交際費, 雑費]から最も適切なものを選んでください。JSON以外は何も書かないでください。 {"date":"", "amount":0, "store":"", "category":""}" },
+            { text: promptText },
             { inline_data: { mime_type: "image/jpeg", data: base64Data } }
           ]
         }]
@@ -86,11 +78,12 @@ function App() {
         const res = await fetch(API_URL, { method: "POST", body: JSON.stringify(payload) });
         const data = await res.json();
         const text = data.candidates[0].content.parts[0].text;
-        const result = JSON.parse(text.replace(/```json|```/g, ""));
+        const result = JSON.parse(text.replace(/`|json/g, "").trim());
         setCurrent(result);
       } catch (err) {
+        console.error(err);
         alert("解析に失敗しました。キーを確認するか、手動で入力してください。");
-        setCurrent({ date: new Date().toISOString().split('T')[0], amount: 0, store: "不明", category: "雑費" });
+        setCurrent({ date: new Date().toISOString().split('T')[0], amount: 0, store: "手動入力", category: "雑費" });
       }
       setLoading(false);
     };
@@ -103,12 +96,10 @@ function App() {
   };
 
   const downloadCSV = () => {
-    // freee 取引インポート形式 (収支, 発生日, 勘定科目, 金額, 備考)
     let csv = "収支,発生日,勘定科目,金額,備考\n";
     items.forEach(item => {
       csv += `支出,${item.date},${item.category},${item.amount},${item.store}\n`;
     });
-    
     const blob = new Blob(["\uFEFF" + csv], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
@@ -133,38 +124,29 @@ function App() {
         </label>
       )}
 
-      {loading && <div className="loading">AIがレシートを読み取り中... 🚀</div>}
+      {loading && <div className="loading">AIが解析中... 🚀</div>}
 
       {current && (
         <div className="card">
+          <div className="field"><label className="label">日付</label><input type="date" value={current.date} onChange={e=>setCurrent({...current, date:e.target.value})} /></div>
+          <div className="field"><label className="label">金額 (円)</label><input type="number" value={current.amount} onChange={e=>setCurrent({...current, amount:e.target.value})} /></div>
+          <div className="field"><label className="label">店名</label><input type="text" value={current.store} onChange={e=>setCurrent({...current, store:e.target.value})} /></div>
           <div className="field">
-            <label className="label">日付</label>
-            <input type="date" value={current.date} onChange={e=>setCurrent({...current, date:e.target.value})} />
-          </div>
-          <div className="field">
-            <label className="label">金額 (円)</label>
-            <input type="number" value={current.amount} onChange={e=>setCurrent({...current, amount:e.target.value})} />
-          </div>
-          <div className="field">
-            <label className="label">店名 / 内容</label>
-            <input type="text" value={current.store} onChange={e=>setCurrent({...current, store:e.target.value})} />
-          </div>
-          <div className="field">
-            <label className="label">勘定科目 (AI推論)</label>
+            <label className="label">勘定科目</label>
             <select value={current.category} onChange={e=>setCurrent({...current, category:e.target.value})}>
               {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
             </select>
           </div>
-          <button className="btn btn-primary" onClick={addItem}>この内容でリストに追加</button>
-          <button className="btn btn-ghost" onClick={()=>setCurrent(null)}>キャンセル</button>
+          <button className="btn btn-primary" onClick={addItem}>リストに追加</button>
+          <button className="btn btn-ghost" onClick={()=>setCurrent(null)}>やり直し</button>
         </div>
       )}
 
       {items.length > 0 && (
         <div style={{marginTop:'30px'}}>
           <div style={{display:'flex', justifyContent:'space-between', marginBottom:'10px'}}>
-            <span style={{fontSize:'12px', fontWeight:'bold'}}>未出力の経費: {items.length}件</span>
-            <button style={{background:'none', border:'none', color:'#ff5252', fontSize:'11px'}} onClick={()=>{if(confirm('クリアしますか？'))setItems([])}}>全クリア</button>
+            <span style={{fontSize:'12px', fontWeight:'bold'}}>未出力: {items.length}件</span>
+            <button style={{background:'none', border:'none', color:'#ff5252', fontSize:'11px'}} onClick={()=>setItems([])}>全クリア</button>
           </div>
           {items.map((item, idx) => (
             <div key={idx} className="list-item">

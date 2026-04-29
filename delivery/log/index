@@ -31,18 +31,18 @@
     .set-body { padding: 0 16px 16px; border-top: 1px solid var(--border); }
     .field-label { font-size: 11px; color: var(--muted); display: block; margin-bottom: 5px; }
     .input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
-    input { width: 100%; padding: 12px; background: rgba(255,255,255,0.05); border: 1.5px solid var(--border); border-radius: var(--radius-sm); color: #fff; font-size: 15px; }
-    input:focus { border-color: var(--accent); outline: none; }
+    input, textarea { width: 100%; padding: 12px; background: rgba(255,255,255,0.05); border: 1.5px solid var(--border); border-radius: var(--radius-sm); color: #fff; font-size: 15px; }
+    input:focus, textarea:focus { border-color: var(--accent); outline: none; }
     .stamp-btn { background: var(--accent); color: #fff; padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: 900; border: none; cursor: pointer; }
     .stamp-btn.secondary { background: rgba(255,255,255,0.15); }
     .platform-block { border-radius: 11px; padding: 12px; margin-top: 10px; border: 1px solid var(--border); }
     .platform-title { font-size: 12px; font-weight: 900; margin-bottom: 8px; display: flex; justify-content: space-between; }
     .diff-badge { font-size: 10px; padding: 2px 6px; border-radius: 4px; background: rgba(0,230,118,0.15); color: var(--green); }
-    .add-btn { width: 100%; padding: 18px; background: rgba(255,255,255,0.04); border: 2px dashed var(--border); color: #fff; font-weight: bold; border-radius: var(--radius); margin-top: 10px; }
-    .gen-btn { width: 100%; padding: 18px; background: linear-gradient(135deg, var(--accent), var(--accent2)); border-radius: var(--radius); color: #fff; font-size: 17px; font-weight: 900; margin-top: 30px; border:none; }
+    .add-btn { width: 100%; padding: 18px; background: rgba(255,255,255,0.04); border: 2px dashed var(--border); color: #fff; font-weight: bold; border-radius: var(--radius); margin-top: 10px; cursor: pointer; }
+    .gen-btn { width: 100%; padding: 18px; background: linear-gradient(135deg, var(--accent), var(--accent2)); border-radius: var(--radius); color: #fff; font-size: 17px; font-weight: 900; margin-top: 30px; border:none; cursor: pointer; }
     .log-box { background: #000; border: 1px solid var(--border); border-radius: var(--radius); margin-top: 15px; padding: 15px; font-family: var(--font-mono); font-size: 12px; white-space: pre-wrap; }
-    .copy-btn { width: 100%; margin-top: 10px; padding: 10px; background: var(--green); color: #000; font-weight: bold; border-radius: 8px; border:none; }
-    .reset-btn { width: 100%; margin-top: 20px; padding: 12px; background: rgba(255,60,60,0.1); color: #ff6e6e; border: 1px solid rgba(255,60,60,0.2); border-radius: 10px; font-size: 12px; }
+    .copy-btn { width: 100%; margin-top: 10px; padding: 10px; background: var(--green); color: #000; font-weight: bold; border-radius: 8px; border:none; cursor: pointer; }
+    .reset-btn { width: 100%; margin-top: 20px; padding: 12px; background: rgba(255,60,60,0.1); color: #ff6e6e; border: 1px solid rgba(255,60,60,0.2); border-radius: 10px; font-size: 12px; cursor: pointer; }
   </style>
 </head>
 <body>
@@ -57,6 +57,13 @@ const PLATFORMS = [
   { key: 'm', label: 'menu',   color: '#e91e8c' },
 ];
 
+// 保存キーをこのツール専用に固定（衝突回避用）
+const STORAGE_KEYS = {
+  DATE: 'delivery_log_date',
+  WEATHER: 'delivery_log_weather',
+  SETS: 'delivery_log_sets'
+};
+
 function getNow() {
   const d = new Date();
   return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
@@ -70,21 +77,20 @@ const INITIAL_SETS = [{
 }];
 
 function App() {
-  // LocalStorageから復元、なければ初期値
-  const savedDate = localStorage.getItem('vibe_date') || new Date().toISOString().split('T')[0];
-  const savedWeather = localStorage.getItem('vibe_weather') || '晴';
-  const savedSets = JSON.parse(localStorage.getItem('vibe_sets')) || INITIAL_SETS;
-
-  const [date, setDate] = useState(savedDate);
-  const [weather, setWeather] = useState(savedWeather);
-  const [sets, setSets] = useState(savedSets);
+  // ブラウザの物置（LocalStorage）から復元
+  const [date, setDate] = useState(() => localStorage.getItem(STORAGE_KEYS.DATE) || new Date().toISOString().split('T')[0]);
+  const [weather, setWeather] = useState(() => localStorage.getItem(STORAGE_KEYS.WEATHER) || '晴');
+  const [sets, setSets] = useState(() => {
+    const saved = localStorage.getItem(STORAGE_KEYS.SETS);
+    return saved ? JSON.parse(saved) : INITIAL_SETS;
+  });
   const [showLog, setShowLog] = useState(false);
 
-  // 状態が変化するたびに保存
+  // 入力が変わるたびに自動保存
   useEffect(() => {
-    localStorage.setItem('vibe_date', date);
-    localStorage.setItem('vibe_weather', weather);
-    localStorage.setItem('vibe_sets', JSON.stringify(sets));
+    localStorage.setItem(STORAGE_KEYS.DATE, date);
+    localStorage.setItem(STORAGE_KEYS.WEATHER, weather);
+    localStorage.setItem(STORAGE_KEYS.SETS, JSON.stringify(sets));
   }, [date, weather, sets]);
 
   const calculatedSets = useMemo(() => {
@@ -147,6 +153,7 @@ function App() {
       log += `第${i+1}セット ${s.start} 〜 ${s.end}\n`;
       log += `実績 ：${s.d_c+s.u_c+s.m_c}件 / ${(s.d_p+s.u_p+s.m_p).toLocaleString()}円\n`;
       if(s.memo) log += `戦術 ：${s.memo}\n`;
+      log += `\n`;
     });
     return log;
   };
@@ -157,7 +164,7 @@ function App() {
         <div className="header-logo">🛡️</div>
         <div>
           <div className="header-title">VIBE ANALYTICS V6.3</div>
-          <div className="header-sub">不揮発メモリ実装・BOSS専用</div>
+          <div className="header-sub">OKG Project | フォルダ専用モデル</div>
         </div>
       </div>
 
@@ -195,56 +202,9 @@ function App() {
               </div>
 
               {PLATFORMS.map(p => (
-                <div key={p.key} className="platform-block" style={{background: p.color+'08'}}>
+                <div key={p.key} className="platform-block" style={{background: p.color + '08'}}>
                   <div className="platform-title" style={{color:p.color}}>
                     {p.label} <span className="diff-badge">+{s[p.key+'_p'].toLocaleString()}円 / {s[p.key+'_c']}件</span>
                   </div>
                   <div className="input-row">
-                    <input type="number" placeholder="総売上(累積)" value={sets[i][p.key+'_cum']} onChange={e=>updateSet(i, p.key+'_cum', e.target.value)} />
-                    <input type="number" placeholder="総件数(累積)" value={sets[i][p.key+'_cnt_cum']} onChange={e=>updateSet(i, p.key+'_cnt_cum', e.target.value)} />
-                  </div>
-                </div>
-              ))}
-              
-              <div className="input-row" style={{marginTop:'10px'}}>
-                <div>
-                  <label className="field-label">セット内走行(km)</label>
-                  <input type="number" value={s.km} onChange={e=>updateSet(i,'km',e.target.value)} />
-                </div>
-                <div>
-                  <label className="field-label">セット内クエ(円)</label>
-                  <input type="number" value={s.quest} onChange={e=>updateSet(i,'quest',e.target.value)} />
-                </div>
-              </div>
-              <textarea style={{width:'100%', marginTop:'10px', padding:'10px', background:'rgba(255,255,255,0.05)', color:'#fff', border:'1px solid var(--border)', borderRadius:'8px'}} 
-                placeholder="戦術メモ" value={s.memo} onChange={e=>updateSet(i,'memo',e.target.value)} />
-            </div>
-          </div>
-        ))}
-        <button className="add-btn" onClick={addSet}>+ 次のセットを追加</button>
-      </div>
-
-      <div className="section">
-        <button className="gen-btn" onClick={() => setShowLog(!showLog)}>
-          {showLog ? '入力を続ける' : 'V5ログを生成'}
-        </button>
-        {showLog && (
-          <div className="log-box">
-            <pre style={{whiteSpace:'pre-wrap'}}>{generateV5Log()}</pre>
-            <button className="copy-btn" onClick={() => {
-              navigator.clipboard.writeText(generateV5Log());
-              alert('コピーしました！');
-            }}>クリップボードにコピー</button>
-          </div>
-        )}
-        
-        <button className="reset-btn" onClick={resetData}>今日のリザルトをリセット</button>
-      </div>
-    </div>
-  );
-}
-
-ReactDOM.createRoot(document.getElementById('root')).render(<App />);
-</script>
-</body>
-</html>
+                    <input type="number"

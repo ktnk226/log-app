@@ -231,8 +231,8 @@ const EMPTY_SET = () => ({
   start: '', end: '',
   d_cum: '', u_cum: '', m_cum: '',
   d_cnt_cum: '', u_cnt_cum: '', m_cnt_cum: '',
-  d_que: '', u_que: '', m_que: '',
-  km: '', set_que: '', memo: '',
+  d_que_cum: '', u_que_cum: '', m_que_cum: '',
+  km_cum: '', memo: '',
   open: true,
 });
 
@@ -266,16 +266,25 @@ function App() {
   const calced = useMemo(() => {
     const n = v => parseFloat(v) || 0;
     return sets.map((s, i) => {
-      const p = sets[i-1] || { d_cum:0, u_cum:0, m_cum:0, d_cnt_cum:0, u_cnt_cum:0, m_cnt_cum:0 };
+      const p = sets[i-1] || {
+        d_cum:0, u_cum:0, m_cum:0,
+        d_cnt_cum:0, u_cnt_cum:0, m_cnt_cum:0,
+        d_que_cum:0, u_que_cum:0, m_que_cum:0,
+        km_cum:0,
+      };
       return {
         ...s,
-        d_p: n(s.d_cum) - n(p.d_cum),
-        u_p: n(s.u_cum) - n(p.u_cum),
-        m_p: n(s.m_cum) - n(p.m_cum),
-        d_c: n(s.d_cnt_cum) - n(p.d_cnt_cum),
-        u_c: n(s.u_cnt_cum) - n(p.u_cnt_cum),
-        m_c: n(s.m_cnt_cum) - n(p.m_cnt_cum),
-        dur: calcDuration(s.start, s.end),
+        d_p:   n(s.d_cum)     - n(p.d_cum),
+        u_p:   n(s.u_cum)     - n(p.u_cum),
+        m_p:   n(s.m_cum)     - n(p.m_cum),
+        d_c:   n(s.d_cnt_cum) - n(p.d_cnt_cum),
+        u_c:   n(s.u_cnt_cum) - n(p.u_cnt_cum),
+        m_c:   n(s.m_cnt_cum) - n(p.m_cnt_cum),
+        d_qp:  n(s.d_que_cum) - n(p.d_que_cum),
+        u_qp:  n(s.u_que_cum) - n(p.u_que_cum),
+        m_qp:  n(s.m_que_cum) - n(p.m_que_cum),
+        km_p:  n(s.km_cum)    - n(p.km_cum),
+        dur:   calcDuration(s.start, s.end),
       };
     });
   }, [sets]);
@@ -285,9 +294,9 @@ function App() {
     const n = v => parseFloat(v) || 0;
     const last = sets[sets.length - 1];
     const total_sales = n(last.d_cum) + n(last.u_cum) + n(last.m_cum);
-    const total_que   = calced.reduce((a, s) => a + n(s.set_que), 0);
+    const total_que   = n(last.d_que_cum) + n(last.u_que_cum) + n(last.m_que_cum);
     const total_cnt   = n(last.d_cnt_cum) + n(last.u_cnt_cum) + n(last.m_cnt_cum);
-    const total_km    = calced.reduce((a, s) => a + n(s.km), 0);
+    const total_km    = n(last.km_cum);
     const total_h     = calced.reduce((a, s) => a + (s.dur ? s.dur.total : 0), 0);
     const jikyu       = total_h > 0 ? Math.round((total_sales + total_que) / total_h) : 0;
     const real_sales  = total_sales + total_que;
@@ -308,6 +317,8 @@ function App() {
       ...EMPTY_SET(),
       d_cum: last.d_cum, u_cum: last.u_cum, m_cum: last.m_cum,
       d_cnt_cum: last.d_cnt_cum, u_cnt_cum: last.u_cnt_cum, m_cnt_cum: last.m_cnt_cum,
+      d_que_cum: last.d_que_cum, u_que_cum: last.u_que_cum, m_que_cum: last.m_que_cum,
+      km_cum: last.km_cum,
     }]);
   };
 
@@ -339,9 +350,9 @@ function App() {
     const u_cnt   = n(last.u_cnt_cum);
     const m_cnt   = n(last.m_cnt_cum);
 
-    const d_que = calced.reduce((a,s) => a + n(s.d_que), 0);
-    const u_que = calced.reduce((a,s) => a + n(s.u_que), 0);
-    const m_que = calced.reduce((a,s) => a + n(s.m_que), 0);
+    const d_que = n(last.d_que_cum);
+    const u_que = n(last.u_que_cum);
+    const m_que = n(last.m_que_cum);
 
     const d_real = d_total + d_que;
     const u_real = u_total + u_que;
@@ -383,8 +394,8 @@ function App() {
     calced.forEach((s, i) => {
       const sp = s.d_p + s.u_p + s.m_p;
       const sc = s.d_c + s.u_c + s.m_c;
-      const sq = n(s.set_que);
-      const skm = n(s.km);
+      const sq = s.d_qp + s.u_qp + s.m_qp;
+      const skm = s.km_p;
       const dur = s.dur ? `(${s.dur.h > 0 ? s.dur.h+'h' : ''}${s.dur.m}m)` : '';
       const pf_parts = [];
       if (s.d_c > 0) pf_parts.push(`D:${s.d_c}`);
@@ -516,7 +527,10 @@ function App() {
                     <div key={p.key} className="platform-block" style={{background: p.color+'09', marginTop:'12px'}}>
                       <div className="platform-title" style={{color: p.color}}>
                         {p.label}
-                        <span className="diff-badge">+{s[p.key+'_p'].toLocaleString()}円 / {s[p.key+'_c']}件</span>
+                        <span className="diff-badge">
+                          +{s[p.key+'_p'].toLocaleString()}円 / {s[p.key+'_c']}件
+                          {s[p.key+'_qp'] > 0 ? ` / クエ+${s[p.key+'_qp'].toLocaleString()}` : ''}
+                        </span>
                       </div>
                       <div className="pf-inputs">
                         <div>
@@ -530,38 +544,26 @@ function App() {
                             onChange={e => updateSet(i, p.key+'_cnt_cum', e.target.value)} />
                         </div>
                         <div>
-                          <label className="field-label">クエ(円)</label>
-                          <input type="number" placeholder="0" value={sets[i][p.key+'_que']}
-                            onChange={e => updateSet(i, p.key+'_que', e.target.value)}
-                            style={{borderColor: parseFloat(sets[i][p.key+'_que']) > 0 ? 'var(--yellow)' : ''}} />
+                          <label className="field-label">クエ累積(円)</label>
+                          <input type="number" placeholder="0" value={sets[i][p.key+'_que_cum']}
+                            onChange={e => updateSet(i, p.key+'_que_cum', e.target.value)}
+                            style={{borderColor: parseFloat(sets[i][p.key+'_que_cum']) > 0 ? 'var(--yellow)' : ''}} />
                         </div>
                       </div>
                     </div>
                   ))}
 
-                  {/* km・セット内クエ・メモ */}
-                  <div className="set-bottom-row" style={{marginTop:'12px'}}>
+                  {/* km累積・差分表示・メモ */}
+                  <div style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:'8px', marginTop:'12px'}}>
                     <div>
-                      <label className="field-label">走行距離(km)</label>
-                      <input type="number" placeholder="0" value={sets[i].km}
-                        onChange={e => updateSet(i,'km',e.target.value)} />
+                      <label className="field-label">走行距離累積(km)</label>
+                      <input type="number" placeholder="0" value={sets[i].km_cum}
+                        onChange={e => updateSet(i,'km_cum',e.target.value)} />
                     </div>
                     <div>
-                      <label className="field-label">クエ合計(円)</label>
-                      <input type="number" placeholder="0" value={sets[i].set_que}
-                        onChange={e => updateSet(i,'set_que',e.target.value)}
-                        style={{borderColor: parseFloat(sets[i].set_que) > 0 ? 'var(--yellow)' : ''}} />
-                    </div>
-                    <div>
-                      <label className="field-label">自動集計</label>
-                      <div className="quest-total-display">
-                        {(() => {
-                          const dq = parseFloat(sets[i].d_que)||0;
-                          const uq = parseFloat(sets[i].u_que)||0;
-                          const mq = parseFloat(sets[i].m_que)||0;
-                          const auto = dq+uq+mq;
-                          return auto > 0 ? `${auto.toLocaleString()}円` : '-';
-                        })()}
+                      <label className="field-label">このセット走行</label>
+                      <div className="quest-total-display" style={{color: s.km_p > 0 ? 'var(--teal)' : 'var(--muted)'}}>
+                        {s.km_p > 0 ? `+${s.km_p}km` : '-'}
                       </div>
                     </div>
                   </div>

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
-  <title>🛡️ Vibe Analytics V6.3</title>
+  <title>🛡️ Vibe Analytics V7</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
@@ -12,44 +12,191 @@
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
-      --bg: #08090d; --surface: #0f1117; --border: rgba(255,255,255,0.08);
-      --text: #f0f0f0; --muted: rgba(255,255,255,0.38);
+      --bg: #08090d; --surface: #0f1117; --surface2: #161820;
+      --border: rgba(255,255,255,0.08); --border2: rgba(255,255,255,0.14);
+      --text: #f0f0f0; --muted: rgba(255,255,255,0.38); --muted2: rgba(255,255,255,0.55);
       --accent: #ff5c1a; --accent2: #e91e8c; --green: #00e676; --yellow: #ffd600;
-      --font-head: 'Bebas Neue', sans-serif; --font-body: 'Noto Sans JP', sans-serif; --font-mono: 'Space Mono', monospace;
+      --blue: #2979ff; --teal: #00bcd4;
+      --font-head: 'Bebas Neue', sans-serif;
+      --font-body: 'Noto Sans JP', sans-serif;
+      --font-mono: 'Space Mono', monospace;
       --radius: 14px; --radius-sm: 9px;
     }
     html, body { height: 100%; background: var(--bg); color: var(--text); font-family: var(--font-body); }
-    body { background-image: radial-gradient(ellipse 60% 40% at 15% 10%, rgba(255,92,26,0.10) 0%, transparent 55%); min-height: 100vh; }
-    #root { max-width: 540px; margin: 0 auto; padding: 0 0 100px; }
-    .header { position: sticky; top: 0; z-index: 200; background: rgba(8,9,13,0.85); backdrop-filter: blur(18px); border-bottom: 1px solid var(--border); padding: 14px 18px; display: flex; align-items: center; gap: 12px; }
-    .header-logo { width: 40px; height: 40px; border-radius: 11px; background: linear-gradient(135deg, var(--accent), var(--accent2)); display: flex; align-items: center; justify-content: center; font-size: 20px; }
-    .header-title { font-family: var(--font-head); font-size: 22px; letter-spacing: 0.04em; }
-    .section { padding: 20px 16px 0; }
-    .section-label { font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; margin-bottom: 10px; }
-    .set-card { background: rgba(255,255,255,0.025); border: 1.5px solid var(--border); border-radius: var(--radius); margin-bottom: 12px; overflow: hidden; }
-    .set-header { padding: 15px 16px; display: flex; align-items: center; justify-content: space-between; }
-    .set-body { padding: 0 16px 16px; border-top: 1px solid var(--border); }
+    body {
+      background-image:
+        radial-gradient(ellipse 60% 40% at 15% 10%, rgba(255,92,26,0.10) 0%, transparent 55%),
+        radial-gradient(ellipse 40% 30% at 85% 90%, rgba(233,30,140,0.07) 0%, transparent 50%);
+      min-height: 100vh;
+    }
+    #root { max-width: 560px; margin: 0 auto; padding: 0 0 120px; }
+
+    /* HEADER */
+    .header {
+      position: sticky; top: 0; z-index: 200;
+      background: rgba(8,9,13,0.88); backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      padding: 13px 18px; display: flex; align-items: center; gap: 12px;
+    }
+    .header-logo {
+      width: 38px; height: 38px; border-radius: 10px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      display: flex; align-items: center; justify-content: center; font-size: 18px;
+    }
+    .header-title { font-family: var(--font-head); font-size: 21px; letter-spacing: 0.04em; }
+    .header-sub { font-size: 10px; color: var(--muted); margin-top: 1px; }
+    .header-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+
+    /* LIVE SUMMARY BAR */
+    .summary-bar {
+      background: var(--surface); border-bottom: 1px solid var(--border);
+      padding: 10px 18px; display: flex; gap: 0; overflow-x: auto;
+    }
+    .summary-bar::-webkit-scrollbar { display: none; }
+    .sum-item { flex-shrink: 0; padding: 0 16px 0 0; border-right: 1px solid var(--border); margin-right: 16px; }
+    .sum-item:last-child { border-right: none; margin-right: 0; }
+    .sum-label { font-size: 10px; color: var(--muted); margin-bottom: 3px; }
+    .sum-val { font-size: 18px; font-family: var(--font-mono); font-weight: 700; }
+    .sum-val.accent { color: var(--accent); }
+    .sum-val.green { color: var(--green); }
+    .sum-val.yellow { color: var(--yellow); }
+    .sum-val.teal { color: var(--teal); }
+
+    /* SECTIONS */
+    .section { padding: 18px 16px 0; }
+    .section-label { font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px; }
+
+    /* DAY INFO */
+    .day-card {
+      background: var(--surface); border: 1.5px solid var(--border);
+      border-radius: var(--radius); padding: 14px 16px; margin-bottom: 12px;
+    }
+    .day-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
     .field-label { font-size: 11px; color: var(--muted); display: block; margin-bottom: 5px; }
-    .input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
-    input, textarea { width: 100%; padding: 12px; background: rgba(255,255,255,0.05); border: 1.5px solid var(--border); border-radius: var(--radius-sm); color: #fff; font-size: 15px; }
-    input:focus, textarea:focus { border-color: var(--accent); outline: none; }
-    .stamp-btn { background: var(--accent); color: #fff; padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: 900; border: none; cursor: pointer; }
+    input, select, textarea {
+      width: 100%; padding: 11px 12px;
+      background: rgba(255,255,255,0.05); border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm); color: #fff; font-size: 14px; font-family: var(--font-body);
+    }
+    input:focus, select:focus, textarea:focus { border-color: var(--accent); outline: none; }
+    select option { background: #1a1c24; }
+
+    /* QUEST ROW */
+    .quest-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+    .quest-total-display {
+      background: rgba(255,214,0,0.08); border: 1px solid rgba(255,214,0,0.2);
+      border-radius: var(--radius-sm); padding: 11px 12px;
+      font-size: 14px; color: var(--yellow); font-family: var(--font-mono);
+    }
+
+    /* SET CARD */
+    .set-card {
+      background: rgba(255,255,255,0.025); border: 1.5px solid var(--border);
+      border-radius: var(--radius); margin-bottom: 12px; overflow: hidden;
+    }
+    .set-header {
+      padding: 13px 16px; display: flex; align-items: center; justify-content: space-between;
+      cursor: pointer; user-select: none;
+    }
+    .set-header:hover { background: rgba(255,255,255,0.03); }
+    .set-title { font-weight: 900; font-size: 14px; display: flex; align-items: center; gap: 8px; }
+    .set-badge { font-size: 10px; padding: 2px 7px; border-radius: 4px; font-weight: 700; }
+    .set-badge.active { background: rgba(255,92,26,0.2); color: var(--accent); }
+    .set-badge.done { background: rgba(0,230,118,0.15); color: var(--green); }
+    .set-summary { font-size: 11px; color: var(--muted2); font-family: var(--font-mono); }
+    .set-body { padding: 0 16px 16px; border-top: 1px solid var(--border); }
+
+    /* TIME ROW */
+    .time-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding-top: 14px; margin-bottom: 12px; }
+    .time-field { display: flex; gap: 5px; }
+    .stamp-btn {
+      padding: 0 10px; height: 100%; background: var(--accent); color: #fff;
+      border-radius: 6px; font-size: 10px; font-weight: 900; border: none; cursor: pointer;
+      white-space: nowrap; min-height: 42px;
+    }
     .stamp-btn.secondary { background: rgba(255,255,255,0.15); }
-    .platform-block { border-radius: 11px; padding: 12px; margin-top: 10px; border: 1px solid var(--border); }
-    .platform-title { font-size: 12px; font-weight: 900; margin-bottom: 8px; display: flex; justify-content: space-between; }
-    .diff-badge { font-size: 10px; padding: 2px 6px; border-radius: 4px; background: rgba(0,230,118,0.15); color: var(--green); }
-    .add-btn { width: 100%; padding: 18px; background: rgba(255,255,255,0.04); border: 2px dashed var(--border); color: #fff; font-weight: bold; border-radius: var(--radius); margin-top: 10px; cursor: pointer; }
-    .gen-btn { width: 100%; padding: 18px; background: linear-gradient(135deg, var(--accent), var(--accent2)); border-radius: var(--radius); color: #fff; font-size: 17px; font-weight: 900; margin-top: 30px; border:none; cursor: pointer; }
-    .log-box { background: #000; border: 1px solid var(--border); border-radius: var(--radius); margin-top: 15px; padding: 15px; font-family: var(--font-mono); font-size: 12px; white-space: pre-wrap; }
-    .copy-btn { width: 100%; margin-top: 10px; padding: 10px; background: var(--green); color: #000; font-weight: bold; border-radius: 8px; border:none; cursor: pointer; }
-    .reset-btn { width: 100%; margin-top: 20px; padding: 12px; background: rgba(255,60,60,0.1); color: #ff6e6e; border: 1px solid rgba(255,60,60,0.2); border-radius: 10px; font-size: 12px; cursor: pointer; }
+
+    /* PLATFORM BLOCKS */
+    .platform-block {
+      border-radius: 11px; padding: 12px; margin-bottom: 10px; border: 1px solid var(--border);
+    }
+    .platform-title {
+      font-size: 12px; font-weight: 900; margin-bottom: 8px;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .diff-badge {
+      font-size: 10px; padding: 2px 7px; border-radius: 4px;
+      background: rgba(0,230,118,0.15); color: var(--green); font-family: var(--font-mono);
+    }
+    .pf-inputs { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+
+    /* SET QUEST & KM */
+    .set-bottom-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+
+    /* DELETE BTN */
+    .del-btn {
+      width: 100%; padding: 8px; background: rgba(255,60,60,0.06);
+      color: rgba(255,100,100,0.6); border: 1px solid rgba(255,60,60,0.15);
+      border-radius: 7px; font-size: 11px; cursor: pointer; margin-top: 8px;
+    }
+
+    /* ADD BTN */
+    .add-btn {
+      width: 100%; padding: 16px;
+      background: rgba(255,255,255,0.04); border: 2px dashed var(--border);
+      color: var(--muted2); font-weight: bold; border-radius: var(--radius); margin-top: 4px;
+      cursor: pointer; font-size: 14px;
+    }
+    .add-btn:hover { background: rgba(255,255,255,0.07); }
+
+    /* GEN BTN */
+    .gen-btn {
+      width: 100%; padding: 18px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border-radius: var(--radius); color: #fff; font-size: 17px;
+      font-weight: 900; margin-top: 28px; border: none; cursor: pointer;
+    }
+
+    /* LOG BOX */
+    .log-box {
+      background: #000; border: 1px solid var(--border);
+      border-radius: var(--radius); margin-top: 14px; padding: 16px;
+      font-family: var(--font-mono); font-size: 12px; white-space: pre-wrap;
+      line-height: 1.7; color: #ccc;
+    }
+    .copy-btn {
+      width: 100%; margin-top: 10px; padding: 12px;
+      background: var(--green); color: #000; font-weight: bold;
+      border-radius: 8px; border: none; cursor: pointer; font-size: 14px;
+    }
+    .reset-btn {
+      width: 100%; margin-top: 16px; padding: 12px;
+      background: rgba(255,60,60,0.08); color: #ff6e6e;
+      border: 1px solid rgba(255,60,60,0.2); border-radius: 10px; font-size: 12px; cursor: pointer;
+    }
+
+    /* CHEVRON */
+    .chevron { font-size: 12px; color: var(--muted); transition: transform 0.2s; }
+    .chevron.open { transform: rotate(180deg); }
+
+    /* REALTIME TIME DISPLAY */
+    .time-duration {
+      font-size: 11px; color: var(--teal); font-family: var(--font-mono); margin-top: 4px;
+    }
   </style>
 </head>
 <body>
 <div id="root"></div>
 
 <script type="text/babel">
-const { useState, useMemo, useEffect } = React;
+const { useState, useMemo, useEffect, useCallback } = React;
+
+/* ── ストレージキー (delivery_log_ プレフィックスで他ツールと完全分離) ── */
+const SK = {
+  date:    'delivery_log_date',
+  weather: 'delivery_log_weather',
+  sets:    'delivery_log_sets',
+};
 
 const PLATFORMS = [
   { key: 'd', label: '出前館', color: '#ff5c1a' },
@@ -57,193 +204,401 @@ const PLATFORMS = [
   { key: 'm', label: 'menu',   color: '#e91e8c' },
 ];
 
-// 保存キーをこのツール専用に固定（衝突回避用）
-const STORAGE_KEYS = {
-  DATE: 'delivery_log_date',
-  WEATHER: 'delivery_log_weather',
-  SETS: 'delivery_log_sets'
-};
+const WEATHERS = ['晴','曇','雨','雪','晴→雨','雨→晴','曇→雨'];
 
 function getNow() {
   const d = new Date();
-  return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+  return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
 }
 
-const INITIAL_SETS = [{ 
-  start: '', end: '', 
-  d_cum: '', u_cum: '', m_cum: '', 
-  d_cnt_cum: '', u_cnt_cum: '', m_cnt_cum: '',
-  km: '', memo: '', quest: '' 
-}];
+function getLocalDateStr() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
 
+function calcDuration(start, end) {
+  if (!start || !end) return null;
+  const [sh,sm] = start.split(':').map(Number);
+  let [eh,em] = end.split(':').map(Number);
+  let mins = (eh * 60 + em) - (sh * 60 + sm);
+  if (mins < 0) mins += 24 * 60;
+  const h = Math.floor(mins / 60);
+  const m = mins % 60;
+  return { h, m, total: mins / 60 };
+}
+
+const EMPTY_SET = () => ({
+  start: '', end: '',
+  d_cum: '', u_cum: '', m_cum: '',
+  d_cnt_cum: '', u_cnt_cum: '', m_cnt_cum: '',
+  d_que: '', u_que: '', m_que: '',
+  km: '', set_que: '', memo: '',
+  open: true,
+});
+
+function loadState() {
+  try {
+    return {
+      date:    localStorage.getItem(SK.date)    || getLocalDateStr(),
+      weather: localStorage.getItem(SK.weather) || '晴',
+      sets:    JSON.parse(localStorage.getItem(SK.sets)) || [EMPTY_SET()],
+    };
+  } catch { return { date: getLocalDateStr(), weather: '晴', sets: [EMPTY_SET()] }; }
+}
+
+/* ────────────────── MAIN APP ────────────────── */
 function App() {
-  // ブラウザの物置（LocalStorage）から復元
-  const [date, setDate] = useState(() => localStorage.getItem(STORAGE_KEYS.DATE) || new Date().toISOString().split('T')[0]);
-  const [weather, setWeather] = useState(() => localStorage.getItem(STORAGE_KEYS.WEATHER) || '晴');
-  const [sets, setSets] = useState(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.SETS);
-    return saved ? JSON.parse(saved) : INITIAL_SETS;
-  });
+  const init = loadState();
+  const [date, setDate]       = useState(init.date);
+  const [weather, setWeather] = useState(init.weather);
+  const [sets, setSets]       = useState(init.sets);
   const [showLog, setShowLog] = useState(false);
 
-  // 入力が変わるたびに自動保存
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.DATE, date);
-    localStorage.setItem(STORAGE_KEYS.WEATHER, weather);
-    localStorage.setItem(STORAGE_KEYS.SETS, JSON.stringify(sets));
+    try {
+      localStorage.setItem(SK.date, date);
+      localStorage.setItem(SK.weather, weather);
+      localStorage.setItem(SK.sets, JSON.stringify(sets));
+    } catch {}
   }, [date, weather, sets]);
 
-  const calculatedSets = useMemo(() => {
+  /* 各セットの差分計算 */
+  const calced = useMemo(() => {
+    const n = v => parseFloat(v) || 0;
     return sets.map((s, i) => {
-      const prev = sets[i-1] || { d_cum:0, u_cum:0, m_cum:0, d_cnt_cum:0, u_cnt_cum:0, m_cnt_cum:0 };
-      const n = (v) => parseFloat(v) || 0;
-      return { 
-        ...s, 
-        d_p: n(s.d_cum) - n(prev.d_cum), 
-        u_p: n(s.u_cum) - n(prev.u_cum), 
-        m_p: n(s.m_cum) - n(prev.m_cum),
-        d_c: n(s.d_cnt_cum) - n(prev.d_cnt_cum),
-        u_c: n(s.u_cnt_cum) - n(prev.u_cnt_cum),
-        m_c: n(s.m_cnt_cum) - n(prev.m_cnt_cum)
+      const p = sets[i-1] || { d_cum:0, u_cum:0, m_cum:0, d_cnt_cum:0, u_cnt_cum:0, m_cnt_cum:0 };
+      return {
+        ...s,
+        d_p: n(s.d_cum) - n(p.d_cum),
+        u_p: n(s.u_cum) - n(p.u_cum),
+        m_p: n(s.m_cum) - n(p.m_cum),
+        d_c: n(s.d_cnt_cum) - n(p.d_cnt_cum),
+        u_c: n(s.u_cnt_cum) - n(p.u_cnt_cum),
+        m_c: n(s.m_cnt_cum) - n(p.m_cnt_cum),
+        dur: calcDuration(s.start, s.end),
       };
     });
   }, [sets]);
 
-  const updateSet = (i, key, val) => {
-    const newSets = [...sets];
-    newSets[i][key] = val;
-    setSets(newSets);
+  /* サマリー集計 */
+  const summary = useMemo(() => {
+    const n = v => parseFloat(v) || 0;
+    const last = sets[sets.length - 1];
+    const total_sales = n(last.d_cum) + n(last.u_cum) + n(last.m_cum);
+    const total_que   = calced.reduce((a, s) => a + n(s.set_que), 0);
+    const total_cnt   = n(last.d_cnt_cum) + n(last.u_cnt_cum) + n(last.m_cnt_cum);
+    const total_km    = calced.reduce((a, s) => a + n(s.km), 0);
+    const total_h     = calced.reduce((a, s) => a + (s.dur ? s.dur.total : 0), 0);
+    const jikyu       = total_h > 0 ? Math.round((total_sales + total_que) / total_h) : 0;
+    const real_sales  = total_sales + total_que;
+    return { total_sales, total_que, real_sales, total_cnt, total_km, total_h, jikyu };
+  }, [sets, calced]);
+
+  const updateSet = useCallback((i, key, val) => {
+    setSets(prev => { const ns = [...prev]; ns[i] = { ...ns[i], [key]: val }; return ns; });
+  }, []);
+
+  const toggleOpen = (i) => {
+    setSets(prev => { const ns = [...prev]; ns[i] = { ...ns[i], open: !ns[i].open }; return ns; });
   };
 
   const addSet = () => {
-    const last = sets[sets.length-1];
-    setSets([...sets, { 
-      start: '', end: '', 
-      d_cum: last.d_cum, u_cum: last.u_cum, m_cum: last.m_cum, 
+    const last = sets[sets.length - 1];
+    setSets([...sets, {
+      ...EMPTY_SET(),
+      d_cum: last.d_cum, u_cum: last.u_cum, m_cum: last.m_cum,
       d_cnt_cum: last.d_cnt_cum, u_cnt_cum: last.u_cnt_cum, m_cnt_cum: last.m_cnt_cum,
-      km: '', memo: '', quest: '' 
     }]);
   };
 
-  const resetData = () => {
-    if(window.confirm('本日のデータをリセットして新しい1日を開始しますか？')) {
-      setSets(INITIAL_SETS);
-      setDate(new Date().toISOString().split('T')[0]);
-      setShowLog(false);
-    }
+  const deleteSet = (i) => {
+    if (sets.length <= 1) return;
+    if (!window.confirm(`SET ${i+1} を削除しますか？`)) return;
+    setSets(prev => prev.filter((_, idx) => idx !== i));
   };
 
-  const generateV5Log = () => {
-    let all_p=0, all_c=0, all_km=0, all_q=0;
-    calculatedSets.forEach(s => {
-      all_p += (s.d_p + s.u_p + s.m_p);
-      all_c += (s.d_c + s.u_c + s.m_c);
-      all_km += parseFloat(s.km) || 0;
-      all_q += parseFloat(s.quest) || 0;
-    });
-    const total = all_p + all_q;
-    const dayJa = ['日','月','火','水','木','金','土'][new Date(date).getDay()];
-    let log = `${date.replace(/-/g,'/')} (${dayJa})\n📊 本日累計リザルト\n\n`;
-    log += `| 項目 | 内容 | 備考 |\n|:--|--:|:--|\n`;
-    log += `| **天気** | ${weather} | |\n`;
-    log += `| **総売上** | **${total.toLocaleString()} 円** | |\n`;
-    log += `| **総完了件数** | **${all_c} 件** | |\n`;
-    log += `| **総走行距離** | **${all_km} km** | |\n\n🕒 各セット詳細\n`;
-    calculatedSets.forEach((s, i) => {
-      log += `第${i+1}セット ${s.start} 〜 ${s.end}\n`;
-      log += `実績 ：${s.d_c+s.u_c+s.m_c}件 / ${(s.d_p+s.u_p+s.m_p).toLocaleString()}円\n`;
-      if(s.memo) log += `戦術 ：${s.memo}\n`;
-      log += `\n`;
-    });
-    return log;
+  const resetData = () => {
+    if (!window.confirm('本日のデータをリセットして新しい1日を開始しますか？')) return;
+    setSets([EMPTY_SET()]);
+    setDate(getLocalDateStr());
+    setShowLog(false);
   };
+
+  /* ── V5ログ生成 ── */
+  const generateLog = () => {
+    const n = v => parseFloat(v) || 0;
+    const { total_sales, total_que, real_sales, total_cnt, total_km, total_h, jikyu } = summary;
+    const dayJa = ['日','月','火','水','木','金','土'][new Date(date).getDay()];
+    const dateStr = date.replace(/-/g,'/');
+
+    const last = sets[sets.length - 1];
+    const d_total = n(last.d_cum);
+    const u_total = n(last.u_cum);
+    const m_total = n(last.m_cum);
+    const d_cnt   = n(last.d_cnt_cum);
+    const u_cnt   = n(last.u_cnt_cum);
+    const m_cnt   = n(last.m_cnt_cum);
+
+    const d_que = calced.reduce((a,s) => a + n(s.d_que), 0);
+    const u_que = calced.reduce((a,s) => a + n(s.u_que), 0);
+    const m_que = calced.reduce((a,s) => a + n(s.m_que), 0);
+
+    const d_real = d_total + d_que;
+    const u_real = u_total + u_que;
+    const m_real = m_total + m_que;
+
+    const hm = (h) => {
+      const hh = Math.floor(h);
+      const mm = Math.round((h - hh) * 60);
+      return mm > 0 ? `${hh}時間${mm}分` : `${hh}時間`;
+    };
+    const ave_cnt  = total_cnt > 0 ? Math.round((total_sales + total_que) / total_cnt) : 0;
+    const real_ave = total_cnt > 0 ? Math.round(real_sales / total_cnt) : 0;
+    const km_ave   = total_km > 0  ? Math.round((total_sales + total_que) / total_km * 10) / 10 : 0;
+    const que_note = total_que > 0 ? 'クエあり' : 'クエなし';
+
+    let log = `${dateStr} (${dayJa})\n`;
+    log += `📊 本日累計リザルト\n\n`;
+    log += `| 項目 | 内容 | 備考 |\n`;
+    log += `| :-- | --: | :-- |\n`;
+    log += `| **天気** | ${weather} | ${que_note} |\n`;
+    log += `| **総売上** | **${(total_sales + total_que).toLocaleString()} 円** | |\n`;
+    log += `| **実質売上** | **${real_sales.toLocaleString()} 円** | クエスト除き |\n`;
+    log += `| **クエ合計** | **${total_que.toLocaleString()} 円** | |\n`;
+    log += `| **総完了件数** | **${total_cnt} 件** | (D:${d_cnt} / m:${m_cnt} / U:${u_cnt}) |\n`;
+    log += `| **1件単価平均** | **${ave_cnt} 円** | 総売上 ÷ 総件数 |\n`;
+    log += `| **実質単価平均** | **${real_ave} 円** | 実質売上 ÷ 総件数 |\n`;
+    log += `| **総走行距離** | **${total_km} km** | |\n`;
+    log += `| **走行単価平均** | **${km_ave} 円/km** | 総売上 ÷ 走行距離 |\n`;
+    log += `| **実稼働時間** | **${hm(total_h)}** | |\n`;
+    log += `| **時給換算** | **${jikyu.toLocaleString()} 円** | 総売上 ÷ 実稼働時間 |\n`;
+    log += `\n📦 Platform別内訳\n\n`;
+    log += `| PF | 件数 | 総額 | 実質売上 | クエ |\n`;
+    log += `| :--: | --: | --: | --: | --: |\n`;
+    log += `| **出前館 (D)** | ${d_cnt} 件 | ${d_total.toLocaleString()} 円 | ${d_real.toLocaleString()} 円 | ${d_que.toLocaleString()} 円 |\n`;
+    log += `| **Uber Eats (U)** | ${u_cnt} 件 | ${u_total.toLocaleString()} 円 | ${u_real.toLocaleString()} 円 | ${u_que.toLocaleString()} 円 |\n`;
+    log += `| **menu (m)** | ${m_cnt} 件 | ${m_total.toLocaleString()} 円 | ${m_real.toLocaleString()} 円 | ${m_que.toLocaleString()} 円 |\n`;
+    log += `\n🕒 各セット詳細\n\n`;
+
+    calced.forEach((s, i) => {
+      const sp = s.d_p + s.u_p + s.m_p;
+      const sc = s.d_c + s.u_c + s.m_c;
+      const sq = n(s.set_que);
+      const skm = n(s.km);
+      const dur = s.dur ? `(${s.dur.h > 0 ? s.dur.h+'h' : ''}${s.dur.m}m)` : '';
+      const pf_parts = [];
+      if (s.d_c > 0) pf_parts.push(`D:${s.d_c}`);
+      if (s.m_c > 0) pf_parts.push(`m:${s.m_c}`);
+      if (s.u_c > 0) pf_parts.push(`U:${s.u_c}`);
+      const pf_str = pf_parts.length > 0 ? `(${pf_parts.join(' / ')})` : '';
+      log += `- **第${i+1}セット ${s.start} 〜 ${s.end}** ${dur}\n`;
+      log += `  - **実績**：${sc}件 / ${sp.toLocaleString()}円${skm > 0 ? ` / ${skm}km` : ''} ${pf_str}\n`;
+      log += `  - **クエ**：${sq > 0 ? sq.toLocaleString()+'円' : 'なし'}\n`;
+      if (s.memo) log += `  - **戦術**：${s.memo}\n`;
+      log += '\n';
+    });
+
+    return log.trim();
+  };
+
+  /* ── RENDER ── */
+  const { total_sales, total_que, real_sales, total_cnt, total_h, jikyu } = summary;
 
   return (
     <div>
+      {/* HEADER */}
       <div className="header">
         <div className="header-logo">🛡️</div>
         <div>
-          <div className="header-title">VIBE ANALYTICS V6.3</div>
-          <div className="header-sub">OKG Project | フォルダ専用モデル</div>
+          <div className="header-title">VIBE ANALYTICS V7</div>
+          <div className="header-sub">V5フォーマット完全対応 · BOSS専用</div>
         </div>
       </div>
 
-      <div className="section">
-        <div className="input-row">
-          <input type="date" value={date} onChange={e => setDate(e.target.value)} />
-          <input type="text" value={weather} onChange={e => setWeather(e.target.value)} />
+      {/* LIVE SUMMARY BAR */}
+      <div className="summary-bar">
+        <div className="sum-item">
+          <div className="sum-label">総売上</div>
+          <div className="sum-val accent">{(total_sales + total_que).toLocaleString()}円</div>
+        </div>
+        <div className="sum-item">
+          <div className="sum-label">実質売上</div>
+          <div className="sum-val">{real_sales.toLocaleString()}円</div>
+        </div>
+        <div className="sum-item">
+          <div className="sum-label">件数</div>
+          <div className="sum-val green">{total_cnt}件</div>
+        </div>
+        <div className="sum-item">
+          <div className="sum-label">時給換算</div>
+          <div className="sum-val yellow">{total_h > 0 ? jikyu.toLocaleString() : '-'}円</div>
+        </div>
+        <div className="sum-item">
+          <div className="sum-label">クエ合計</div>
+          <div className="sum-val teal">{total_que.toLocaleString()}円</div>
         </div>
       </div>
 
+      {/* DAY INFO */}
       <div className="section">
-        <div className="section-label">稼働セット (自動保存中)</div>
-        {calculatedSets.map((s, i) => (
-          <div key={i} className="set-card">
-            <div className="set-header">
-              <span style={{fontWeight:'900'}}>SET {i+1}</span>
-              {s.start && !s.end && <span style={{fontSize:'10px', color: 'var(--accent)'}}>● 稼働中...</span>}
+        <div className="section-label">基本情報</div>
+        <div className="day-card">
+          <div className="day-grid">
+            <div>
+              <label className="field-label">日付</label>
+              <input type="date" value={date} onChange={e => setDate(e.target.value)} />
             </div>
-            <div className="set-body">
-              <div className="input-row">
-                <div>
-                  <label className="field-label">開始</label>
-                  <div style={{display:'flex', gap:'5px'}}>
-                    <input type="time" value={s.start} onChange={e=>updateSet(i,'start',e.target.value)} />
-                    <button className="stamp-btn" onClick={()=>updateSet(i,'start',getNow())}>START</button>
-                  </div>
-                </div>
-                <div>
-                  <label className="field-label">終了</label>
-                  <div style={{display:'flex', gap:'5px'}}>
-                    <input type="time" value={s.end} onChange={e=>updateSet(i,'end',e.target.value)} />
-                    <button className="stamp-btn secondary" onClick={()=>updateSet(i,'end',getNow())}>FIN</button>
-                  </div>
-                </div>
+            <div>
+              <label className="field-label">天気</label>
+              <select value={weather} onChange={e => setWeather(e.target.value)}>
+                {WEATHERS.map(w => <option key={w}>{w}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="field-label">クエ有無</label>
+              <div style={{padding:'11px 12px', background:'rgba(255,255,255,0.05)', border:'1.5px solid var(--border)', borderRadius:'var(--radius-sm)', fontSize:'12px', color: total_que > 0 ? 'var(--yellow)' : 'var(--muted)'}}>
+                {total_que > 0 ? `${total_que.toLocaleString()}円` : 'なし'}
               </div>
-
-              {PLATFORMS.map(p => (
-                <div key={p.key} className="platform-block" style={{background: p.color + '08'}}>
-                  <div className="platform-title" style={{color:p.color}}>
-                    {p.label} <span className="diff-badge">+{s[p.key+'_p'].toLocaleString()}円 / {s[p.key+'_c']}件</span>
-                  </div>
-                  <div className="input-row">
-                    <input type="number" placeholder="総売上(累積)" value={sets[i][p.key+'_cum']} onChange={e=>updateSet(i, p.key+'_cum', e.target.value)} />
-                    <input type="number" placeholder="総件数(累積)" value={sets[i][p.key+'_cnt_cum']} onChange={e=>updateSet(i, p.key+'_cnt_cum', e.target.value)} />
-                  </div>
-                </div>
-              ))}
-              
-              <div className="input-row" style={{marginTop:'10px'}}>
-                <div>
-                  <label className="field-label">セット内走行(km)</label>
-                  <input type="number" value={s.km} onChange={e=>updateSet(i,'km',e.target.value)} />
-                </div>
-                <div>
-                  <label className="field-label">セット内クエ(円)</label>
-                  <input type="number" value={s.quest} onChange={e=>updateSet(i,'quest',e.target.value)} />
-                </div>
-              </div>
-              <textarea placeholder="戦術メモ" value={s.memo} onChange={e=>updateSet(i,'memo',e.target.value)} style={{marginTop:'10px'}} />
             </div>
           </div>
-        ))}
-        <button className="add-btn" onClick={addSet}>+ 次のセットを追加</button>
+        </div>
       </div>
 
+      {/* SETS */}
+      <div className="section">
+        <div className="section-label">稼働セット (自動保存中)</div>
+        {calced.map((s, i) => {
+          const sp = s.d_p + s.u_p + s.m_p;
+          const sc = s.d_c + s.u_c + s.m_c;
+          const isActive = s.start && !s.end;
+          const isDone   = s.start && s.end;
+          return (
+            <div key={i} className="set-card">
+              <div className="set-header" onClick={() => toggleOpen(i)}>
+                <div className="set-title">
+                  SET {i+1}
+                  {isActive && <span className="set-badge active">稼働中</span>}
+                  {isDone   && <span className="set-badge done">完了</span>}
+                </div>
+                <div style={{display:'flex', alignItems:'center', gap:'10px'}}>
+                  {(sp > 0 || sc > 0) && (
+                    <span className="set-summary">{sc}件 / {sp.toLocaleString()}円{s.dur ? ` / ${s.dur.h}h${s.dur.m}m` : ''}</span>
+                  )}
+                  <span className={`chevron ${s.open ? 'open' : ''}`}>▼</span>
+                </div>
+              </div>
+
+              {s.open && (
+                <div className="set-body">
+                  {/* 時刻 */}
+                  <div className="time-row">
+                    <div>
+                      <label className="field-label">開始時刻</label>
+                      <div className="time-field">
+                        <input type="time" value={sets[i].start} onChange={e => updateSet(i,'start',e.target.value)} />
+                        <button className="stamp-btn" onClick={() => updateSet(i,'start',getNow())}>NOW</button>
+                      </div>
+                    </div>
+                    <div>
+                      <label className="field-label">終了時刻</label>
+                      <div className="time-field">
+                        <input type="time" value={sets[i].end} onChange={e => updateSet(i,'end',e.target.value)} />
+                        <button className="stamp-btn secondary" onClick={() => updateSet(i,'end',getNow())}>FIN</button>
+                      </div>
+                    </div>
+                  </div>
+                  {s.dur && (
+                    <div className="time-duration">稼働時間: {s.dur.h > 0 ? `${s.dur.h}時間` : ''}{s.dur.m}分 ({(s.dur.total).toFixed(2)}h)</div>
+                  )}
+
+                  {/* プラットフォーム別 */}
+                  {PLATFORMS.map(p => (
+                    <div key={p.key} className="platform-block" style={{background: p.color+'09', marginTop:'12px'}}>
+                      <div className="platform-title" style={{color: p.color}}>
+                        {p.label}
+                        <span className="diff-badge">+{s[p.key+'_p'].toLocaleString()}円 / {s[p.key+'_c']}件</span>
+                      </div>
+                      <div className="pf-inputs">
+                        <div>
+                          <label className="field-label">総売上(累積)</label>
+                          <input type="number" placeholder="0" value={sets[i][p.key+'_cum']}
+                            onChange={e => updateSet(i, p.key+'_cum', e.target.value)} />
+                        </div>
+                        <div>
+                          <label className="field-label">総件数(累積)</label>
+                          <input type="number" placeholder="0" value={sets[i][p.key+'_cnt_cum']}
+                            onChange={e => updateSet(i, p.key+'_cnt_cum', e.target.value)} />
+                        </div>
+                        <div>
+                          <label className="field-label">クエ(円)</label>
+                          <input type="number" placeholder="0" value={sets[i][p.key+'_que']}
+                            onChange={e => updateSet(i, p.key+'_que', e.target.value)}
+                            style={{borderColor: parseFloat(sets[i][p.key+'_que']) > 0 ? 'var(--yellow)' : ''}} />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+
+                  {/* km・セット内クエ・メモ */}
+                  <div className="set-bottom-row" style={{marginTop:'12px'}}>
+                    <div>
+                      <label className="field-label">走行距離(km)</label>
+                      <input type="number" placeholder="0" value={sets[i].km}
+                        onChange={e => updateSet(i,'km',e.target.value)} />
+                    </div>
+                    <div>
+                      <label className="field-label">クエ合計(円)</label>
+                      <input type="number" placeholder="0" value={sets[i].set_que}
+                        onChange={e => updateSet(i,'set_que',e.target.value)}
+                        style={{borderColor: parseFloat(sets[i].set_que) > 0 ? 'var(--yellow)' : ''}} />
+                    </div>
+                    <div>
+                      <label className="field-label">自動集計</label>
+                      <div className="quest-total-display">
+                        {(() => {
+                          const dq = parseFloat(sets[i].d_que)||0;
+                          const uq = parseFloat(sets[i].u_que)||0;
+                          const mq = parseFloat(sets[i].m_que)||0;
+                          const auto = dq+uq+mq;
+                          return auto > 0 ? `${auto.toLocaleString()}円` : '-';
+                        })()}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div style={{marginTop:'8px'}}>
+                    <label className="field-label">戦術メモ</label>
+                    <textarea rows="2" placeholder="このセットの戦術・所感を記入"
+                      value={sets[i].memo} onChange={e => updateSet(i,'memo',e.target.value)} />
+                  </div>
+
+                  {sets.length > 1 && (
+                    <button className="del-btn" onClick={() => deleteSet(i)}>
+                      SET {i+1} を削除
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+          );
+        })}
+        <button className="add-btn" onClick={addSet}>＋ 次のセットを追加</button>
+      </div>
+
+      {/* LOG GENERATE */}
       <div className="section">
         <button className="gen-btn" onClick={() => setShowLog(!showLog)}>
-          {showLog ? '入力を続ける' : 'V5ログを生成'}
+          {showLog ? '入力に戻る' : 'V5ログを生成'}
         </button>
         {showLog && (
           <div className="log-box">
-            <pre>{generateV5Log()}</pre>
+            <pre style={{whiteSpace:'pre-wrap'}}>{generateLog()}</pre>
             <button className="copy-btn" onClick={() => {
-              navigator.clipboard.writeText(generateV5Log());
+              navigator.clipboard.writeText(generateLog());
               alert('コピーしました！');
             }}>クリップボードにコピー</button>
           </div>
         )}
-        
         <button className="reset-btn" onClick={resetData}>今日のリザルトをリセット</button>
       </div>
     </div>

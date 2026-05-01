@@ -299,7 +299,7 @@ function App() {
     const total_km    = n(last.km_cum);
     const total_h     = calced.reduce((a, s) => a + (s.dur ? s.dur.total : 0), 0);
     const jikyu       = total_h > 0 ? Math.round((total_sales + total_que) / total_h) : 0;
-    const real_sales  = total_sales + total_que;
+    const real_sales  = total_sales;
     return { total_sales, total_que, real_sales, total_cnt, total_km, total_h, jikyu };
   }, [sets, calced]);
 
@@ -374,7 +374,7 @@ function App() {
     log += `| :-- | --: | :-- |\n`;
     log += `| **天気** | ${weather} | ${que_note} |\n`;
     log += `| **総売上** | **${(total_sales + total_que).toLocaleString()} 円** | |\n`;
-    log += `| **実質売上** | **${real_sales.toLocaleString()} 円** | クエスト除き |\n`;
+    log += `| **実質売上** | **${real_sales.toLocaleString()} 円** | クエスト含まず |\n`;
     log += `| **クエ合計** | **${total_que.toLocaleString()} 円** | |\n`;
     log += `| **総完了件数** | **${total_cnt} 件** | (D:${d_cnt} / m:${m_cnt} / U:${u_cnt}) |\n`;
     log += `| **1件単価平均** | **${ave_cnt} 円** | 総売上 ÷ 総件数 |\n`;

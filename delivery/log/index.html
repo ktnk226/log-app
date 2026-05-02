@@ -448,6 +448,14 @@ function App() {
           <div className="sum-label">クエ合計</div>
           <div className="sum-val teal">{total_que.toLocaleString()}円</div>
         </div>
+        <div className="sum-item">
+          <div className="sum-label">単価(クエ込)</div>
+          <div className="sum-val">{total_cnt > 0 ? Math.round((total_sales + total_que) / total_cnt).toLocaleString() : '-'}円</div>
+        </div>
+        <div className="sum-item">
+          <div className="sum-label">単価(クエ抜)</div>
+          <div className="sum-val">{total_cnt > 0 ? Math.round(total_sales / total_cnt).toLocaleString() : '-'}円</div>
+        </div>
       </div>
 
       {/* DAY INFO */}
@@ -480,7 +488,10 @@ function App() {
         <div className="section-label">稼働セット (自動保存中)</div>
         {calced.map((s, i) => {
           const sp = s.d_p + s.u_p + s.m_p;
+          const sq = s.d_qp + s.u_qp + s.m_qp;
           const sc = s.d_c + s.u_c + s.m_c;
+          const tanka     = sc > 0 ? Math.round((sp + sq) / sc) : 0;
+          const tankaReal = sc > 0 ? Math.round(sp / sc) : 0;
           const isActive = s.start && !s.end;
           const isDone   = s.start && s.end;
           return (
@@ -493,7 +504,7 @@ function App() {
                 </div>
                 <div style={{display:'flex', alignItems:'center', gap:'10px'}}>
                   {(sp > 0 || sc > 0) && (
-                    <span className="set-summary">{sc}件 / {sp.toLocaleString()}円{s.dur ? ` / ${s.dur.h}h${s.dur.m}m` : ''}</span>
+                    <span className="set-summary">{sc}件 / {sp.toLocaleString()}円{tanka > 0 ? ` / @${tanka.toLocaleString()}円(込) @${tankaReal.toLocaleString()}円(抜)` : ''}{s.dur ? ` / ${s.dur.h}h${s.dur.m}m` : ''}</span>
                   )}
                   <span className={`chevron ${s.open ? 'open' : ''}`}>▼</span>
                 </div>

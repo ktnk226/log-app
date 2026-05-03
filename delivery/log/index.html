@@ -50,9 +50,10 @@
     /* LIVE SUMMARY BAR */
     .summary-bar {
       background: var(--surface); border-bottom: 1px solid var(--border);
-      padding: 10px 18px; display: flex; gap: 0; overflow-x: auto;
+      padding: 10px 18px; display: flex; flex-direction: column; gap: 8px;
     }
-    .summary-bar::-webkit-scrollbar { display: none; }
+    .sum-row { display: flex; gap: 0; overflow-x: auto; }
+    .sum-row::-webkit-scrollbar { display: none; }
     .sum-item { flex-shrink: 0; padding: 0 16px 0 0; border-right: 1px solid var(--border); margin-right: 16px; }
     .sum-item:last-child { border-right: none; margin-right: 0; }
     .sum-label { font-size: 10px; color: var(--muted); margin-bottom: 3px; }
@@ -61,6 +62,23 @@
     .sum-val.green { color: var(--green); }
     .sum-val.yellow { color: var(--yellow); }
     .sum-val.teal { color: var(--teal); }
+    .sum-row + .sum-row { border-top: 1px solid var(--border); padding-top: 8px; }
+    .goal-bar {
+      background: var(--surface); border-bottom: 1px solid var(--border);
+      padding: 10px 18px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+    }
+    .goal-label { font-size: 11px; color: var(--muted); white-space: nowrap; }
+    .goal-input {
+      font-family: var(--font-mono); font-size: 15px; font-weight: 700;
+      background: var(--bg); border: 1px solid var(--border); border-radius: 6px;
+      color: var(--text); padding: 4px 8px; width: 130px; text-align: right;
+    }
+    .goal-input:focus { outline: none; border-color: var(--accent); }
+    .goal-stat { font-size: 12px; font-family: var(--font-mono); font-weight: 700; }
+    .goal-stat.remain { color: var(--accent); }
+    .goal-stat.done { color: var(--green); }
+    .goal-stat.cnt { color: var(--yellow); }
+    .goal-divider { color: var(--border); font-size: 14px; }
 
     /* SECTIONS */
     .section { padding: 18px 16px 0; }
@@ -253,6 +271,7 @@ function App() {
   const [weather, setWeather] = useState(init.weather);
   const [sets, setSets]       = useState(init.sets);
   const [showLog, setShowLog] = useState(false);
+  const [goalAmt, setGoalAmt]  = useState(0);
 
   useEffect(() => {
     try {
@@ -426,37 +445,83 @@ function App() {
         </div>
       </div>
 
-      {/* LIVE SUMMARY BAR */}
+      {/* LIVE SUMMARY BAR - 2段 */}
       <div className="summary-bar">
-        <div className="sum-item">
-          <div className="sum-label">総売上</div>
-          <div className="sum-val accent">{(total_sales + total_que).toLocaleString()}円</div>
+        {/* 1段目: 総売上/実質売上/クエ合計/件数/時間 */}
+        <div className="sum-row">
+          <div className="sum-item">
+            <div className="sum-label">総売上</div>
+            <div className="sum-val accent">{(total_sales + total_que).toLocaleString()}円</div>
+          </div>
+          <div className="sum-item">
+            <div className="sum-label">実質売上</div>
+            <div className="sum-val">{real_sales.toLocaleString()}円</div>
+          </div>
+          <div className="sum-item">
+            <div className="sum-label">クエ合計</div>
+            <div className="sum-val teal">{total_que.toLocaleString()}円</div>
+          </div>
+          <div className="sum-item">
+            <div className="sum-label">件数</div>
+            <div className="sum-val green">{total_cnt}件</div>
+          </div>
+          <div className="sum-item">
+            <div className="sum-label">時間</div>
+            <div className="sum-val">{total_h > 0 ? (() => { const hh = Math.floor(total_h); const mm = Math.round((total_h - hh) * 60); return mm > 0 ? hh+'h'+mm+'m' : hh+'h'; })() : '-'}</div>
+          </div>
         </div>
-        <div className="sum-item">
-          <div className="sum-label">実質売上</div>
-          <div className="sum-val">{real_sales.toLocaleString()}円</div>
-        </div>
-        <div className="sum-item">
-          <div className="sum-label">件数</div>
-          <div className="sum-val green">{total_cnt}件</div>
-        </div>
-        <div className="sum-item">
-          <div className="sum-label">時給換算</div>
-          <div className="sum-val yellow">{total_h > 0 ? jikyu.toLocaleString() : '-'}円</div>
-        </div>
-        <div className="sum-item">
-          <div className="sum-label">クエ合計</div>
-          <div className="sum-val teal">{total_que.toLocaleString()}円</div>
-        </div>
-        <div className="sum-item">
-          <div className="sum-label">単価(クエ込)</div>
-          <div className="sum-val">{total_cnt > 0 ? Math.round((total_sales + total_que) / total_cnt).toLocaleString() : '-'}円</div>
-        </div>
-        <div className="sum-item">
-          <div className="sum-label">単価(クエ抜)</div>
-          <div className="sum-val">{total_cnt > 0 ? Math.round(total_sales / total_cnt).toLocaleString() : '-'}円</div>
+        {/* 2段目: 時給換算/単価(クエ込)/単価(クエ抜) */}
+        <div className="sum-row">
+          <div className="sum-item">
+            <div className="sum-label">時給換算</div>
+            <div className="sum-val yellow">{total_h > 0 ? jikyu.toLocaleString() : '-'}円</div>
+          </div>
+          <div className="sum-item">
+            <div className="sum-label">単価(クエ込)</div>
+            <div className="sum-val">{total_cnt > 0 ? Math.round((total_sales + total_que) / total_cnt).toLocaleString() : '-'}円</div>
+          </div>
+          <div className="sum-item">
+            <div className="sum-label">単価(クエ抜)</div>
+            <div className="sum-val">{total_cnt > 0 ? Math.round(total_sales / total_cnt).toLocaleString() : '-'}円</div>
+          </div>
         </div>
       </div>
+      {/* 目標金額バー */}
+      {(() => {
+        const tankaReal = total_cnt > 0 ? Math.round(total_sales / total_cnt) : 0;
+        const currentTotal = total_sales + total_que;
+        const remain = goalAmt > 0 ? goalAmt - currentTotal : 0;
+        const reached = goalAmt > 0 && currentTotal >= goalAmt;
+        const needCnt = (!reached && tankaReal > 0 && remain > 0) ? Math.ceil(remain / tankaReal) : 0;
+        return (
+          <div className="goal-bar">
+            <span className="goal-label">🎯 目標</span>
+            <input
+              className="goal-input"
+              type="number"
+              placeholder="例: 20000"
+              value={goalAmt || ''}
+              onChange={e => setGoalAmt(Number(e.target.value))}
+            />
+            <span className="goal-label">円</span>
+            {goalAmt > 0 && (
+              <>
+                <span className="goal-divider">|</span>
+                {reached ? (
+                  <span className="goal-stat done">✅ 目標達成！</span>
+                ) : (
+                  <>
+                    <span className="goal-stat remain">残り {remain.toLocaleString()}円</span>
+                    <span className="goal-divider">|</span>
+                    <span className="goal-stat cnt">{needCnt > 0 ? ("あと " + needCnt + "件") : '-'}</span>
+                    {tankaReal > 0 && <span className="goal-label">(クエ抜き単価 {tankaReal.toLocaleString()}円/件)</span>}
+                  </>
+                )}
+              </>
+            )}
+          </div>
+        );
+      })()}
 
       {/* DAY INFO */}
       <div className="section">

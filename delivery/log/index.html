@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -472,4 +473,218 @@ function App() {
         </div>
         {/* 2段目: 時給換算/単価(クエ込)/単価(クエ抜) */}
         <div className="sum-row">
-          <div className=
+          <div className="sum-item">
+            <div className="sum-label">時給換算</div>
+            <div className="sum-val yellow">{total_h > 0 ? jikyu.toLocaleString() : '-'}円</div>
+          </div>
+          <div className="sum-item">
+            <div className="sum-label">単価(クエ込)</div>
+            <div className="sum-val">{total_cnt > 0 ? Math.round((total_sales + total_que) / total_cnt).toLocaleString() : '-'}円</div>
+          </div>
+          <div className="sum-item">
+            <div className="sum-label">単価(クエ抜)</div>
+            <div className="sum-val">{total_cnt > 0 ? Math.round(total_sales / total_cnt).toLocaleString() : '-'}円</div>
+          </div>
+        </div>
+      </div>
+      {/* 目標金額バー */}
+      {(() => {
+        const tankaReal = total_cnt > 0 ? Math.round(total_sales / total_cnt) : 0;
+        const currentTotal = total_sales + total_que;
+        const remain = goalAmt > 0 ? goalAmt - currentTotal : 0;
+        const reached = goalAmt > 0 && currentTotal >= goalAmt;
+        const needCnt = (!reached && tankaReal > 0 && remain > 0) ? Math.ceil(remain / tankaReal) : 0;
+        return (
+          <div className="goal-bar">
+            <span className="goal-label">🎯 目標</span>
+            <input
+              className="goal-input"
+              type="number"
+              placeholder="例: 20000"
+              value={goalAmt || ''}
+              onChange={e => setGoalAmt(Number(e.target.value))}
+            />
+            <span className="goal-label">円</span>
+            {goalAmt > 0 && (
+              <>
+                <span className="goal-divider">|</span>
+                {reached ? (
+                  <span className="goal-stat done">✅ 目標達成！</span>
+                ) : (
+                  <>
+                    <span className="goal-stat remain">残り {remain.toLocaleString()}円</span>
+                    <span className="goal-divider">|</span>
+                    <span className="goal-stat cnt">{needCnt > 0 ? ("あと " + needCnt + "件") : '-'}</span>
+                    {tankaReal > 0 && <span className="goal-label">(クエ抜き単価 {tankaReal.toLocaleString()}円/件)</span>}
+                  </>
+                )}
+              </>
+            )}
+          </div>
+        );
+      })()}
+
+      {/* DAY INFO */}
+      <div className="section">
+        <div className="section-label">基本情報</div>
+        <div className="day-card">
+          <div className="day-grid">
+            <div>
+              <label className="field-label">日付</label>
+              <input type="date" value={date} onChange={e => setDate(e.target.value)} />
+            </div>
+            <div>
+              <label className="field-label">天気</label>
+              <select value={weather} onChange={e => setWeather(e.target.value)}>
+                {WEATHERS.map(w => <option key={w}>{w}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="field-label">クエ有無</label>
+              <div style={{padding:'11px 12px', background:'rgba(255,255,255,0.05)', border:'1.5px solid var(--border)', borderRadius:'var(--radius-sm)', fontSize:'12px', color: total_que > 0 ? 'var(--yellow)' : 'var(--muted)'}}>
+                {total_que > 0 ? `${total_que.toLocaleString()}円` : 'なし'}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* SETS */}
+      <div className="section">
+        <div className="section-label">稼働セット (自動保存中)</div>
+        {calced.map((s, i) => {
+          const sp = s.d_p + s.u_p + s.m_p;
+          const sq = s.d_qp + s.u_qp + s.m_qp;
+          const sc = s.d_c + s.u_c + s.m_c;
+          const tanka     = sc > 0 ? Math.round((sp + sq) / sc) : 0;
+          const tankaReal = sc > 0 ? Math.round(sp / sc) : 0;
+          const isActive = s.start && !s.end;
+          const isDone   = s.start && s.end;
+          return (
+            <div key={i} className="set-card">
+              <div className="set-header" onClick={() => toggleOpen(i)}>
+                <div className="set-title">
+                  SET {i+1}
+                  {isActive && <span className="set-badge active">稼働中</span>}
+                  {isDone   && <span className="set-badge done">完了</span>}
+                </div>
+                <div style={{display:'flex', alignItems:'center', gap:'10px'}}>
+                  {(sp > 0 || sc > 0) && (
+                    <span className="set-summary">{sc}件 / {sp.toLocaleString()}円{tanka > 0 ? ` / @${tanka.toLocaleString()}円(込) @${tankaReal.toLocaleString()}円(抜)` : ''}{s.dur ? ` / ${s.dur.h}h${s.dur.m}m` : ''}</span>
+                  )}
+                  <span className={`chevron ${s.open ? 'open' : ''}`}>▼</span>
+                </div>
+              </div>
+
+              {s.open && (
+                <div className="set-body">
+                  {/* 時刻 */}
+                  <div className="time-row">
+                    <div>
+                      <label className="field-label">開始時刻</label>
+                      <div className="time-field">
+                        <input type="time" value={sets[i].start} onChange={e => updateSet(i,'start',e.target.value)} />
+                        <button className="stamp-btn" onClick={() => updateSet(i,'start',getNow())}>NOW</button>
+                      </div>
+                    </div>
+                    <div>
+                      <label className="field-label">終了時刻</label>
+                      <div className="time-field">
+                        <input type="time" value={sets[i].end} onChange={e => updateSet(i,'end',e.target.value)} />
+                        <button className="stamp-btn secondary" onClick={() => updateSet(i,'end',getNow())}>FIN</button>
+                      </div>
+                    </div>
+                  </div>
+                  {s.dur && (
+                    <div className="time-duration">稼働時間: {s.dur.h > 0 ? `${s.dur.h}時間` : ''}{s.dur.m}分 ({(s.dur.total).toFixed(2)}h)</div>
+                  )}
+
+                  {/* プラットフォーム別 */}
+                  {PLATFORMS.map(p => (
+                    <div key={p.key} className="platform-block" style={{background: p.color+'09', marginTop:'12px'}}>
+                      <div className="platform-title" style={{color: p.color}}>
+                        {p.label}
+                        <span className="diff-badge">
+                          +{s[p.key+'_p'].toLocaleString()}円 / {s[p.key+'_c']}件
+                          {s[p.key+'_qp'] > 0 ? ` / クエ+${s[p.key+'_qp'].toLocaleString()}` : ''}
+                        </span>
+                      </div>
+                      <div className="pf-inputs">
+                        <div>
+                          <label className="field-label">総売上(累積)</label>
+                          <input type="number" placeholder="0" value={sets[i][p.key+'_cum']}
+                            onChange={e => updateSet(i, p.key+'_cum', e.target.value)} />
+                        </div>
+                        <div>
+                          <label className="field-label">総件数(累積)</label>
+                          <input type="number" placeholder="0" value={sets[i][p.key+'_cnt_cum']}
+                            onChange={e => updateSet(i, p.key+'_cnt_cum', e.target.value)} />
+                        </div>
+                        <div>
+                          <label className="field-label">クエ累積(円)</label>
+                          <input type="number" placeholder="0" value={sets[i][p.key+'_que_cum']}
+                            onChange={e => updateSet(i, p.key+'_que_cum', e.target.value)}
+                            style={{borderColor: parseFloat(sets[i][p.key+'_que_cum']) > 0 ? 'var(--yellow)' : ''}} />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+
+                  {/* km累積・差分表示・メモ */}
+                  <div style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:'8px', marginTop:'12px'}}>
+                    <div>
+                      <label className="field-label">走行距離累積(km)</label>
+                      <input type="number" placeholder="0" value={sets[i].km_cum}
+                        onChange={e => updateSet(i,'km_cum',e.target.value)} />
+                    </div>
+                    <div>
+                      <label className="field-label">このセット走行</label>
+                      <div className="quest-total-display" style={{color: s.km_p > 0 ? 'var(--teal)' : 'var(--muted)'}}>
+                        {s.km_p > 0 ? `+${s.km_p}km` : '-'}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div style={{marginTop:'8px'}}>
+                    <label className="field-label">戦術メモ</label>
+                    <textarea rows="2" placeholder="このセットの戦術・所感を記入"
+                      value={sets[i].memo} onChange={e => updateSet(i,'memo',e.target.value)} />
+                  </div>
+
+                  {sets.length > 1 && (
+                    <button className="del-btn" onClick={() => deleteSet(i)}>
+                      SET {i+1} を削除
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+          );
+        })}
+        <button className="add-btn" onClick={addSet}>＋ 次のセットを追加</button>
+      </div>
+
+      {/* LOG GENERATE */}
+      <div className="section">
+        <button className="gen-btn" onClick={() => setShowLog(!showLog)}>
+          {showLog ? '入力に戻る' : 'V5ログを生成'}
+        </button>
+        {showLog && (
+          <div className="log-box">
+            <pre style={{whiteSpace:'pre-wrap'}}>{generateLog()}</pre>
+            <button className="copy-btn" onClick={() => {
+              navigator.clipboard.writeText(generateLog());
+              alert('コピーしました！');
+            }}>クリップボードにコピー</button>
+          </div>
+        )}
+        <button className="reset-btn" onClick={resetData}>今日のリザルトをリセット</button>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>

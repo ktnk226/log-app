@@ -175,6 +175,7 @@
       .view-container { padding: 16px; }
       .summary-bar { padding: 12px 16px; }
       .goal-bar { padding: 10px 16px; }
+      .grid-3 { grid-template-columns: 1fr; gap: 12px; } /* スマホでの重なり・被りを完全に防止 */
     }
   </style>
 </head>
@@ -399,7 +400,6 @@ function App() {
     return log.trim();
   };
 
-  // スコープ競合を避けるため、summaryから安全に抽出
   const currentTotal = summary.total_sales + summary.total_que;
   const tankaReal = summary.total_cnt > 0 ? Math.round(summary.total_sales / summary.total_cnt) : 0;
   const remain = goalAmt > 0 ? goalAmt - currentTotal : 0;
@@ -422,7 +422,7 @@ function App() {
           <button class={`nav-item ${activeTab === 'entries' ? 'active' : ''}`} onClick={() => setActiveTab('entries')}>📝 記録入力</button>
           <button class={`nav-item ${activeTab === 'settings' ? 'active' : ''}`} onClick={() => setActiveTab('settings')}>⚙️ 設定・データ</button>
         </nav>
-      </aside>
+      </</aside>
 
       {/* MAIN LAYOUT CONTENT */}
       <div class="main-content">

@@ -360,6 +360,58 @@ function App() {
     return cells;
   }, [vault, date]);
 
+  /* ── freee用CSVの自動出力機能 ── */
+  const downloadFreeeCSV = () => {
+    const n = v => parseFloat(v) || 0;
+    const sortedDates = Object.keys(vault).sort();
+    if (sortedDates.length === 0) {
+      alert("エクスポートするデータがまだありません。");
+      return;
+    }
+
+    // freee独自のインポート用ヘッダー
+    let csvContent = "日付け,出金額,入金額,備考\r\n";
+
+    sortedDates.forEach(dKey => {
+      const day = vault[dKey];
+      const sList = day.sets || [];
+      if (sList.length === 0) return;
+      
+      const lastS = sList[sList.length - 1];
+      const d_tot = n(lastS.d_cum) + n(lastS.d_que_cum);
+      const u_tot = n(lastS.u_cum) + n(lastS.u_que_cum);
+      const r_tot = n(lastS.r_cum) + n(lastS.r_que_cum);
+      const m_tot = n(lastS.m_cum) + n(lastS.m_que_cum);
+      const dayTotalAmt = d_tot + u_tot + r_tot + m_tot;
+
+      if (dayTotalAmt === 0) return; // 売上ゼロの日はスキップ
+
+      // freeeにインポートした際に自動仕訳ルールが効きやすいよう、備考欄に内訳テキストを格納
+      const d_cnt = n(lastS.d_cnt_cum); const u_cnt = n(lastS.u_cnt_cum); const r_cnt = n(lastS.r_cnt_cum); const m_cnt = n(lastS.m_cnt_cum);
+      const pf_details = [];
+      if (d_tot > 0) pf_details.push(`出前館:${d_tot}円(${d_cnt}件)`);
+      if (u_tot > 0) pf_details.push(`Uber:${u_tot}円(${u_cnt}件)`);
+      if (r_tot > 0) pf_details.push(`RocketNow:${r_tot}円(${r_cnt}件)`);
+      if (m_tot > 0) pf_details.push(`menu:${m_tot}円(${m_cnt}件)`);
+
+      const memoStr = `本日売上計 [${pf_details.join(' / ')}] 走行距離:${n(lastS.km_cum)}km`;
+      const dateFormated = dKey.replace(/-/g, '/'); // YYYY/MM/DD形式
+
+      // カンマ混入防止のエスケープ
+      csvContent += `${dateFormated},0,${dayTotalAmt},"${memoStr}"\r\n`;
+    });
+
+    const bom = new Uint8Array([0xEF, 0xBB, 0xBF]); // Excelの文字化けを防ぐBOMコード
+    const blob = new Blob([bom, csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `freee_delivery_sales_${new Date().getFullYear()}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   const generateLog = () => {
     const n = v => parseFloat(v) || 0;
     const { total_sales, total_que, real_sales, total_cnt, total_km, total_h, jikyu } = summary;
@@ -592,6 +644,13 @@ function App() {
 
         {/* ── TAB CONTENT 4: SETTINGS & HISTORIES ── */}
         <div class={`view-container ${activeTab === 'settings' ? 'active' : ''}`}>
+          <div class="section-title">会計連携（確定申告自動化）</div>
+          <div class="card" style={{borderColor:'var(--green)', background:'rgba(0,230,118,0.02)'}}>
+            <label style={{color:'var(--green)', fontWeight:'bold', fontSize:'13px'}}>クラウド会計ソフト freee 連動</label>
+            <p style={{fontSize:'12px', color:'var(--muted2)', marginBottom:'12px'}}>蓄積された全営業日の売上データを、freeeの「明細アップロード」にそのまま取り込める形式のCSVとして書き出します。</p>
+            <button class="gen-btn" style={{background:'var(--green)', color:'#000', fontWeight:'900'}} onClick={downloadFreeeCSV}>📊 freee用売上CSVを書き出す</button>
+          </div>
+
           <div class="section-title">データコントロール</div>
           <div class="card">
             <button class="gen-btn" style={{background:'var(--blue)'}} onClick={startNewDay}>新しい営業日を開始する (4時起点判定)</button>

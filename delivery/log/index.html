@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
-  <title>🛵 デリログ</title>
+  <title>::: デリログ :::</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
@@ -91,7 +91,7 @@
     /* VIEW MANAGEMENT */
     .view-container { padding: 24px; max-width: 700px; width: 100%; margin: 0 auto; display: none; }
     .view-container.active { display: block; }
-    .section-title { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px; margin-top: 10px; }
+    .section-title { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px; margin-top: 15px; }
 
     /* CARDS & FORMS */
     .card { background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--radius); padding: 18px; margin-bottom: 16px; }
@@ -218,28 +218,6 @@ function getBusinessDateStr() {
   return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 }
 
-function calcDuration(start, end) {
-  if (!start || !end) return null;
-  const [sh,sm] = start.split(':').map(Number);
-  let [eh,em] = end.split(':').map(Number);
-  let mins = (eh * 60 + em) - (sh * 60 + sm);
-  if (mins < 0) mins += 24 * 60;
-  return { h: Math.floor(mins / 60), m: mins % 60, total: mins / 60 };
-}
-
-const EMPTY_SET = () => ({
-  start: '', end: '',
-  d_cum: '', u_cum: '', r_cum: '', m_cum: '',
-  d_cnt_cum: '', u_cnt_cum: '', r_cnt_cum: '', m_cnt_cum: '',
-  d_que_cum: '', u_que_cum: '', r_que_cum: '', m_que_cum: '',
-  km_cum: '', memo: '', open: true,
-});
-
-function loadInitialVault() {
-  try { const raw = localStorage.getItem(SK.db); return raw ? JSON.parse(raw) : {}; } catch { return {}; }
-}
-function loadInitialDate() { return localStorage.getItem(SK.currentDate) || getBusinessDateStr(); }
-
 /* ────────────────── MAIN APP ────────────────── */
 function App() {
   const [vault, setVault] = useState(loadInitialVault);
@@ -310,8 +288,16 @@ function App() {
     let weekTotal = 0; let weekReal = 0; let weekQue = 0; let weekCnt = 0;
 
     const currentRefDate = new Date(date);
-    const oneWeekAgoRef = new Date(date);
-    oneWeekAgoRef.setDate(oneWeekAgoRef.getDate() - 6);
+    const dayOfWeek = currentRefDate.getDay();
+    
+    const mondayDiff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+    const mondayRef = new Date(date);
+    mondayRef.setDate(mondayRef.getDate() + mondayDiff);
+    mondayRef.setHours(0,0,0,0);
+
+    const sundayRef = new Date(mondayRef);
+    sundayRef.setDate(sundayRef.getDate() + 6);
+    sundayRef.setHours(23,59,59,999);
 
     Object.keys(vault).forEach(dKey => {
       const [y, m, d] = dKey.split('-').map(Number);
@@ -328,7 +314,7 @@ function App() {
       }
 
       const thisDate = new Date(dKey);
-      if (thisDate >= oneWeekAgoRef && thisDate <= currentRefDate) {
+      if (thisDate >= mondayRef && thisDate <= sundayRef) {
         weekTotal += totalAmt; weekReal += sales; weekQue += que; weekCnt += cnt;
       }
     });
@@ -434,6 +420,49 @@ function App() {
     document.body.appendChild(link); link.click(); document.body.removeChild(link);
   };
 
+  /* 📦 1: 新機能：JSON丸ごとバックアップ書き出し */
+  const exportBackupJSON = () => {
+    if (Object.keys(vault).length === 0) {
+      alert("バックアップするデータがまだありません。");
+      return;
+    }
+    const dataStr = JSON.stringify(vault, null, 2);
+    const blob = new Blob([dataStr], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    const d = new Date();
+    const timeStamp = `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`;
+    link.setAttribute("href", url);
+    link.setAttribute("download", `delilog_backup_${timeStamp}.json`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  /* 📥 2: 新機能：JSONファイルからデータを完全復元 */
+  const importBackupJSON = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (!window.confirm("バックアップファイルを読み込みますか？\n※既存のデータはすべて上書きされます。")) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const importedData = JSON.parse(event.target.event ? event.target.event.target.result : event.target.result);
+        if (typeof importedData === "object" && importedData !== null) {
+          setVault(importedData);
+          alert("データの復元が完了しました！");
+        } else {
+          alert("不正なファイルフォーマットです。復元に失敗しました。");
+        }
+      } catch (err) {
+        alert("ファイルの解析に失敗しました。正しいJSONファイルかご確認ください。");
+      }
+    };
+    reader.readAsText(file);
+  };
+
   const generateLog = () => {
     const n = v => parseFloat(v) || 0;
     const { total_sales, total_que, real_sales, total_cnt, total_km, total_h, jikyu } = summary;
@@ -489,7 +518,7 @@ function App() {
           <div class="brand-mark">🛵</div>
           <div>
             <div class="brand-title">DELIVERY LOG</div>
-            <p style={{fontSize:'9px', color:'var(--muted)'}}>デリログ // V10</p>
+            <p style={{fontSize:'9px', color:'var(--muted)'}}>デリログ // V11</p>
           </div>
         </div>
         <nav class="nav-menu">
@@ -560,7 +589,7 @@ function App() {
               </div>
             </div>
             <div class="analysis-card">
-              <div class="analysis-card-title">⏳ 直近7日間 累計リザルト</div>
+              <div class="analysis-card-title">⏳ 今週の累計リザルト（月〜日）</div>
               <div class="analysis-value" style={{color: 'var(--yellow)'}}>{periodicAnalysis.weekTotal.toLocaleString()} 円</div>
               <div class="analysis-sub">
                 <span>実質: {periodicAnalysis.weekReal.toLocaleString()}円</span>
@@ -692,6 +721,19 @@ function App() {
 
         {/* ── TAB CONTENT 4: SETTINGS ── */}
         <div class={`view-container ${activeTab === 'settings' ? 'active' : ''}`}>
+          
+          <div class="section-title">🛡️ データ保護（バックアップ＆復元）</div>
+          <div class="card" style={{borderColor:'var(--blue)', background:'rgba(41,121,255,0.02)'}}>
+            <p style={{fontSize:'12px', color:'var(--muted2)', marginBottom:'12px'}}>
+              iPhoneの故障・紛失やアプリアイコンの削除に備え、データをファイルに保存します。定期的なバックアップ（月1回以上）を推奨します。
+            </p>
+            <div class="grid-2">
+              <button class="gen-btn" style={{background:'var(--blue)', fontWeight:'900'}} onClick={exportBackupJSON}>💾 データをバックアップする</button>
+              <button class="gen-btn" style={{background:'rgba(255,255,255,0.1)', color:'#fff', border:'1px solid var(--border)'}} onClick={() => document.getElementById('importFileInput').click()}>📥 バックアップから復元する</button>
+            </div>
+            <input type="file" id="importFileInput" accept=".json" style={{display:'none'}} onChange={importBackupJSON} />
+          </div>
+
           <div class="section-title">会計連携（確定申告自動化）</div>
           <div class="card" style={{borderColor:'var(--green)', background:'rgba(0,230,118,0.02)'}}>
             <label style={{color:'var(--green)', fontWeight:'bold', fontSize:'13px'}}>クラウド会計ソフト freee 連動</label>
@@ -735,6 +777,14 @@ function App() {
     </div>
   );
 }
+
+const EMPTY_SET = () => ({
+  start: '', end: '',
+  d_cum: '', u_cum: '', r_cum: '', m_cum: '',
+  d_cnt_cum: '', u_cnt_cum: '', r_cnt_cum: '', m_cnt_cum: '',
+  d_que_cum: '', u_que_cum: '', r_que_cum: '', m_que_cum: '',
+  km_cum: '', memo: '', open: true,
+});
 
 ReactDOM.createRoot(document.getElementById('root')).render(<App />);
 </script>

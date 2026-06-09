@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
-  <title>🛡️ Vibe Analytics V7</title>
+  <title>🛡️ Vibe Analytics V8</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
@@ -45,7 +45,6 @@
     }
     .header-title { font-family: var(--font-head); font-size: 21px; letter-spacing: 0.04em; }
     .header-sub { font-size: 10px; color: var(--muted); margin-top: 1px; }
-    .header-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
 
     /* LIVE SUMMARY BAR */
     .summary-bar {
@@ -63,6 +62,7 @@
     .sum-val.yellow { color: var(--yellow); }
     .sum-val.teal { color: var(--teal); }
     .sum-row + .sum-row { border-top: 1px solid var(--border); padding-top: 8px; }
+    
     .goal-bar {
       background: var(--surface); border-bottom: 1px solid var(--border);
       padding: 10px 18px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
@@ -99,8 +99,7 @@
     input:focus, select:focus, textarea:focus { border-color: var(--accent); outline: none; }
     select option { background: #1a1c24; }
 
-    /* QUEST ROW */
-    .quest-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+    /* QUEST TOTAL DISPLAY */
     .quest-total-display {
       background: rgba(255,214,0,0.08); border: 1px solid rgba(255,214,0,0.2);
       border-radius: var(--radius-sm); padding: 11px 12px;
@@ -148,17 +147,12 @@
     }
     .pf-inputs { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
 
-    /* SET QUEST & KM */
-    .set-bottom-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 10px; }
-
-    /* DELETE BTN */
+    /* BUTTONS */
     .del-btn {
       width: 100%; padding: 8px; background: rgba(255,60,60,0.06);
       color: rgba(255,100,100,0.6); border: 1px solid rgba(255,60,60,0.15);
       border-radius: 7px; font-size: 11px; cursor: pointer; margin-top: 8px;
     }
-
-    /* ADD BTN */
     .add-btn {
       width: 100%; padding: 16px;
       background: rgba(255,255,255,0.04); border: 2px dashed var(--border);
@@ -166,13 +160,16 @@
       cursor: pointer; font-size: 14px;
     }
     .add-btn:hover { background: rgba(255,255,255,0.07); }
-
-    /* GEN BTN */
     .gen-btn {
       width: 100%; padding: 18px;
       background: linear-gradient(135deg, var(--accent), var(--accent2));
       border-radius: var(--radius); color: #fff; font-size: 17px;
       font-weight: 900; margin-top: 28px; border: none; cursor: pointer;
+    }
+    .reset-btn {
+      width: 100%; margin-top: 16px; padding: 12px;
+      background: rgba(255,60,60,0.08); color: #ff6e6e;
+      border: 1px solid rgba(255,60,60,0.2); border-radius: 10px; font-size: 12px; cursor: pointer;
     }
 
     /* LOG BOX */
@@ -187,20 +184,20 @@
       background: var(--green); color: #000; font-weight: bold;
       border-radius: 8px; border: none; cursor: pointer; font-size: 14px;
     }
-    .reset-btn {
-      width: 100%; margin-top: 16px; padding: 12px;
-      background: rgba(255,60,60,0.08); color: #ff6e6e;
-      border: 1px solid rgba(255,60,60,0.2); border-radius: 10px; font-size: 12px; cursor: pointer;
-    }
 
     /* CHEVRON */
     .chevron { font-size: 12px; color: var(--muted); transition: transform 0.2s; }
     .chevron.open { transform: rotate(180deg); }
+    .time-duration { font-size: 11px; color: var(--teal); font-family: var(--font-mono); margin-top: 4px; }
 
-    /* REALTIME TIME DISPLAY */
-    .time-duration {
-      font-size: 11px; color: var(--teal); font-family: var(--font-mono); margin-top: 4px;
+    /* HISTORY LIST SECTION */
+    .history-card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 12px 16px; margin-bottom: 8px; cursor: pointer; display: flex; align-items: center; justify-content: space-between;
     }
+    .history-card:hover { background: var(--surface2); border-color: var(--muted); }
+    .history-date { font-weight: 700; font-size: 14px; }
+    .history-summary { font-family: var(--font-mono); font-size: 13px; color: var(--muted2); }
   </style>
 </head>
 <body>
@@ -209,11 +206,10 @@
 <script type="text/babel">
 const { useState, useMemo, useEffect, useCallback } = React;
 
-/* ── ストレージキー (delivery_log_ プレフィックスで他ツールと完全分離) ── */
+/* ── ストレージキー ── */
 const SK = {
-  date:    'delivery_log_date',
-  weather: 'delivery_log_weather',
-  sets:    'delivery_log_sets',
+  db: 'delivery_log_vault_v8', // 全日付データを統合してオブジェクト保存するキー
+  currentDate: 'delivery_log_current_date',
 };
 
 const PLATFORMS = [
@@ -230,8 +226,13 @@ function getNow() {
   return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
 }
 
-function getLocalDateStr() {
+/* 4時起点の日付算出ロジック */
+function getBusinessDateStr() {
   const d = new Date();
+  // もし朝4時前（0:00〜3:59）ならカレンダー上は「前日」扱いにする
+  if (d.getHours() < 4) {
+    d.setDate(d.getDate() - 1);
+  }
   return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 }
 
@@ -255,32 +256,56 @@ const EMPTY_SET = () => ({
   open: true,
 });
 
-function loadState() {
+/* 初期データロード */
+function loadInitialVault() {
   try {
-    return {
-      date:    localStorage.getItem(SK.date)    || getLocalDateStr(),
-      weather: localStorage.getItem(SK.weather) || '晴',
-      sets:    JSON.parse(localStorage.getItem(SK.sets)) || [EMPTY_SET()],
-    };
-  } catch { return { date: getLocalDateStr(), weather: '晴', sets: [EMPTY_SET()] }; }
+    const raw = localStorage.getItem(SK.db);
+    return raw ? JSON.parse(raw) : {};
+  } catch { return {}; }
+}
+
+function loadInitialDate() {
+  return localStorage.getItem(SK.currentDate) || getBusinessDateStr();
 }
 
 /* ────────────────── MAIN APP ────────────────── */
 function App() {
-  const init = loadState();
-  const [date, setDate]       = useState(init.date);
-  const [weather, setWeather] = useState(init.weather);
-  const [sets, setSets]       = useState(init.sets);
+  const [vault, setVault] = useState(loadInitialVault);
+  const [date, setDate] = useState(loadInitialDate);
   const [showLog, setShowLog] = useState(false);
-  const [goalAmt, setGoalAmt]  = useState(0);
+
+  // 現在選ばれている日付のデータを抽出し、無ければデフォルト値を割り当て
+  const dayData = useMemo(() => {
+    return vault[date] || { weather: '晴', goalAmt: 0, sets: [EMPTY_SET()] };
+  }, [vault, date]);
+
+  const weather = dayData.weather;
+  const goalAmt = dayData.goalAmt;
+  const sets = dayData.sets;
+
+  // データの自動保存（Vaultオブジェクト全体と現在日付の同期）
+  useEffect(() => {
+    localStorage.setItem(SK.db, JSON.stringify(vault));
+  }, [vault]);
 
   useEffect(() => {
-    try {
-      localStorage.setItem(SK.date, date);
-      localStorage.setItem(SK.weather, weather);
-      localStorage.setItem(SK.sets, JSON.stringify(sets));
-    } catch {}
-  }, [date, weather, sets]);
+    localStorage.setItem(SK.currentDate, date);
+    setShowLog(false);
+  }, [date]);
+
+  /* 特定の日付の特定フィールドをスマートに更新 */
+  const updateDayField = useCallback((field, value) => {
+    setVault(prev => ({
+      ...prev,
+      [date]: {
+        ...prev[date],
+        weather: prev[date]?.weather || '晴',
+        goalAmt: prev[date]?.goalAmt || 0,
+        sets: prev[date]?.sets || [EMPTY_SET()],
+        [field]: value
+      }
+    }));
+  }, [date]);
 
   /* 各セットの差分計算 */
   const calced = useMemo(() => {
@@ -315,7 +340,7 @@ function App() {
   /* サマリー集計 */
   const summary = useMemo(() => {
     const n = v => parseFloat(v) || 0;
-    const last = sets[sets.length - 1];
+    const last = sets[sets.length - 1] || EMPTY_SET();
     const total_sales = n(last.d_cum) + n(last.u_cum) + n(last.r_cum) + n(last.m_cum);
     const total_que   = n(last.d_que_cum) + n(last.u_que_cum) + n(last.r_que_cum) + n(last.m_que_cum);
     const total_cnt   = n(last.d_cnt_cum) + n(last.u_cnt_cum) + n(last.r_cnt_cum) + n(last.m_cnt_cum);
@@ -327,16 +352,20 @@ function App() {
   }, [sets, calced]);
 
   const updateSet = useCallback((i, key, val) => {
-    setSets(prev => { const ns = [...prev]; ns[i] = { ...ns[i], [key]: val }; return ns; });
-  }, []);
+    const newSets = [...sets];
+    newSets[i] = { ...newSets[i], [key]: val };
+    updateDayField('sets', newSets);
+  }, [sets, updateDayField]);
 
   const toggleOpen = (i) => {
-    setSets(prev => { const ns = [...prev]; ns[i] = { ...ns[i], open: !ns[i].open }; return ns; });
+    const newSets = [...sets];
+    newSets[i] = { ...newSets[i], open: !newSets[i].open };
+    updateDayField('sets', newSets);
   };
 
   const addSet = () => {
-    const last = sets[sets.length - 1];
-    setSets([...sets, {
+    const last = sets[sets.length - 1] || EMPTY_SET();
+    updateDayField('sets', [...sets, {
       ...EMPTY_SET(),
       d_cum: last.d_cum, u_cum: last.u_cum, r_cum: last.r_cum, m_cum: last.m_cum,
       d_cnt_cum: last.d_cnt_cum, u_cnt_cum: last.u_cnt_cum, r_cnt_cum: last.r_cnt_cum, m_cnt_cum: last.m_cnt_cum,
@@ -348,15 +377,37 @@ function App() {
   const deleteSet = (i) => {
     if (sets.length <= 1) return;
     if (!window.confirm(`SET ${i+1} を削除しますか？`)) return;
-    setSets(prev => prev.filter((_, idx) => idx !== i));
+    updateDayField('sets', sets.filter((_, idx) => idx !== i));
   };
 
-  const resetData = () => {
-    if (!window.confirm('本日のデータをリセットして新しい1日を開始しますか？')) return;
-    setSets([EMPTY_SET()]);
-    setDate(getLocalDateStr());
-    setShowLog(false);
+  /* 次の日の稼働を開始するボタン（4時起点で自動的に日付を進める） */
+  const startNewDay = () => {
+    const targetDate = getBusinessDateStr();
+    if (date === targetDate) {
+      if (!window.confirm('すでに現在の最新営業日（起点4時）を開いています。データを真っ新にリセットしますか？')) return;
+      setVault(prev => ({
+        ...prev,
+        [targetDate]: { weather: '晴', goalAmt: 0, sets: [EMPTY_SET()] }
+      }));
+    } else {
+      setDate(targetDate);
+    }
   };
+
+  /* 履歴一覧の集計データ算出 */
+  const historyList = useMemo(() => {
+    const n = v => parseFloat(v) || 0;
+    return Object.keys(vault).sort().reverse().map(dKey => {
+      const day = vault[dKey];
+      const sList = day.sets || [];
+      const lastS = sList[sList.length - 1] || {};
+      const sales = n(lastS.d_cum) + n(lastS.u_cum) + n(lastS.r_cum) + n(lastS.m_cum);
+      const que = n(lastS.d_que_cum) + n(lastS.u_que_cum) + n(lastS.r_que_cum) + n(lastS.m_que_cum);
+      const cnt = n(lastS.d_cnt_cum) + n(lastS.u_cnt_cum) + n(lastS.r_cnt_cum) + n(lastS.m_cnt_cum);
+      return { dateKey: dKey, total: sales + que, count: cnt };
+    });
+  }, [vault]);
+
 
   /* ── V5ログ生成 ── */
   const generateLog = () => {
@@ -365,7 +416,7 @@ function App() {
     const dayJa = ['日','月','火','水','木','金','土'][new Date(date).getDay()];
     const dateStr = date.replace(/-/g,'/');
 
-    const last = sets[sets.length - 1];
+    const last = sets[sets.length - 1] || EMPTY_SET();
     const d_total = n(last.d_cum);
     const u_total = n(last.u_cum);
     const r_total = n(last.r_cum);
@@ -441,7 +492,6 @@ function App() {
     return log.trim();
   };
 
-  /* ── RENDER ── */
   const { total_sales, total_que, real_sales, total_cnt, total_h, jikyu } = summary;
 
   return (
@@ -450,14 +500,13 @@ function App() {
       <div className="header">
         <div className="header-logo">🛡️</div>
         <div>
-          <div className="header-title">VIBE ANALYTICS V7</div>
-          <div className="header-sub">V5フォーマット完全対応 · BOSS専用</div>
+          <div className="header-title">VIBE ANALYTICS V8</div>
+          <div className="header-sub">履歴蓄積・カレンダー連動・4AM起点モデル</div>
         </div>
       </div>
 
-      {/* LIVE SUMMARY BAR - 2段 */}
+      {/* LIVE SUMMARY BAR */}
       <div className="summary-bar">
-        {/* 1段目: 総売上/実質売上/クエ合計/件数/時間 */}
         <div className="sum-row">
           <div className="sum-item">
             <div className="sum-label">総売上</div>
@@ -480,7 +529,6 @@ function App() {
             <div className="sum-val">{total_h > 0 ? (() => { const hh = Math.floor(total_h); const mm = Math.round((total_h - hh) * 60); return mm > 0 ? hh+'h'+mm+'m' : hh+'h'; })() : '-'}</div>
           </div>
         </div>
-        {/* 2段目: 時給換算/単価(クエ込)/単価(クエ抜) */}
         <div className="sum-row">
           <div className="sum-item">
             <div className="sum-label">時給換算</div>
@@ -496,6 +544,7 @@ function App() {
           </div>
         </div>
       </div>
+
       {/* 目標金額バー */}
       {(() => {
         const tankaReal = total_cnt > 0 ? Math.round(total_sales / total_cnt) : 0;
@@ -511,7 +560,7 @@ function App() {
               type="number"
               placeholder="例: 20000"
               value={goalAmt || ''}
-              onChange={e => setGoalAmt(Number(e.target.value))}
+              onChange={e => updateDayField('goalAmt', Number(e.target.value))}
             />
             <span className="goal-label">円</span>
             {goalAmt > 0 && (
@@ -524,7 +573,7 @@ function App() {
                     <span className="goal-stat remain">残り {remain.toLocaleString()}円</span>
                     <span className="goal-divider">|</span>
                     <span className="goal-stat cnt">{needCnt > 0 ? ("あと " + needCnt + "件") : '-'}</span>
-                    {tankaReal > 0 && <span className="goal-label">(クエ抜き単価 {tankaReal.toLocaleString()}円/件)</span>}
+                    {tankaReal > 0 && <span className="goal-label">(単価 {tankaReal.toLocaleString()}円)</span>}
                   </>
                 )}
               </>
@@ -535,16 +584,16 @@ function App() {
 
       {/* DAY INFO */}
       <div className="section">
-        <div className="section-label">基本情報</div>
+        <div className="section-label">基本情報 (日付選択でデータ切替)</div>
         <div className="day-card">
           <div className="day-grid">
             <div>
-              <label className="field-label">日付</label>
-              <input type="date" value={date} onChange={e => setDate(e.target.value)} />
+              <label className="field-label">営業日選択</label>
+              <input type="date" value={date} onChange={e => setDate(e.target.value)} style={{borderColor: 'var(--teal)'}} />
             </div>
             <div>
               <label className="field-label">天気</label>
-              <select value={weather} onChange={e => setWeather(e.target.value)}>
+              <select value={weather} onChange={e => updateDayField('weather', e.target.value)}>
                 {WEATHERS.map(w => <option key={w}>{w}</option>)}
               </select>
             </div>
@@ -560,7 +609,7 @@ function App() {
 
       {/* SETS */}
       <div className="section">
-        <div className="section-label">稼働セット (自動保存中)</div>
+        <div className="section-label">{date.replace(/-/g,'/')} 稼働セット</div>
         {calced.map((s, i) => {
           const sp = s.d_p + s.u_p + s.r_p + s.m_p;
           const sq = s.d_qp + s.u_qp + s.r_qp + s.m_qp;
@@ -579,7 +628,7 @@ function App() {
                 </div>
                 <div style={{display:'flex', alignItems:'center', gap:'10px'}}>
                   {(sp > 0 || sc > 0) && (
-                    <span className="set-summary">{sc}件 / {sp.toLocaleString()}円{tanka > 0 ? ` / @${tanka.toLocaleString()}円(込) @${tankaReal.toLocaleString()}円(抜)` : ''}{s.dur ? ` / ${s.dur.h}h${s.dur.m}m` : ''}</span>
+                    <span className="set-summary">{sc}件 / {sp.toLocaleString()}円{tanka > 0 ? ` / @${tanka.toLocaleString()}(込)` : ''}</span>
                   )}
                   <span className={`chevron ${s.open ? 'open' : ''}`}>▼</span>
                 </div>
@@ -587,7 +636,6 @@ function App() {
 
               {s.open && (
                 <div className="set-body">
-                  {/* 時刻 */}
                   <div className="time-row">
                     <div>
                       <label className="field-label">開始時刻</label>
@@ -608,7 +656,6 @@ function App() {
                     <div className="time-duration">稼働時間: {s.dur.h > 0 ? `${s.dur.h}時間` : ''}{s.dur.m}分 ({(s.dur.total).toFixed(2)}h)</div>
                   )}
 
-                  {/* プラットフォーム別 */}
                   {PLATFORMS.map(p => (
                     <div key={p.key} className="platform-block" style={{background: p.color+'09', marginTop:'12px'}}>
                       <div className="platform-title" style={{color: p.color}}>
@@ -639,7 +686,6 @@ function App() {
                     </div>
                   ))}
 
-                  {/* km累積・差分表示・メモ */}
                   <div style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:'8px', marginTop:'12px'}}>
                     <div>
                       <label className="field-label">走行距離累積(km)</label>
@@ -661,9 +707,7 @@ function App() {
                   </div>
 
                   {sets.length > 1 && (
-                    <button className="del-btn" onClick={() => deleteSet(i)}>
-                      SET {i+1} を削除
-                    </button>
+                    <button className="del-btn" onClick={() => deleteSet(i)}>SET {i+1} を削除</button>
                   )}
                 </div>
               )}
@@ -687,7 +731,24 @@ function App() {
             }}>クリップボードにコピー</button>
           </div>
         )}
-        <button className="reset-btn" onClick={resetData}>今日のリザルトをリセット</button>
+        <button className="reset-btn" onClick={startNewDay}>
+          {date === getBusinessDateStr() ? '当日のデータをクリアしてリセット' : '最新営業日の稼働を開始 (4時起点判定)'}
+        </button>
+      </div>
+
+      {/* HISTORY VAULT SECTION */}
+      <div className="section" style={{marginTop: '20px'}}>
+        <div className="section-label">📜 過去の営業データ履歴</div>
+        {historyList.length === 0 ? (
+          <div style={{fontSize: '12px', color: 'var(--muted)', textAlign: 'center', padding: '20px'}}>履歴はまだありません</div>
+        ) : (
+          historyList.map(h => (
+            <div key={h.dateKey} className="history-card" onClick={() => setDate(h.dateKey)} style={{borderColor: date === h.dateKey ? 'var(--accent)' : ''}}>
+              <span className="history-date">{h.dateKey.replace(/-/g,'/')}</span>
+              <span className="history-summary">{h.count} 件 / {h.total.toLocaleString()} 円</span>
+            </div>
+          ))
+        )}
       </div>
     </div>
   );

@@ -199,7 +199,7 @@ const SK = {
 };
 
 const PLATFORMS = [
-  { key: 'd', label: '出前館', color: '#ff5c1a' },
+  { key: 'd', label: '出前館', color: '#ff2a2a' },
   { key: 'u', label: 'Uber Eats',   color: '#06C167' },
   { key: 'r', label: 'RocketNow', color: '#2979ff' },
   { key: 'm', label: 'menu',   color: '#e91e8c' },
@@ -272,7 +272,7 @@ function App() {
     const total_sales = n(last.d_cum) + n(last.u_cum) + n(last.r_cum) + n(last.m_cum);
     const total_que   = n(last.d_que_cum) + n(last.u_que_cum) + n(last.r_que_cum) + n(last.m_que_cum);
     const total_cnt   = n(last.d_cnt_cum) + n(last.u_cnt_cum) + n(last.r_cnt_cum) + n(last.m_cnt_cum);
-    const total_km    = n(last.km_cum);
+    const total_km     = n(last.km_cum);
     const total_h     = calced.reduce((a, s) => a + (s.dur ? s.dur.total : 0), 0);
     return {
       total_sales, total_que, real_sales: total_sales, total_cnt, total_km, total_h,

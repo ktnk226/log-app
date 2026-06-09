@@ -238,6 +238,7 @@ function calcDuration(start, end) {
   };
 }
 
+// 📦 ローカルストレージ初期化ヘルパー
 function loadInitialVault() {
   const saved = localStorage.getItem(SK.db);
   return saved ? JSON.parse(saved) : {};
@@ -254,7 +255,7 @@ function App() {
   const [date, setDate] = useState(loadInitialDate);
   const [activeTab, setActiveTab] = useState('dashboard');
   const [showLog, setShowLog] = useState(false);
-  const [isDirty, setIsDirty] = useState(false); // 保存が必要かどうかの状態
+  const [isDirty, setIsDirty] = useState(false);
 
   const dayData = useMemo(() => {
     return vault[date] || { weather: '晴', goalAmt: 0, sets: [EMPTY_SET()] };
@@ -462,21 +463,21 @@ function App() {
     document.body.appendChild(link); link.click(); document.body.removeChild(link);
   };
 
-  /* ☁️ iCloud Drive 連動：セーブ（固定ファイル名で書き出し） */
+  /* ☁️ iCloud Drive 連動：セーブ */
   const saveToiCloudJSON = () => {
     const dataStr = JSON.stringify(vault, null, 2);
     const blob = new Blob([dataStr], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.setAttribute("href", url);
-    link.setAttribute("download", "delilog_data.json"); // iCloud上で上書きしやすいようにファイル名を固定
+    link.setAttribute("download", "delilog_data.json");
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
     setIsDirty(false);
   };
 
-  /* ☁️ iCloud Drive 連動：ロード（ファイルからデータ読み込み） */
+  /* ☁️ iCloud Drive 連動：ロード（ご提示のシンプル版に書き換え） */
   const loadFromiCloudJSON = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -484,7 +485,8 @@ function App() {
     const reader = new FileReader();
     reader.onload = (event) => {
       try {
-        const importedData = JSON.parse(event.target.event ? event.target.event.target.result : event.target.result);
+        // ✨ event.target.result をダイレクトに解析する形に修正
+        const importedData = JSON.parse(event.target.result);
         if (typeof importedData === "object" && importedData !== null) {
           setVault(importedData);
           setIsDirty(false);
@@ -497,7 +499,7 @@ function App() {
       }
     };
     reader.readAsText(file);
-    e.target.value = ''; // 同じファイルを連続で選べるようにリセット
+    e.target.value = '';
   };
 
   const generateLog = () => {
@@ -790,7 +792,7 @@ function App() {
             <input type="file" id="settingsCloudLoad" accept=".json" style={{display:'none'}} onChange={loadFromiCloudJSON} />
           </div>
 
-          <div class="section-title">会計連携（確定申告自動化）</div>
+          <div class="section-title">会計連携（確定申申告自動化）</div>
           <div class="card" style={{borderColor:'var(--green)', background:'rgba(0,230,118,0.02)'}}>
             <label style={{color:'var(--green)', fontWeight:'bold', fontSize:'13px'}}>クラウド会計ソフト freee 連動</label>
             <p style={{fontSize:'12px', color:'var(--muted2)', marginBottom:'12px'}}>蓄積された全営業日の売上データを、freeeの「明細アップロード」にそのまま取り込める形式のCSVとして書き出します。</p>

@@ -235,7 +235,7 @@ function loadInitialDate() { return localStorage.getItem(SK.currentDate) || getB
 function App() {
   const [vault, setVault] = useState(loadInitialVault);
   const [date, setDate] = useState(loadInitialDate);
-  const [activeTab, setActiveTab] = useState('dashboard'); // 'dashboard', 'calendar', 'entries', 'settings'
+  const [activeTab, setActiveTab] = useState('dashboard');
   const [showLog, setShowLog] = useState(false);
 
   const dayData = useMemo(() => {
@@ -340,7 +340,6 @@ function App() {
     });
   }, [vault]);
 
-  // カレンダー画面描画用
   const calendarDays = useMemo(() => {
     const [year, month] = date.split('-').map(Number);
     const firstDayIndex = new Date(year, month - 1, 1).getDay();
@@ -400,10 +399,11 @@ function App() {
     return log.trim();
   };
 
-  const currentTotal = total_sales + total_que;
-  const tankaReal = total_cnt > 0 ? Math.round(total_sales / total_cnt) : 0;
+  // スコープ競合を避けるため、summaryから安全に抽出
+  const currentTotal = summary.total_sales + summary.total_que;
+  const tankaReal = summary.total_cnt > 0 ? Math.round(summary.total_sales / summary.total_cnt) : 0;
   const remain = goalAmt > 0 ? goalAmt - currentTotal : 0;
-  const needCnt = (! (goalAmt > 0 && currentTotal >= goalAmt) && tankaReal > 0 && remain > 0) ? Math.ceil(remain / tankaReal) : 0;
+  const needCnt = (!(goalAmt > 0 && currentTotal >= goalAmt) && tankaReal > 0 && remain > 0) ? Math.ceil(remain / tankaReal) : 0;
 
   return (
     <div class="app-shell">
@@ -437,14 +437,14 @@ function App() {
         <div class="summary-bar">
           <div class="sum-row">
             <div class="sum-item"><div class="sum-label">総売上</div><div class="sum-val accent">{currentTotal.toLocaleString()}円</div></div>
-            <div class="sum-item"><div class="sum-label">実質売上</div><div class="sum-val">{real_sales.toLocaleString()}円</div></div>
-            <div class="sum-item"><div class="sum-label">クエ合計</div><div class="sum-val teal">{total_que.toLocaleString()}円</div></div>
-            <div class="sum-item"><div class="sum-label">件数</div><div class="sum-val green">{total_cnt}件</div></div>
-            <div class="sum-item"><div class="sum-label">実働時間</div><div class="sum-val">{total_h > 0 ? (() => { const hh = Math.floor(total_h); const mm = Math.round((total_h - hh) * 60); return mm > 0 ? hh+'h'+mm+'m' : hh+'h'; })() : '-'}</div></div>
+            <div class="sum-item"><div class="sum-label">実質売上</div><div class="sum-val">{summary.real_sales.toLocaleString()}円</div></div>
+            <div class="sum-item"><div class="sum-label">クエ合計</div><div class="sum-val teal">{summary.total_que.toLocaleString()}円</div></div>
+            <div class="sum-item"><div class="sum-label">件数</div><div class="sum-val green">{summary.total_cnt}件</div></div>
+            <div class="sum-item"><div class="sum-label">実働時間</div><div class="sum-val">{summary.total_h > 0 ? (() => { const hh = Math.floor(summary.total_h); const mm = Math.round((summary.total_h - hh) * 60); return mm > 0 ? hh+'h'+mm+'m' : hh+'h'; })() : '-'}</div></div>
           </div>
           <div class="sum-row">
-            <div class="sum-item"><div class="sum-label">時給換算</div><div class="sum-val yellow">{total_h > 0 ? jikyu.toLocaleString() : '-'}円</div></div>
-            <div class="sum-item"><div class="sum-label">単価(込)</div><div class="sum-val">{total_cnt > 0 ? Math.round(currentTotal / total_cnt).toLocaleString() : '-'}円</div></div>
+            <div class="sum-item"><div class="sum-label">時給換算</div><div class="sum-val yellow">{summary.total_h > 0 ? summary.jikyu.toLocaleString() : '-'}円</div></div>
+            <div class="sum-item"><div class="sum-label">単価(込)</div><div class="sum-val">{summary.total_cnt > 0 ? Math.round(currentTotal / summary.total_cnt).toLocaleString() : '-'}円</div></div>
             <div class="sum-item"><div class="sum-label">単価(抜)</div><div class="sum-val">{tankaReal > 0 ? tankaReal.toLocaleString() : '-'}円</div></div>
           </div>
         </div>
@@ -474,7 +474,7 @@ function App() {
           <div class="card grid-3">
             <div><label>選択中営業日</label><input type="date" value={date} onChange={e => setDate(e.target.value)} style={{borderColor:'var(--teal)'}} /></div>
             <div><label>天気状況</label><select value={weather} onChange={e => updateDayField('weather', e.target.value)}>{WEATHERS.map(w => <option key={w}>{w}</option>)}</select></div>
-            <div><label>総走行距離</label><div style={{padding:'11px 12px', background:'rgba(255,255,255,0.02)', border:'1.5px solid var(--border)', borderRadius:'var(--radius-sm)', fontSize:'14px', fontFamily:'var(--font-mono)'}}>{total_km} km</div></div>
+            <div><label>総走行距離</label><div style={{padding:'11px 12px', background:'rgba(255,255,255,0.02)', border:'1.5px solid var(--border)', borderRadius:'var(--radius-sm)', fontSize:'14px', fontFamily:'var(--font-mono)'}}>{summary.total_km} km</div></div>
           </div>
 
           <div class="section-title">本日累計のプラットフォーム内訳</div>
@@ -510,12 +510,12 @@ function App() {
           </div>
         </div>
 
-        {/* ── TAB CONTENT 3: ENTRIES (CORE SET-BY-SET SYSTEM) ── */}
+        {/* ── TAB CONTENT 3: ENTRIES ── */}
         <div class={`view-container ${activeTab === 'entries' ? 'active' : ''}`}>
           <div class="section-title">稼働セットごとの詳細入力 (4時起点自動保存)</div>
           
           {calced.map((s, i) => {
-            const sp = s.d_p + s.u_p + s.r_p + s.m_p; const sq = s.d_qp + s.u_qp + s.r_qp + s.m_qp; const sc = s.d_c + s.u_c + s.r_c + s.m_c;
+            const sp = s.d_p + s.u_p + s.r_p + s.m_p; const sc = s.d_c + s.u_c + s.r_c + s.m_c;
             return (
               <div key={i} class="set-card">
                 <div class="set-header" onClick={() => toggleOpen(i)}>

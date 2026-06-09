@@ -151,7 +151,14 @@
     .history-date { font-weight: 700; font-size: 15px; }
     .history-summary { font-family: var(--font-mono); font-size: 14px; color: var(--muted2); }
 
-    /* CALENDAR GRID VIEW */
+    /* CALENDAR GRID VIEW (月曜始まり対応用) */
+    .cal-header-container { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .cal-title-nav { display: flex; align-items: center; gap: 16px; }
+    .cal-nav-btn { background: rgba(255,255,255,0.06); border: 1px solid var(--border); color: #fff; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 14px; }
+    .cal-nav-btn:hover { background: rgba(255,255,255,0.12); }
+    .cal-title-text { font-size: 18px; font-weight: 900; }
+    .cal-monthly-total { font-family: var(--font-mono); font-size: 16px; font-weight: 700; color: var(--accent); background: rgba(255,92,26,0.08); padding: 6px 14px; border-radius: 20px; border: 1px solid rgba(255,92,26,0.2); }
+
     .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-top: 10px; }
     .cal-head-cell { text-align: center; font-size: 11px; color: var(--muted); font-weight: 700; padding: 6px 0; }
     .cal-day-cell { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; min-height: 85px; padding: 6px; cursor: pointer; display: flex; flex-direction: column; justify-content: space-between; }
@@ -191,6 +198,7 @@
       .goal-bar { padding: 10px 16px; }
       .grid-3 { grid-template-columns: 1fr; gap: 12px; }
       .analysis-grid { grid-template-columns: 1fr; }
+      .cal-header-container { flex-direction: column; align-items: flex-start; gap: 10px; }
     }
   </style>
 </head>
@@ -238,7 +246,6 @@ function calcDuration(start, end) {
   };
 }
 
-// 📦 ローカルストレージ初期化ヘルパー
 function loadInitialVault() {
   const saved = localStorage.getItem(SK.db);
   return saved ? JSON.parse(saved) : {};
@@ -257,6 +264,10 @@ function App() {
   const [showLog, setShowLog] = useState(false);
   const [isDirty, setIsDirty] = useState(false);
 
+  // カレンダー閲覧用の年月ステート (初期値は選択中の営業日の年月)
+  const [calYear, setCalYear] = useState(() => Number(loadInitialDate().split('-')[0]));
+  const [calMonth, setCalMonth] = useState(() => Number(loadInitialDate().split('-')[1]));
+
   const dayData = useMemo(() => {
     return vault[date] || { weather: '晴', goalAmt: 0, sets: [EMPTY_SET()] };
   }, [vault, date]);
@@ -270,6 +281,13 @@ function App() {
   useEffect(() => { 
     localStorage.setItem(SK.currentDate, date); 
     setShowLog(false); 
+  }, [date]);
+
+  // 営業日が直接変更された際、カレンダーの閲覧年月も連動させる
+  useEffect(() => {
+    const [y, m] = date.split('-').map(Number);
+    setCalYear(y);
+    setCalMonth(m);
   }, [date]);
 
   const updateDayField = useCallback((field, value) => {
@@ -361,6 +379,24 @@ function App() {
     return { monthTotal, monthReal, monthQue, monthCnt, weekTotal, weekReal, weekQue, weekCnt };
   }, [vault, date]);
 
+  // ☁️ カレンダー表示中の月の「月間累計売上」を自動集計するロジック
+  const currentCalendarMonthTotal = useMemo(() => {
+    const n = v => parseFloat(v) || 0;
+    let total = 0;
+    Object.keys(vault).forEach(dKey => {
+      const [y, m] = dKey.split('-').map(Number);
+      if (y === calYear && m === calMonth) {
+        const dayVault = vault[dKey];
+        const sList = dayVault.sets || [];
+        if (sList.length > 0) {
+          const lastS = sList[sList.length - 1];
+          total += (n(lastS.d_cum) + n(lastS.u_cum) + n(lastS.r_cum) + n(lastS.m_cum)) + (n(lastS.d_que_cum) + n(lastS.u_que_cum) + n(lastS.r_que_cum) + n(lastS.m_que_cum));
+        }
+      }
+    });
+    return total;
+  }, [vault, calYear, calMonth]);
+
   const updateSet = useCallback((i, key, val) => {
     setIsDirty(true);
     const newSets = [...sets]; newSets[i] = { ...newSets[i], [key]: val };
@@ -412,14 +448,21 @@ function App() {
     });
   }, [vault]);
 
+  // 📅 月曜始まりカレンダーグリッド計算ロジック
   const calendarDays = useMemo(() => {
-    const [year, month] = date.split('-').map(Number);
-    const firstDayIndex = new Date(year, month - 1, 1).getDay();
-    const totalDays = new Date(year, month, 0).getDate();
+    const firstDayIndex = new Date(calYear, calMonth - 1, 1).getDay(); // 0:日, 1:月...
+    const totalDays = new Date(calYear, calMonth, 0).getDate();
+    
+    // 日曜始まり(0)を月曜始まり(0)のインデックスに変換する計算
+    // 日(0) -> 6, 月(1) -> 0, 火(2) -> 1, 水(3) -> 2, 木(4) -> 3, 金(5) -> 4, 土(6) -> 5
+    const mondayBasedStartIndex = firstDayIndex === 0 ? 6 : firstDayIndex - 1;
+
     const cells = [];
-    for (let i = 0; i < firstDayIndex; i++) { cells.push({ empty: true }); }
+    // 頭の空セルを追加
+    for (let i = 0; i < mondayBasedStartIndex; i++) { cells.push({ empty: true }); }
+    // 日付セルを追加
     for (let dayNum = 1; dayNum <= totalDays; dayNum++) {
-      const currentKey = `${year}-${String(month).padStart(2,'0')}-${String(dayNum).padStart(2,'0')}`;
+      const currentKey = `${calYear}-${String(calMonth).padStart(2,'0')}-${String(dayNum).padStart(2,'0')}`;
       const dayVault = vault[currentKey];
       let totalSales = 0;
       if (dayVault && dayVault.sets && dayVault.sets.length > 0) {
@@ -429,7 +472,26 @@ function App() {
       cells.push({ empty: false, dayNum, dateKey: currentKey, amt: totalSales });
     }
     return cells;
-  }, [vault, date]);
+  }, [vault, calYear, calMonth]);
+
+  // カレンダーの月移動処理
+  const handlePrevMonth = () => {
+    if (calMonth === 1) {
+      setCalYear(prev => prev - 1);
+      setCalMonth(12);
+    } else {
+      setCalMonth(prev => prev - 1);
+    }
+  };
+
+  const handleNextMonth = () => {
+    if (calMonth === 12) {
+      setCalYear(prev => prev + 1);
+      setCalMonth(1);
+    } else {
+      setCalMonth(prev => prev + 1);
+    }
+  };
 
   const downloadFreeeCSV = () => {
     const n = v => parseFloat(v) || 0;
@@ -477,7 +539,7 @@ function App() {
     setIsDirty(false);
   };
 
-  /* ☁️ iCloud Drive 連動：ロード（ご提示のシンプル版に書き換え） */
+  /* ☁️ iCloud Drive 連動：ロード */
   const loadFromiCloudJSON = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -485,7 +547,6 @@ function App() {
     const reader = new FileReader();
     reader.onload = (event) => {
       try {
-        // ✨ event.target.result をダイレクトに解析する形に修正
         const importedData = JSON.parse(event.target.result);
         if (typeof importedData === "object" && importedData !== null) {
           setVault(importedData);
@@ -681,12 +742,25 @@ function App() {
           <button class="gen-btn" style={{marginTop:'10px'}} onClick={() => setActiveTab('entries')}>📝 記録の編集・セット追加を行う</button>
         </div>
 
-        {/* ── TAB CONTENT 2: CALENDAR ── */}
+        {/* ── TAB CONTENT 2: CALENDAR (月曜始まり & ページング & 累計対応) ── */}
         <div class={`view-container ${activeTab === 'calendar' ? 'active' : ''}`}>
-          <div class="section-title">月間売上カレンダー</div>
+          
+          <div class="cal-header-container">
+            <div class="cal-title-nav">
+              <button class="cal-nav-btn" onClick={handlePrevMonth}>◀ 前月</button>
+              <span class="cal-title-text">📅 {calYear}年 {calMonth}月</span>
+              <button class="cal-nav-btn" onClick={handleNextMonth}>次月 ▶</button>
+            </div>
+            {/* 月間累計売上バッジ */}
+            <div class="cal-monthly-total">
+              月間累計: {currentCalendarMonthTotal.toLocaleString()} 円
+            </div>
+          </div>
+
           <div class="card" style={{padding:'10px'}}>
             <div class="cal-grid">
-              {['日','月','火','水','木','金','土'].map(w => <div key={w} class="cal-head-cell">{w}</div>)}
+              {/* 月曜始まり（月〜日）のヘッダーラベル */}
+              {['月','火','水','木','金','土','日'].map(w => <div key={w} class="cal-head-cell">{w}</div>)}
               {calendarDays.map((c, idx) => c.empty ? <div key={idx} class="cal-day-cell empty" /> : (
                 <div key={idx} class={`cal-day-cell ${date === c.dateKey ? 'selected' : ''}`} onClick={() => { setDate(c.dateKey); setActiveTab('dashboard'); }}>
                   <span class="cal-day-num current-month">{c.dayNum}</span>
@@ -792,7 +866,7 @@ function App() {
             <input type="file" id="settingsCloudLoad" accept=".json" style={{display:'none'}} onChange={loadFromiCloudJSON} />
           </div>
 
-          <div class="section-title">会計連携（確定申申告自動化）</div>
+          <div class="section-title">会計連携（確定申告自動化）</div>
           <div class="card" style={{borderColor:'var(--green)', background:'rgba(0,230,118,0.02)'}}>
             <label style={{color:'var(--green)', fontWeight:'bold', fontSize:'13px'}}>クラウド会計ソフト freee 連動</label>
             <p style={{fontSize:'12px', color:'var(--muted2)', marginBottom:'12px'}}>蓄積された全営業日の売上データを、freeeの「明細アップロード」にそのまま取り込める形式のCSVとして書き出します。</p>

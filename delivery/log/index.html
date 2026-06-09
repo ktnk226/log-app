@@ -174,6 +174,13 @@
     }
     .tab-btn.active { color: var(--accent); font-weight: 700; }
 
+    /* CLOUD STATUS HEADER IN BAR */
+    .cloud-indicator {
+      display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: bold;
+      padding: 6px 12px; border-radius: 20px; background: rgba(41,121,255,0.1); color: var(--blue);
+    }
+    .cloud-indicator.unsaved { background: rgba(255,214,0,0.1); color: var(--yellow); }
+
     /* RESPONSIVE LAYOUT */
     @media (max-width: 768px) {
       .sidebar { display: none; }
@@ -218,13 +225,12 @@ function getBusinessDateStr() {
   return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 }
 
-// 🕒 時間計算のヘルパー関数
 function calcDuration(start, end) {
   if (!start || !end) return null;
   const [sh, sm] = start.split(':').map(Number);
   const [eh, em] = end.split(':').map(Number);
   let diffMin = (eh * 60 + em) - (sh * 60 + sm);
-  if (diffMin < 0) diffMin += 24 * 60; // 日跨ぎ対応
+  if (diffMin < 0) diffMin += 24 * 60;
   return {
     total: diffMin / 60,
     h: Math.floor(diffMin / 60),
@@ -232,7 +238,6 @@ function calcDuration(start, end) {
   };
 }
 
-// 📦 ローカルストレージ初期化ヘルパー
 function loadInitialVault() {
   const saved = localStorage.getItem(SK.db);
   return saved ? JSON.parse(saved) : {};
@@ -249,6 +254,7 @@ function App() {
   const [date, setDate] = useState(loadInitialDate);
   const [activeTab, setActiveTab] = useState('dashboard');
   const [showLog, setShowLog] = useState(false);
+  const [isDirty, setIsDirty] = useState(false); // 保存が必要かどうかの状態
 
   const dayData = useMemo(() => {
     return vault[date] || { weather: '晴', goalAmt: 0, sets: [EMPTY_SET()] };
@@ -256,10 +262,17 @@ function App() {
 
   const { weather, goalAmt, sets } = dayData;
 
-  useEffect(() => { localStorage.setItem(SK.db, JSON.stringify(vault)); }, [vault]);
-  useEffect(() => { localStorage.setItem(SK.currentDate, date); setShowLog(false); }, [date]);
+  useEffect(() => { 
+    localStorage.setItem(SK.db, JSON.stringify(vault)); 
+  }, [vault]);
+
+  useEffect(() => { 
+    localStorage.setItem(SK.currentDate, date); 
+    setShowLog(false); 
+  }, [date]);
 
   const updateDayField = useCallback((field, value) => {
+    setIsDirty(true);
     setVault(prev => ({
       ...prev,
       [date]: {
@@ -348,6 +361,7 @@ function App() {
   }, [vault, date]);
 
   const updateSet = useCallback((i, key, val) => {
+    setIsDirty(true);
     const newSets = [...sets]; newSets[i] = { ...newSets[i], [key]: val };
     updateDayField('sets', newSets);
   }, [sets, updateDayField]);
@@ -358,6 +372,7 @@ function App() {
   };
 
   const addSet = () => {
+    setIsDirty(true);
     const last = sets[sets.length - 1] || EMPTY_SET();
     updateDayField('sets', [...sets, {
       ...EMPTY_SET(),
@@ -371,6 +386,7 @@ function App() {
   const deleteSet = (i) => {
     if (sets.length <= 1) return;
     if (!window.confirm(`SET ${i+1} を削除しますか？`)) return;
+    setIsDirty(true);
     updateDayField('sets', sets.filter((_, idx) => idx !== i));
   };
 
@@ -378,6 +394,7 @@ function App() {
     const targetDate = getBusinessDateStr();
     if (date === targetDate) {
       if (!window.confirm('現在の最新営業日データを完全にクリアしてリセットしますか？')) return;
+      setIsDirty(true);
       setVault(prev => ({ ...prev, [targetDate]: { weather: '晴', goalAmt: 0, sets: [EMPTY_SET()] } }));
     } else { setDate(targetDate); }
   };
@@ -445,31 +462,24 @@ function App() {
     document.body.appendChild(link); link.click(); document.body.removeChild(link);
   };
 
-  /* 📦 1: 新機能：JSON丸ごとバックアップ書き出し */
-  const exportBackupJSON = () => {
-    if (Object.keys(vault).length === 0) {
-      alert("バックアップするデータがまだありません。");
-      return;
-    }
+  /* ☁️ iCloud Drive 連動：セーブ（固定ファイル名で書き出し） */
+  const saveToiCloudJSON = () => {
     const dataStr = JSON.stringify(vault, null, 2);
     const blob = new Blob([dataStr], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
-    const d = new Date();
-    const timeStamp = `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`;
     link.setAttribute("href", url);
-    link.setAttribute("download", `delilog_backup_${timeStamp}.json`);
+    link.setAttribute("download", "delilog_data.json"); // iCloud上で上書きしやすいようにファイル名を固定
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    setIsDirty(false);
   };
 
-  /* 📥 2: 新機能：JSONファイルからデータを完全復元 */
-  const importBackupJSON = (e) => {
+  /* ☁️ iCloud Drive 連動：ロード（ファイルからデータ読み込み） */
+  const loadFromiCloudJSON = (e) => {
     const file = e.target.files[0];
     if (!file) return;
-
-    if (!window.confirm("バックアップファイルを読み込みますか？\n※既存のデータはすべて上書きされます。")) return;
 
     const reader = new FileReader();
     reader.onload = (event) => {
@@ -477,15 +487,17 @@ function App() {
         const importedData = JSON.parse(event.target.event ? event.target.event.target.result : event.target.result);
         if (typeof importedData === "object" && importedData !== null) {
           setVault(importedData);
-          alert("データの復元が完了しました！");
+          setIsDirty(false);
+          alert("iCloudからデータを同期しました！");
         } else {
-          alert("不正なファイルフォーマットです。復元に失敗しました。");
+          alert("不正なデータ形式です。");
         }
       } catch (err) {
-        alert("ファイルの解析に失敗しました。正しいJSONファイルかご確認ください。");
+        alert("ファイルの読み込みに失敗しました。");
       }
     };
     reader.readAsText(file);
+    e.target.value = ''; // 同じファイルを連続で選べるようにリセット
   };
 
   const generateLog = () => {
@@ -561,6 +573,14 @@ function App() {
             <p>Target Date // {date.replace(/-/g,'/')}</p>
             <h1>🛵 DELIVERY LOG</h1>
           </div>
+          {/* iCloud保存状況インジケーター */}
+          <div style={{display:'flex', gap:'10px'}}>
+            {isDirty ? (
+              <div class="cloud-indicator unsaved" onClick={saveToiCloudJSON} style={{cursor:'pointer'}}>⚠️ iCloud未保存 (タップセーブ)</div>
+            ) : (
+              <div class="cloud-indicator">☁️ iCloud同期済み</div>
+            )}
+          </div>
         </header>
 
         {/* LIVE SUMMARY HEADER */}
@@ -601,6 +621,17 @@ function App() {
         {/* ── TAB CONTENT 1: DASHBOARD ── */}
         <div class={`view-container ${activeTab === 'dashboard' ? 'active' : ''}`}>
           
+          {/* ☁️ QUICK CLOUD BAR */}
+          <div class="card grid-2" style={{borderColor:'var(--blue)', background:'rgba(41,121,255,0.02)', padding:'12px', marginBottom:'16px'}}>
+            <button class="gen-btn" style={{background:'rgba(255,255,255,0.1)', color:'#fff', padding:'10px', fontSize:'13px', border:'1px solid var(--border)'}} onClick={() => document.getElementById('dashCloudLoad').click()}>
+              📥 iCloudからロード
+            </button>
+            <button class="gen-btn" style={{background: isDirty ? 'var(--blue)' : 'rgba(255,255,255,0.05)', padding:'10px', fontSize:'13px'}} onClick={saveToiCloudJSON}>
+              💾 iCloudへ保存
+            </button>
+            <input type="file" id="dashCloudLoad" accept=".json" style={{display:'none'}} onChange={loadFromiCloudJSON} />
+          </div>
+
           {/* 📊 PERIODIC ANALYSIS UI */}
           <div class="section-title">📊 期間別売上インサイト</div>
           <div class="analysis-grid">
@@ -747,16 +778,16 @@ function App() {
         {/* ── TAB CONTENT 4: SETTINGS ── */}
         <div class={`view-container ${activeTab === 'settings' ? 'active' : ''}`}>
           
-          <div class="section-title">🛡️ データ保護（バックアップ＆復元）</div>
+          <div class="section-title">☁️ iCloud Drive 連動（データ同期・バックアップ）</div>
           <div class="card" style={{borderColor:'var(--blue)', background:'rgba(41,121,255,0.02)'}}>
             <p style={{fontSize:'12px', color:'var(--muted2)', marginBottom:'12px'}}>
-              iPhoneの故障・紛失やアプリアイコンの削除に備え、データをファイルに保存します。定期的なバックアップ（月1回以上）を推奨します。
+              MacとiPhoneの間で売上データを完全連動させます。iCloud Drive内の同一ファイル（<code>delilog_data.json</code>）を選択・上書きして運用してください。
             </p>
             <div class="grid-2">
-              <button class="gen-btn" style={{background:'var(--blue)', fontWeight:'900'}} onClick={exportBackupJSON}>💾 データをバックアップする</button>
-              <button class="gen-btn" style={{background:'rgba(255,255,255,0.1)', color:'#fff', border:'1px solid var(--border)'}} onClick={() => document.getElementById('importFileInput').click()}>📥 バックアップから復元する</button>
+              <button class="gen-btn" style={{background:'var(--blue)', fontWeight:'900'}} onClick={saveToiCloudJSON}>💾 iCloudへ書き出し保存</button>
+              <button class="gen-btn" style={{background:'rgba(255,255,255,0.1)', color:'#fff', border:'1px solid var(--border)'}} onClick={() => document.getElementById('settingsCloudLoad').click()}>📥 iCloudから読み込み同期</button>
             </div>
-            <input type="file" id="importFileInput" accept=".json" style={{display:'none'}} onChange={importBackupJSON} />
+            <input type="file" id="settingsCloudLoad" accept=".json" style={{display:'none'}} onChange={loadFromiCloudJSON} />
           </div>
 
           <div class="section-title">会計連携（確定申告自動化）</div>

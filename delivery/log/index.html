@@ -218,6 +218,31 @@ function getBusinessDateStr() {
   return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 }
 
+// 🕒 時間計算のヘルパー関数
+function calcDuration(start, end) {
+  if (!start || !end) return null;
+  const [sh, sm] = start.split(':').map(Number);
+  const [eh, em] = end.split(':').map(Number);
+  let diffMin = (eh * 60 + em) - (sh * 60 + sm);
+  if (diffMin < 0) diffMin += 24 * 60; // 日跨ぎ対応
+  return {
+    total: diffMin / 60,
+    h: Math.floor(diffMin / 60),
+    m: diffMin % 60
+  };
+}
+
+// 📦 ローカルストレージ初期化ヘルパー
+function loadInitialVault() {
+  const saved = localStorage.getItem(SK.db);
+  return saved ? JSON.parse(saved) : {};
+}
+
+function loadInitialDate() {
+  const saved = localStorage.getItem(SK.currentDate);
+  return saved || getBusinessDateStr();
+}
+
 /* ────────────────── MAIN APP ────────────────── */
 function App() {
   const [vault, setVault] = useState(loadInitialVault);

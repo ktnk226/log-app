@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
-  <title>🛡️ Vibe Analytics V9</title>
+  <title>🛵 デリログ</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
@@ -24,7 +24,7 @@
     }
     html, body { height: 100%; background: var(--bg); color: var(--text); font-family: var(--font-body); overflow-x: hidden; }
     
-    /* APP LAYOUT (デリザルト風シェル) */
+    /* APP LAYOUT */
     .app-shell { display: flex; height: 100vh; width: 100vw; overflow: hidden; }
     .main-content { flex: 1; display: flex; flex-direction: column; overflow-y: auto; padding-bottom: 100px; }
     
@@ -35,7 +35,7 @@
     }
     .brand { display: flex; align-items: center; gap: 12px; padding-bottom: 15px; border-bottom: 1px solid var(--border); }
     .brand-mark { font-size: 24px; }
-    .brand-title { font-family: var(--font-head); font-size: 22px; letter-spacing: 0.05em; color: #fff; }
+    .brand-title { font-family: var(--font-head); font-size: 24px; letter-spacing: 0.05em; color: #fff; line-height: 1.1; }
     
     .nav-menu { display: flex; flex-direction: column; gap: 8px; }
     .nav-item {
@@ -302,7 +302,6 @@ function App() {
     };
   }, [sets, calced]);
 
-  /* ── 週間・月間売上の高度集計ロジック ── */
   const periodicAnalysis = useMemo(() => {
     const n = v => parseFloat(v) || 0;
     const [targetYear, targetMonth] = date.split('-').map(Number);
@@ -310,16 +309,13 @@ function App() {
     let monthTotal = 0; let monthReal = 0; let monthQue = 0; let monthCnt = 0;
     let weekTotal = 0; let weekReal = 0; let weekQue = 0; let weekCnt = 0;
 
-    // 現在選択されている日付のタイムスタンプ
     const currentRefDate = new Date(date);
     const oneWeekAgoRef = new Date(date);
-    oneWeekAgoRef.setDate(oneWeekAgoRef.getDate() - 6); // 直近7日間
+    oneWeekAgoRef.setDate(oneWeekAgoRef.getDate() - 6);
 
     Object.keys(vault).forEach(dKey => {
       const [y, m, d] = dKey.split('-').map(Number);
-      const dayVault = vault[dKey];
-      const sList = dayVault.sets || [];
-      if (sList.length === 0) return;
+      const dayVault = vault[dKey]; const sList = dayVault.sets || []; if (sList.length === 0) return;
 
       const lastS = sList[sList.length - 1];
       const sales = n(lastS.d_cum) + n(lastS.u_cum) + n(lastS.r_cum) + n(lastS.m_cum);
@@ -327,12 +323,10 @@ function App() {
       const cnt = n(lastS.d_cnt_cum) + n(lastS.u_cnt_cum) + n(lastS.r_cnt_cum) + n(lastS.m_cnt_cum);
       const totalAmt = sales + que;
 
-      // 月間累計（選択された年・月に合致するもの）
       if (y === targetYear && m === targetMonth) {
         monthTotal += totalAmt; monthReal += sales; monthQue += que; monthCnt += cnt;
       }
 
-      // 週間累計（選択された日から遡って7日間の範囲内）
       const thisDate = new Date(dKey);
       if (thisDate >= oneWeekAgoRef && thisDate <= currentRefDate) {
         weekTotal += totalAmt; weekReal += sales; weekQue += que; weekCnt += cnt;
@@ -492,10 +486,10 @@ function App() {
       {/* SIDEBAR (PC PANEL) */}
       <aside class="sidebar">
         <div class="brand">
-          <div class="brand-mark">🛡️</div>
+          <div class="brand-mark">🛵</div>
           <div>
-            <div class="brand-title">VIBE ANALYTICS</div>
-            <p style={{fontSize:'9px', color:'var(--muted)'}}>V9 ACCUMULATE MODEL</p>
+            <div class="brand-title">DELIVERY LOG</div>
+            <p style={{fontSize:'9px', color:'var(--muted)'}}>デリログ // V10</p>
           </div>
         </div>
         <nav class="nav-menu">
@@ -511,7 +505,7 @@ function App() {
         <header class="topbar">
           <div>
             <p>Target Date // {date.replace(/-/g,'/')}</p>
-            <h1>🛡️ VIBE ANALYTICS V9</h1>
+            <h1>🛵 DELIVERY LOG</h1>
           </div>
         </header>
 
@@ -550,10 +544,10 @@ function App() {
           )}
         </div>
 
-        {/* ── TAB CONTENT 1: DASHBOARD (PERIODIC INTEGRATED) ── */}
+        {/* ── TAB CONTENT 1: DASHBOARD ── */}
         <div class={`view-container ${activeTab === 'dashboard' ? 'active' : ''}`}>
           
-          {/* ⚡ PERIODIC ANALYSIS UI (月間・週間売上カード) ⚡ */}
+          {/* 📊 PERIODIC ANALYSIS UI */}
           <div class="section-title">📊 期間別売上インサイト</div>
           <div class="analysis-grid">
             <div class="analysis-card">
@@ -602,7 +596,7 @@ function App() {
 
         {/* ── TAB CONTENT 2: CALENDAR ── */}
         <div class={`view-container ${activeTab === 'calendar' ? 'active' : ''}`}>
-          <div class="section-title">{tYear}年{tMonth}月 売上カレンダー</div>
+          <div class="section-title">月間売上カレンダー</div>
           <div class="card" style={{padding:'10px'}}>
             <div class="cal-grid">
               {['日','月','火','水','木','金','土'].map(w => <div key={w} class="cal-head-cell">{w}</div>)}
@@ -696,7 +690,7 @@ function App() {
           </div>
         </div>
 
-        {/* ── TAB CONTENT 4: SETTINGS & HISTORIES ── */}
+        {/* ── TAB CONTENT 4: SETTINGS ── */}
         <div class={`view-container ${activeTab === 'settings' ? 'active' : ''}`}>
           <div class="section-title">会計連携（確定申告自動化）</div>
           <div class="card" style={{borderColor:'var(--green)', background:'rgba(0,230,118,0.02)'}}>

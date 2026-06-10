@@ -50,7 +50,7 @@
     .topbar {
       background: rgba(8,9,13,0.85); backdrop-filter: blur(20px);
       border-bottom: 1px solid var(--border); padding: 16px 24px;
-      display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100;
+      display: flex; justify-between: center; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100;
     }
     .topbar h1 { font-size: 20px; font-weight: 900; letter-spacing: -0.02em; }
     .topbar p { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
@@ -119,12 +119,6 @@
     .analysis-grid { display: grid; grid-template-columns: 1fr; gap: 12px; margin-bottom: 16px; }
     .analysis-card { background: linear-gradient(135deg, #11141d, #161a26); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; }
     .analysis-card-title { font-size: 12px; font-weight: bold; color: var(--muted2); margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
-    .analysis-value { font-size: 22px; font-family: var(--font-mono); font-weight: 900; color: #fff; }
-    .analysis-sub { font-size: 11px; color: var(--muted); margin-top: 4px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
-
-    .platform-block { border-radius: 11px; padding: 14px; margin-bottom: 12px; border: 1px solid var(--border); }
-    .platform-title { font-size: 13px; font-weight: 900; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
-    .diff-badge { font-size: 11px; padding: 2px 7px; border-radius: 4px; background: rgba(0,230,118,0.15); color: var(--green); font-family: var(--font-mono); }
 
     .set-card { background: rgba(255,255,255,0.02); border: 1.5px solid var(--border); border-radius: var(--radius); margin-bottom: 14px; overflow: hidden; }
     .set-header { padding: 14px 18px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; user-select: none; }
@@ -363,6 +357,7 @@ function App() {
     };
   }, [date]);
 
+  // 🛠️ 拡張：日・週・月・年それぞれの「PF別の合計値」も一括計算する高度な集計ロジック
   const periodicAnalysis = useMemo(() => {
     const n = v => parseFloat(v) || 0;
     const [targetYear, targetMonth] = date.split('-').map(Number);
@@ -370,6 +365,12 @@ function App() {
     let monthTotal = 0; let monthReal = 0; let monthQue = 0; let monthCnt = 0;
     let weekTotal = 0; let weekReal = 0; let weekQue = 0; let weekCnt = 0;
     let yearTotal = 0; let yearReal = 0; let yearQue = 0; let yearCnt = 0;
+
+    // 週・月・年ごとの各社合算バッファ
+    const createPfBuffer = () => ({ d: { s:0, c:0 }, u: { s:0, c:0 }, r: { s:0, c:0 }, m: { s:0, c:0 } });
+    const weekPf = createPfBuffer();
+    const monthPf = createPfBuffer();
+    const yearPf = createPfBuffer();
 
     Object.keys(vault).forEach(dKey => {
       const [y, m] = dKey.split('-').map(Number);
@@ -381,26 +382,53 @@ function App() {
       const cnt = n(lastS.d_cnt_cum) + n(lastS.u_cnt_cum) + n(lastS.r_cnt_cum) + n(lastS.m_cnt_cum);
       const totalAmt = sales + que;
 
+      // 会社別の個別累積を抽出
+      const getPfData = (k) => ({
+        sales: n(lastS[k+'_cum']) + n(lastS[k+'_que_cum']),
+        cnt: n(lastS[k+'_cnt_cum'])
+      });
+
       if (y === targetYear) {
         yearTotal += totalAmt; yearReal += sales; yearQue += que; yearCnt += cnt;
+        PLATFORMS.forEach(p => {
+          const pData = getPfData(p.key);
+          yearPf[p.key].s += pData.sales; yearPf[p.key].c += pData.cnt;
+        });
+
         if (m === targetMonth) {
           monthTotal += totalAmt; monthReal += sales; monthQue += que; monthCnt += cnt;
+          PLATFORMS.forEach(p => {
+            const pData = getPfData(p.key);
+            monthPf[p.key].s += pData.sales; monthPf[p.key].c += pData.cnt;
+          });
         }
       }
 
       const thisDate = new Date(dKey);
       if (thisDate >= periodMeta.monRef && thisDate <= periodMeta.sunRef) {
         weekTotal += totalAmt; weekReal += sales; weekQue += que; weekCnt += cnt;
+        PLATFORMS.forEach(p => {
+          const pData = getPfData(p.key);
+          weekPf[p.key].s += pData.sales; weekPf[p.key].c += pData.cnt;
+        });
       }
     });
 
+    // 本日のPF内訳バッファ
+    const lastDayS = sets[sets.length - 1] || EMPTY_SET();
+    const dayPf = createPfBuffer();
+    PLATFORMS.forEach(p => {
+      dayPf[p.key].s = n(lastDayS[p.key+'_cum']) + n(lastDayS[p.key+'_que_cum']);
+      dayPf[p.key].c = n(lastDayS[p.key+'_cnt_cum']);
+    });
+
     return { 
-      day: { total: daySummary.total_sales, real: daySummary.real_sales, que: daySummary.total_que, cnt: daySummary.total_cnt },
-      week: { total: weekTotal, real: weekReal, que: weekQue, cnt: weekCnt },
-      month: { total: monthTotal, real: monthReal, que: monthQue, cnt: monthCnt },
-      year: { total: yearTotal, real: yearReal, que: yearQue, cnt: yearCnt }
+      day: { total: daySummary.total_sales, real: daySummary.real_sales, que: daySummary.total_que, cnt: daySummary.total_cnt, pf: dayPf },
+      week: { total: weekTotal, real: weekReal, que: weekQue, cnt: weekCnt, pf: weekPf },
+      month: { total: monthTotal, real: monthReal, que: monthQue, cnt: monthCnt, pf: monthPf },
+      year: { total: yearTotal, real: yearReal, que: yearQue, cnt: yearCnt, pf: yearPf }
     };
-  }, [vault, date, daySummary, periodMeta]);
+  }, [vault, date, daySummary, periodMeta, sets]);
 
   const activePeriodData = useMemo(() => {
     const data = periodicAnalysis[period];
@@ -436,7 +464,6 @@ function App() {
     setCalMonth(nextMonth);
   };
 
-  // 🛠️ 復活ロジック：消えていた startNewDay 処理を完全復帰
   const startNewDay = () => {
     const targetDate = getBusinessDateStr();
     if (date === targetDate) {
@@ -634,23 +661,24 @@ function App() {
 
         {/* ── TAB CONTENT 1: DASHBOARD ── */}
         <div class={`view-container ${activeTab === 'dashboard' ? 'active' : ''}`}>
-          <div class="section-title">📊 プラットフォーム別内訳（累積値）</div>
+          {/* 🛠️ 完全に期間連動するように進化したプラットフォーム別内訳カード */}
+          <div class="section-title">📊 {periodLabels[period]}のプラットフォーム別内訳</div>
           <div class="analysis-grid">
             <div class="analysis-card">
-              <div style={{display:'flex', flexDirection:'column', gap:'10px'}}>
-                {period === 'day' ? (
-                  PLATFORMS.map(p => {
-                    const last = sets[sets.length - 1] || EMPTY_SET();
-                    return (
-                      <div key={p.key} style={{display:'flex', justifyContent:'space-between', fontSize:'14px', borderBottom:'1px solid var(--border)', paddingBottom:'4px'}}>
-                        <span style={{color:p.color, fontWeight:'bold'}}>{p.label}</span>
-                        <span class="font-mono">{(parseFloat(last[p.key+'_cum'])+parseFloat(last[p.key+'_que_cum']) || 0).toLocaleString()} 円 / {(parseFloat(last[p.key+'_cnt_cum']) || 0)} 件</span>
-                      </div>
-                    );
-                  })
-                ) : (
-                  <p style={{fontSize:'12px', color:'var(--muted)', textAlign:'center', padding:'10px'}}>※矢印ナビゲーションで過去の特定日へ移動して、詳細な内訳を追うことができます。</p>
-                )}
+              <div style={{display:'flex', flexDirection:'column', gap:'12px'}}>
+                {PLATFORMS.map(p => {
+                  const targetPf = activePeriodData.pf?.[p.key] || { s: 0, c: 0 };
+                  return (
+                    <div key={p.key} style={{display:'flex', justifyContent:'space-between', alignItems:'center', fontSize:'14px', borderBottom:'1px solid var(--border)', paddingBottom:'6px'}}>
+                      <span style={{color: p.color, fontWeight:'bold', display:'flex', alignItems:'center', gap:'6px'}}>
+                        <span>{p.label}</span>
+                      </span>
+                      <span class="font-mono" style={{fontWeight: '700'}}>
+                        {targetPf.s.toLocaleString()} 円 <span style={{fontSize:'11px', color:'var(--muted2)', marginLeft:'6px'}}>{targetPf.c} 件</span>
+                      </span>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           </div>
@@ -788,7 +816,6 @@ function App() {
           </div>
           <div class="section-title">データコントロール</div>
           <div class="card">
-            {/* 🛠️ ここが原因でした：startNewDay を再バインドして復旧 */}
             <button class="gen-btn" style={{background:'var(--blue)'}} onClick={startNewDay}>新しい営業日を開始する (4時起点判定)</button>
           </div>
         </div>

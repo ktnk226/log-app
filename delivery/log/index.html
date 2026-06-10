@@ -300,6 +300,19 @@ function App() {
     }));
   }, [date]);
 
+  // 🛠️ 復活ロジック：消えていた updateSet 関数を完全に定義・再配置
+  const updateSet = useCallback((i, key, val) => {
+    setIsDirty(true);
+    const newSets = [...sets];
+    newSets[i] = { ...newSets[i], [key]: val };
+    updateDayField('sets', newSets);
+  }, [sets, updateDayField]);
+
+  const toggleOpen = (i) => {
+    const newSets = [...sets]; newSets[i] = { ...newSets[i], open: !newSets[i].open };
+    updateDayField('sets', newSets);
+  };
+
   const goalStorageKey = useMemo(() => {
     const [y, m] = date.split('-');
     if (period === 'day') return `D-${date}`;
@@ -427,7 +440,6 @@ function App() {
     };
   }, [vault, date, daySummary, periodMeta, sets]);
 
-  // 🛠️ リアルタイム残日数ノルマ（1日換算売上）計算の組み込み
   const activePeriodData = useMemo(() => {
     const data = periodicAnalysis[period];
     const goal = periodicGoals[goalStorageKey] || 0;
@@ -437,15 +449,14 @@ function App() {
     const tanka = data.cnt > 0 ? Math.round(data.real / data.cnt) : 0;
     const needCnt = (remain > 0 && tanka > 0) ? Math.ceil(remain / tanka) : 0;
 
-    // 1日あたりの必要ノルマ売上を現在の「残り日数」から動的逆算
     let dailyNorma = 0;
     if (remain > 0) {
       const currentRef = new Date(date);
       if (period === 'day') {
         dailyNorma = remain;
       } else if (period === 'week') {
-        const dayIdx = currentRef.getDay(); // 0(日)〜6(土)
-        const remainDays = dayIdx === 0 ? 1 : 7 - dayIdx + 1; // 日曜なら残り1日、月曜なら残り7日
+        const dayIdx = currentRef.getDay(); 
+        const remainDays = dayIdx === 0 ? 1 : 7 - dayIdx + 1; 
         dailyNorma = Math.ceil(remain / remainDays);
       } else if (period === 'month') {
         const lastDayOfMonth = new Date(currentRef.getFullYear(), currentRef.getMonth() + 1, 0).getDate();
@@ -464,25 +475,18 @@ function App() {
 
   const handleStepPeriod = (direction) => {
     const current = new Date(date);
-    if (period === 'day') {
-      current.setDate(current.getDate() + direction);
-    } else if (period === 'week') {
-      current.setDate(current.getDate() + (direction * 7));
-    } else if (period === 'month') {
-      current.setMonth(current.getMonth() + direction);
-    } else if (period === 'year') {
-      current.setFullYear(current.getFullYear() + direction);
-    }
+    if (period === 'day') { current.setDate(current.getDate() + direction); } 
+    else if (period === 'week') { current.setDate(current.getDate() + (direction * 7)); } 
+    else if (period === 'month') { current.setMonth(current.getMonth() + direction); } 
+    else if (period === 'year') { current.setFullYear(current.getFullYear() + direction); }
     setDate(formatDateToParam(current));
   };
 
   const handleCalendarMonthChange = (direction) => {
-    let nextMonth = calMonth + direction;
-    let nextYear = calYear;
+    let nextMonth = calMonth + direction; let nextYear = calYear;
     if (nextMonth < 1) { nextMonth = 12; nextYear -= 1; }
     else if (nextMonth > 12) { nextMonth = 1; nextYear += 1; }
-    setCalYear(nextYear);
-    setCalMonth(nextMonth);
+    setCalYear(nextYear); setCalMonth(nextMonth);
   };
 
   const startNewDay = () => {
@@ -493,6 +497,13 @@ function App() {
       setVault(prev => ({ ...prev, [targetDate]: { weather: '晴', goalAmt: 0, sets: [EMPTY_SET()] } }));
     } else { setDate(targetDate); }
     setActiveTab('entries');
+  };
+
+  const deleteSet = (i) => {
+    if (sets.length <= 1) return;
+    if (!window.confirm(`SET ${i+1} を削除しますか？`)) return;
+    setIsDirty(true);
+    updateDayField('sets', sets.filter((_, idx) => idx !== i));
   };
 
   const currentCalendarMonthTotal = useMemo(() => {
@@ -574,6 +585,46 @@ function App() {
       } catch (err) { alert("失敗しました。"); }
     };
     reader.readAsText(file); e.target.value = '';
+  };
+
+  const generateLog = () => {
+    const n = v => parseFloat(v) || 0;
+    const { real_sales, total_que, total_cnt, total_km, total_h, jikyu } = daySummary;
+    const dayJa = ['日','月','火','水','木','金','土'][new Date(date).getDay()];
+    const dateStr = date.replace(/-/g,'/');
+
+    const last = sets[sets.length - 1] || EMPTY_SET();
+    const d_total = n(last.d_cum); const u_total = n(last.u_cum); const r_total = n(last.r_cum); const m_total = n(last.m_cum);
+    const d_cnt   = n(last.d_cnt_cum); const u_cnt   = n(last.u_cnt_cum); const r_cnt   = n(last.r_cnt_cum); const m_cnt   = n(last.m_cnt_cum);
+    const d_que = n(last.d_que_cum); const u_que = n(last.u_que_cum); const r_que = n(last.r_que_cum); const m_que = n(last.m_que_cum);
+
+    const hm = (h) => { const hh = Math.floor(h); const mm = Math.round((h - hh) * 60); return mm > 0 ? `${hh}時間${mm}分` : `${hh}時間`; };
+    
+    let log = `${dateStr} (${dayJa})\n📊 本日累計リザルト\n\n| 項目 | 内容 | 備考 |\n| :-- | --: | :-- |\n`;
+    log += `| **天気** | ${weather} | ${total_que > 0 ? 'クエあり' : 'クエなし'} |\n`;
+    log += `| **総売上** | **${(real_sales + total_que).toLocaleString()} 円** | |\n`;
+    log += `| **実質売上** | **${real_sales.toLocaleString()} 円** | クエスト含まず |\n`;
+    log += `| **クエ合計** | **${total_que.toLocaleString()} 円** | |\n`;
+    log += `| **総完了件数** | **${total_cnt} 件** | (D:${d_cnt} / U:${u_cnt} / R:${r_cnt} / m:${m_cnt}) |\n`;
+    log += `| **1件単価平均** | **${total_cnt > 0 ? Math.round((real_sales + total_que) / total_cnt) : 0} 円** | 総売上 ÷ 総件数 |\n`;
+    log += `| **総走行距離** | **${total_km} km** | |\n`;
+    log += `| **実稼働時間** | **${hm(total_h)}** | |\n`;
+    log += `| **時給換算** | **${jikyu.toLocaleString()} 円** | 総売上 ÷ 実稼働時間 |\n\n📦 Platform別内訳\n\n`;
+    log += `| PF | 件数 | 総額 | 実質売上 | クエ |\n| :--: | --: | --: | --: | --: |\n`;
+    log += `| **出前館 (D)** | ${d_cnt} 件 | ${(d_total+d_que).toLocaleString()} 円 | ${d_total.toLocaleString()} 円 | ${d_que.toLocaleString()} 円 |\n`;
+    log += `| **Uber Eats (U)** | ${u_cnt} 件 | ${(u_total+u_que).toLocaleString()} 円 | ${u_total.toLocaleString()} 円 | ${u_que.toLocaleString()} 円 |\n`;
+    log += `| **RocketNow (R)** | ${r_cnt} 件 | ${(r_total+r_que).toLocaleString()} 円 | ${r_total.toLocaleString()} 円 | ${r_que.toLocaleString()} 円 |\n`;
+    log += `| **menu (m)** | ${m_cnt} 件 | ${(m_total+m_que).toLocaleString()} 円 | ${m_total.toLocaleString()} 円 | ${m_que.toLocaleString()} 円 |\n\n🕒 各セット詳細\n\n`;
+
+    calced.forEach((s, i) => {
+      const sp = s.d_p + s.u_p + s.r_p + s.m_p; const sc = s.d_c + s.u_c + s.r_c + s.m_c;
+      const pf_parts = []; if (s.d_c > 0) pf_parts.push("D:" + s.d_c); if (s.u_c > 0) pf_parts.push("U:" + s.u_c); if (s.r_c > 0) pf_parts.push("R:" + s.r_c); if (s.m_c > 0) pf_parts.push("m:" + s.m_c);
+      log += `- **第${i+1}セット ${s.start || '--:--'} 〜 ${s.end || '--:--'}** ${s.dur ? `(${s.dur.h>0?s.dur.h+'h':''}${s.dur.m}m)` : ''}\n`;
+      log += `  - **実績**：${sc}件 / ${sp.toLocaleString()}円${s.km_p > 0 ? ` / ${s.km_p}km` : ''} ${pf_parts.length>0 ? `(${pf_parts.join(' / ')})` : ''}\n`;
+      if (s.memo) log += `  - **戦術**：${s.memo}\n`;
+      log += '\n';
+    });
+    return log.trim();
   };
 
   const periodLabels = { day: '本日', week: '今週', month: '今月累計', year: '今年累計' };
@@ -677,7 +728,6 @@ function App() {
                     </div>
                   )}
                 </div>
-                {/* 🛠️ 【新設】残り日数から逆算した1日換算売上ノルマのインジケーター表示 */}
                 {activePeriodData.remain > 0 && period !== 'day' && (
                   <div class="goal-footer-bottom">
                     📈 目標達成には今日を含めて1日平均 <strong>{activePeriodData.dailyNorma.toLocaleString()} 円</strong> の稼働が必要です

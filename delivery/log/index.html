@@ -50,7 +50,7 @@
     .topbar {
       background: rgba(8,9,13,0.85); backdrop-filter: blur(20px);
       border-bottom: 1px solid var(--border); padding: 16px 24px;
-      display: flex; justify-between: center; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100;
+      display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100;
     }
     .topbar h1 { font-size: 20px; font-weight: 900; letter-spacing: -0.02em; }
     .topbar p { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
@@ -92,7 +92,9 @@
     .goal-input { font-family: var(--font-mono); font-size: 14px; font-weight: 700; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; color: var(--text); padding: 4px 8px; width: 100px; text-align: right; }
     .progress-track { width: 100%; height: 8px; background: rgba(255,255,255,0.04); border-radius: 4px; overflow: hidden; margin-bottom: 6px; border: 1px solid var(--border); }
     .progress-bar { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); transition: width 0.3s ease; }
-    .goal-footer-row { display: flex; justify-content: space-between; font-size: 12px; font-family: var(--font-mono); }
+    .goal-footer-row { display: flex; justify-content: space-between; font-size: 12px; font-family: var(--font-mono); flex-direction: column; gap: 4px; }
+    .goal-footer-top { display: flex; justify-content: space-between; width: 100%; }
+    .goal-footer-bottom { font-size: 11px; color: var(--teal); text-align: right; width: 100%; }
     .goal-status-text { color: var(--muted); }
     .goal-status-text strong { color: #fff; }
     .goal-remain-text { font-weight: 700; }
@@ -115,7 +117,6 @@
     }
     input:focus, select:focus, textarea:focus { border-color: var(--accent); outline: none; }
 
-    /* ANALYSIS CARD */
     .analysis-grid { display: grid; grid-template-columns: 1fr; gap: 12px; margin-bottom: 16px; }
     .analysis-card { background: linear-gradient(135deg, #11141d, #161a26); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; }
     .analysis-card-title { font-size: 12px; font-weight: bold; color: var(--muted2); margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
@@ -357,7 +358,6 @@ function App() {
     };
   }, [date]);
 
-  // 🛠️ 拡張：日・週・月・年それぞれの「PF別の合計値」も一括計算する高度な集計ロジック
   const periodicAnalysis = useMemo(() => {
     const n = v => parseFloat(v) || 0;
     const [targetYear, targetMonth] = date.split('-').map(Number);
@@ -366,7 +366,6 @@ function App() {
     let weekTotal = 0; let weekReal = 0; let weekQue = 0; let weekCnt = 0;
     let yearTotal = 0; let yearReal = 0; let yearQue = 0; let yearCnt = 0;
 
-    // 週・月・年ごとの各社合算バッファ
     const createPfBuffer = () => ({ d: { s:0, c:0 }, u: { s:0, c:0 }, r: { s:0, c:0 }, m: { s:0, c:0 } });
     const weekPf = createPfBuffer();
     const monthPf = createPfBuffer();
@@ -382,7 +381,6 @@ function App() {
       const cnt = n(lastS.d_cnt_cum) + n(lastS.u_cnt_cum) + n(lastS.r_cnt_cum) + n(lastS.m_cnt_cum);
       const totalAmt = sales + que;
 
-      // 会社別の個別累積を抽出
       const getPfData = (k) => ({
         sales: n(lastS[k+'_cum']) + n(lastS[k+'_que_cum']),
         cnt: n(lastS[k+'_cnt_cum'])
@@ -414,7 +412,6 @@ function App() {
       }
     });
 
-    // 本日のPF内訳バッファ
     const lastDayS = sets[sets.length - 1] || EMPTY_SET();
     const dayPf = createPfBuffer();
     PLATFORMS.forEach(p => {
@@ -430,16 +427,40 @@ function App() {
     };
   }, [vault, date, daySummary, periodMeta, sets]);
 
+  // 🛠️ リアルタイム残日数ノルマ（1日換算売上）計算の組み込み
   const activePeriodData = useMemo(() => {
     const data = periodicAnalysis[period];
     const goal = periodicGoals[goalStorageKey] || 0;
     const remain = goal > 0 ? goal - data.total : 0;
     const percent = goal > 0 ? Math.min(Math.round((data.total / goal) * 100), 100) : 0;
+    
     const tanka = data.cnt > 0 ? Math.round(data.real / data.cnt) : 0;
     const needCnt = (remain > 0 && tanka > 0) ? Math.ceil(remain / tanka) : 0;
 
-    return { ...data, goal, remain, percent, needCnt };
-  }, [periodicAnalysis, period, periodicGoals, goalStorageKey]);
+    // 1日あたりの必要ノルマ売上を現在の「残り日数」から動的逆算
+    let dailyNorma = 0;
+    if (remain > 0) {
+      const currentRef = new Date(date);
+      if (period === 'day') {
+        dailyNorma = remain;
+      } else if (period === 'week') {
+        const dayIdx = currentRef.getDay(); // 0(日)〜6(土)
+        const remainDays = dayIdx === 0 ? 1 : 7 - dayIdx + 1; // 日曜なら残り1日、月曜なら残り7日
+        dailyNorma = Math.ceil(remain / remainDays);
+      } else if (period === 'month') {
+        const lastDayOfMonth = new Date(currentRef.getFullYear(), currentRef.getMonth() + 1, 0).getDate();
+        const remainDays = lastDayOfMonth - currentRef.getDate() + 1;
+        dailyNorma = Math.ceil(remain / remainDays);
+      } else if (period === 'year') {
+        const lastDayOfYear = new Date(currentRef.getFullYear(), 11, 31);
+        const diffTime = lastDayOfYear - currentRef;
+        const remainDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+        dailyNorma = Math.ceil(remain / remainDays);
+      }
+    }
+
+    return { ...data, goal, remain, percent, needCnt, dailyNorma };
+  }, [periodicAnalysis, period, periodicGoals, goalStorageKey, date]);
 
   const handleStepPeriod = (direction) => {
     const current = new Date(date);
@@ -645,13 +666,21 @@ function App() {
                 <div class="progress-bar" style={{ width: `${activePeriodData.percent}%` }}></div>
               </div>
               <div class="goal-footer-row">
-                <div class="goal-status-text">達成率 <strong>{activePeriodData.percent}%</strong></div>
-                {activePeriodData.remain <= 0 ? (
-                  <div class="goal-remain-text done">🎉 目標達成完了！</div>
-                ) : (
-                  <div class="goal-remain-text remain">
-                    残り {activePeriodData.remain.toLocaleString()}円 
-                    {activePeriodData.needCnt > 0 && ` (あと約 ${activePeriodData.needCnt} 件)`}
+                <div class="goal-footer-top">
+                  <div class="goal-status-text">達成率 <strong>{activePeriodData.percent}%</strong></div>
+                  {activePeriodData.remain <= 0 ? (
+                    <div class="goal-remain-text done">🎉 目標達成完了！</div>
+                  ) : (
+                    <div class="goal-remain-text remain">
+                      残り {activePeriodData.remain.toLocaleString()}円 
+                      {activePeriodData.needCnt > 0 && ` (あと約 ${activePeriodData.needCnt} 件)`}
+                    </div>
+                  )}
+                </div>
+                {/* 🛠️ 【新設】残り日数から逆算した1日換算売上ノルマのインジケーター表示 */}
+                {activePeriodData.remain > 0 && period !== 'day' && (
+                  <div class="goal-footer-bottom">
+                    📈 目標達成には今日を含めて1日平均 <strong>{activePeriodData.dailyNorma.toLocaleString()} 円</strong> の稼働が必要です
                   </div>
                 )}
               </div>
@@ -661,7 +690,6 @@ function App() {
 
         {/* ── TAB CONTENT 1: DASHBOARD ── */}
         <div class={`view-container ${activeTab === 'dashboard' ? 'active' : ''}`}>
-          {/* 🛠️ 完全に期間連動するように進化したプラットフォーム別内訳カード */}
           <div class="section-title">📊 {periodLabels[period]}のプラットフォーム別内訳</div>
           <div class="analysis-grid">
             <div class="analysis-card">

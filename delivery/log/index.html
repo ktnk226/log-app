@@ -172,7 +172,7 @@
       background: var(--surface); 
       border: 1px solid var(--border); 
       border-radius: 8px; 
-      min-height: 85px; /* 売上文字拡大に伴い、セルの最低高さを少し拡張 */
+      min-height: 85px; 
       padding: 6px 5px; 
       cursor: pointer; 
       display: flex; 
@@ -187,9 +187,9 @@
     .cal-day-num { font-size: 11px; font-weight: 700; font-family: var(--font-mono); color: var(--muted2); }
     .cal-day-num.current-month { color: #fff; }
     
-    /* 🛠️ 【修正】売上表示のフォントサイズを大きくし、視認性を大幅向上 */
+    /* PC用：変更後の大きな文字サイズ（12px）で視認性を維持 */
     .cal-day-amt { 
-      font-size: 12px; /* 9px から 12px へ拡大 */
+      font-size: 12px; 
       font-family: var(--font-mono); 
       font-weight: 700; 
       text-align: right; 
@@ -234,8 +234,8 @@
       .cal-header-container { flex-direction: column; align-items: flex-start; gap: 10px; }
       .cal-day-cell { min-height: 70px; padding: 5px 4px; }
       
-      /* 🛠️ 【修正】スマホ画面でも潰れずに読める限界サイズまで最適拡大 */
-      .cal-day-amt { font-size: 10.5px; } /* 8.5px から 10.5px へ拡大 */
+      /* 🛠️ 【修正】スマホ表示の時のみ、はみ出しを防ぐために元の安全なサイズ（8.5px）へ復元 */
+      .cal-day-amt { font-size: 8.5px; } 
     }
   </style>
 </head>
@@ -892,6 +892,7 @@ function App() {
           <div class="card" style={{borderColor:'var(--green)', background:'rgba(0,230,118,0.02)'}}>
             <label style={{color:'var(--green)', fontWeight:'bold', fontSize:'13px'}}>クラウド会計ソフト freee 連動</label>
             <p style={{fontSize:'12px', color:'var(--muted2)', marginBottom:'12px'}}>蓄積された全営業日の売上データを、freeeの「明細アップロード」にそのまま取り込める形式のCSVとして書き出します。</p>
+            <p style={{fontSize:'11px', color:'var(--muted)', marginTop:'-8px', marginBottom:'12px'}}>※Taxnapなどの他サービスへ取り込む際の下地データとしてもご活用いただけます。</p>
             <button class="gen-btn" style={{background:'var(--green)', color:'#000', fontWeight:'900'}} onClick={downloadFreeeCSV}>📊 freee用売上CSVを書き出す</button>
           </div>
 
@@ -901,7 +902,7 @@ function App() {
             <p style={{fontSize:'11px', color: 'var(--muted)', marginTop:'8px'}}>※現在の時刻が午前0:00〜3:59の場合、自動的に前日の日付ページを生成・リセットします。</p>
           </div>
 
-          <div class="section-title">📜 蓄積された過去の稼働データ履歴</div>
+          <div class="section-title">📜 蓄積された過去の稼稼データ履歴</div>
           {historyList.length === 0 ? <div style={{textAlign:'center', padding:'20px', fontSize:'13px', color:'var(--muted)'}}>データがありません</div> : (
             historyList.map(h => (
               <div key={h.dateKey} class="history-card" style={{borderColor: date === h.dateKey ? 'var(--accent)' : ''}} onClick={() => { setDate(h.dateKey); setActiveTab('dashboard'); }}>

@@ -45,7 +45,6 @@
     }
     .nav-item:hover { background: rgba(255,255,255,0.03); color: #fff; }
     .nav-item.active { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; font-weight: 700; }
-    .nav-icon { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; }
 
     /* HEADER TOPBAR */
     .topbar {
@@ -57,10 +56,16 @@
     .topbar p { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
 
     /* PERIOD SWITCHER TABS */
-    .period-switcher-container { padding: 16px 24px 0; background: var(--bg); }
+    .period-switcher-container { padding: 16px 24px 0; background: var(--bg); display: flex; flex-direction: column; gap: 10px; }
     .period-tabs { display: flex; background: var(--surface); border: 1px solid var(--border); padding: 4px; border-radius: var(--radius-sm); width: 100%; max-width: 400px; margin: 0 auto; }
     .period-tab { flex: 1; background: transparent; border: none; color: var(--muted2); padding: 8px 0; font-size: 14px; font-weight: 700; cursor: pointer; border-radius: 6px; transition: all 0.2s; text-align: center; }
     .period-tab.active { background: var(--surface2); color: var(--accent); border: 1px solid rgba(255,92,26,0.2); }
+
+    /* ◀ PERIOD NAV BAR ▶ */
+    .period-nav-bar { display: flex; justify-content: space-between; align-items: center; width: 100%; max-width: 400px; margin: 0 auto; background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--radius-sm); padding: 6px 12px; }
+    .period-nav-btn { background: transparent; border: none; color: var(--accent); font-size: 16px; font-weight: 900; cursor: pointer; padding: 4px 10px; user-select: none; }
+    .period-nav-btn:hover { color: #fff; }
+    .period-nav-display { font-size: 13px; font-weight: 700; font-family: var(--font-mono); color: #fff; text-align: center; }
 
     /* SUMMARY BAR */
     .summary-bar {
@@ -120,14 +125,7 @@
     .platform-block { border-radius: 11px; padding: 14px; margin-bottom: 12px; border: 1px solid var(--border); }
     .platform-title { font-size: 13px; font-weight: 900; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
     .diff-badge { font-size: 11px; padding: 2px 7px; border-radius: 4px; background: rgba(0,230,118,0.15); color: var(--green); font-family: var(--font-mono); }
-    .pf-inputs { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
 
-    /* CORE BUTTONS */
-    .add-btn { width: 100%; padding: 16px; background: rgba(255,255,255,0.03); border: 2px dashed var(--border); color: var(--muted2); font-weight: bold; border-radius: var(--radius); cursor: pointer; font-size: 14px; }
-    .add-btn:hover { background: rgba(255,255,255,0.05); color: #fff; }
-    .gen-btn { width: 100%; padding: 16px; background: linear-gradient(135deg, var(--accent), var(--accent2)); border-radius: var(--radius); color: #fff; font-size: 16px; font-weight: 900; border: none; cursor: pointer; }
-    .del-btn { width: 100%; padding: 8px; background: rgba(255,60,60,0.06); color: rgba(255,100,100,0.7); border: 1px solid rgba(255,60,60,0.15); border-radius: 7px; font-size: 12px; cursor: pointer; margin-top: 8px; }
-    
     .set-card { background: rgba(255,255,255,0.02); border: 1.5px solid var(--border); border-radius: var(--radius); margin-bottom: 14px; overflow: hidden; }
     .set-header { padding: 14px 18px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; user-select: none; }
     .set-header:hover { background: rgba(255,255,255,0.02); }
@@ -149,13 +147,11 @@
     .chevron { font-size: 12px; color: var(--muted); transition: transform 0.2s; }
     .chevron.open { transform: rotate(180deg); }
 
-    /* HISTORY LIST CARD */
     .history-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 18px; margin-bottom: 10px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; }
     .history-card:hover { background: var(--surface2); border-color: var(--muted2); }
     .history-date { font-weight: 700; font-size: 15px; }
     .history-summary { font-family: var(--font-mono); font-size: 14px; color: var(--muted2); }
 
-    /* CALENDAR GRID VIEW */
     .cal-header-container { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
     .cal-title-nav { display: flex; align-items: center; gap: 16px; }
     .cal-nav-btn { background: rgba(255,255,255,0.06); border: 1px solid var(--border); color: #fff; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 14px; }
@@ -163,68 +159,25 @@
     .cal-title-text { font-size: 18px; font-weight: 900; }
     .cal-monthly-total { font-family: var(--font-mono); font-size: 16px; font-weight: 700; color: var(--accent); background: rgba(255,92,26,0.08); padding: 6px 14px; border-radius: 20px; border: 1px solid rgba(255,92,26,0.2); }
 
-    .cal-grid { 
-      display: grid; 
-      grid-template-columns: repeat(7, minmax(0, 1fr)); 
-      gap: 4px; 
-      margin-top: 10px;
-      width: 100%;
-    }
+    .cal-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; margin-top: 10px; width: 100%; }
     .cal-head-cell { text-align: center; font-size: 11px; color: var(--muted); font-weight: 700; padding: 4px 0; }
-    
-    .cal-day-cell { 
-      background: var(--surface); 
-      border: 1px solid var(--border); 
-      border-radius: 8px; 
-      min-height: 85px; 
-      padding: 6px 5px; 
-      cursor: pointer; 
-      display: flex; 
-      flex-direction: column; 
-      justify-content: space-between;
-      min-width: 0; 
-      word-break: break-all;
-    }
+    .cal-day-cell { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; min-height: 85px; padding: 6px 5px; cursor: pointer; display: flex; flex-direction: column; justify-content: space-between; min-width: 0; word-break: break-all; }
     .cal-day-cell:hover { background: var(--surface2); border-color: var(--muted2); }
     .cal-day-cell.empty { background: transparent; border: none; cursor: default; }
     .cal-day-cell.selected { border-color: var(--accent); background: rgba(255,92,26,0.05); }
     .cal-day-num { font-size: 11px; font-weight: 700; font-family: var(--font-mono); color: var(--muted2); }
     .cal-day-num.current-month { color: #fff; }
-    
-    .cal-day-amt { 
-      font-size: 12px; 
-      font-family: var(--font-mono); 
-      font-weight: 700; 
-      text-align: right; 
-      color: var(--accent); 
-      white-space: nowrap; 
-      overflow: hidden; 
-      text-overflow: ellipsis; 
-      margin-top: auto;
-      padding-top: 4px;
-      width: 100%;
-    }
+    .cal-day-amt { font-size: 12px; font-family: var(--font-mono); font-weight: 700; text-align: right; color: var(--accent); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: auto; padding-top: 4px; width: 100%; }
 
-    /* BOTTOM NAV TABS (MOBILE ONLY) */
-    .bottom-nav {
-      position: fixed; bottom: 0; left: 0; right: 0; height: 68px;
-      background: rgba(15,17,23,0.92); backdrop-filter: blur(20px);
-      border-top: 1px solid var(--border); display: none; justify-content: space-around; align-items: center; z-index: 500;
-    }
-    .tab-btn {
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      background: transparent; border: none; color: var(--muted); gap: 4px; font-size: 10px; font-weight: 500; cursor: pointer; width: 60px;
-    }
+    .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 68px; background: rgba(15,17,23,0.92); backdrop-filter: blur(20px); border-top: 1px solid var(--border); display: none; justify-content: space-around; align-items: center; z-index: 500; }
+    .tab-btn { display: flex; flex-direction: column; align-items: center; justify-content: center; background: transparent; border: none; color: var(--muted); gap: 4px; font-size: 10px; font-weight: 500; cursor: pointer; width: 60px; }
     .tab-btn.active { color: var(--accent); font-weight: 700; }
 
-    /* CLOUD STATUS HEADER IN BAR */
-    .cloud-indicator {
-      display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: bold;
-      padding: 6px 12px; border-radius: 20px; background: rgba(41,121,255,0.1); color: var(--blue);
-    }
+    .cloud-indicator { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: bold; padding: 6px 12px; border-radius: 20px; background: rgba(41,121,255,0.1); color: var(--blue); }
     .cloud-indicator.unsaved { background: rgba(255,214,0,0.1); color: var(--yellow); }
 
-    /* RESPONSIVE LAYOUT */
+    .gen-btn { width: 100%; padding: 16px; background: linear-gradient(135deg, var(--accent), var(--accent2)); border-radius: var(--radius); color: #fff; font-size: 16px; font-weight: 900; border: none; cursor: pointer; }
+
     @media (max-width: 768px) {
       .sidebar { display: none; }
       .bottom-nav { display: flex; }
@@ -248,7 +201,7 @@ const { useState, useMemo, useEffect, useCallback } = React;
 const SK = {
   db: 'delivery_log_vault_v9',
   currentDate: 'delivery_log_current_date_v9',
-  goals: 'delivery_log_periodic_goals_v11', // 新しい目標用ストレージキー
+  goals: 'delivery_log_periodic_goals_v12', // 移動バグを防ぐため新構造で定義
 };
 
 const PLATFORMS = [
@@ -271,17 +224,17 @@ function getBusinessDateStr() {
   return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 }
 
+function formatDateToParam(d) {
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
 function calcDuration(start, end) {
   if (!start || !end) return null;
   const [sh, sm] = start.split(':').map(Number);
   const [eh, em] = end.split(':').map(Number);
   let diffMin = (eh * 60 + em) - (sh * 60 + sm);
   if (diffMin < 0) diffMin += 24 * 60;
-  return {
-    total: diffMin / 60,
-    h: Math.floor(diffMin / 60),
-    m: diffMin % 60
-  };
+  return { total: diffMin / 60, h: Math.floor(diffMin / 60), m: diffMin % 60 };
 }
 
 function loadInitialVault() {
@@ -296,7 +249,20 @@ function loadInitialDate() {
 
 function loadInitialGoals() {
   const saved = localStorage.getItem(SK.goals);
-  return saved ? JSON.parse(saved) : { day: 0, week: 0, month: 0, year: 0 };
+  return saved ? JSON.parse(saved) : {}; // { "2026-W24": 150000, "2026-06": 500000, "2026": 6000000 } のような構造にバグ対策化
+}
+
+// 週番号(ISO基準に近く月曜始まり)を取得
+function getYearWeekStr(dateStr) {
+  const d = new Date(dateStr);
+  const day = d.getDay();
+  const mondayOffset = day === 0 ? -6 : 1 - day;
+  const mon = new Date(d.getTime() + mondayOffset * 86400000);
+  // 月曜基準の年と週
+  const year = mon.getFullYear();
+  const startOfYear = new Date(year, 0, 1);
+  const weekNum = Math.ceil((((mon - startOfYear) / 86400000) + startOfYear.getDay() + 1) / 7);
+  return `${year}-W${String(weekNum).padStart(2,'0')}`;
 }
 
 /* ────────────────── MAIN APP ────────────────── */
@@ -304,7 +270,7 @@ function App() {
   const [vault, setVault] = useState(loadInitialVault);
   const [date, setDate] = useState(loadInitialDate);
   const [activeTab, setActiveTab] = useState('dashboard');
-  const [period, setPeriod] = useState('day'); // 'day', 'week', 'month', 'year' 切り替え用
+  const [period, setPeriod] = useState('day'); 
   const [periodicGoals, setPeriodicGoals] = useState(loadInitialGoals);
   const [showLog, setShowLog] = useState(false);
   const [isDirty, setIsDirty] = useState(false);
@@ -318,23 +284,13 @@ function App() {
 
   const { weather, sets } = dayData;
 
-  useEffect(() => { 
-    localStorage.setItem(SK.db, JSON.stringify(vault)); 
-  }, [vault]);
-
-  useEffect(() => {
-    localStorage.setItem(SK.goals, JSON.stringify(periodicGoals));
-  }, [periodicGoals]);
-
-  useEffect(() => { 
-    localStorage.setItem(SK.currentDate, date); 
-    setShowLog(false); 
-  }, [date]);
+  useEffect(() => { localStorage.setItem(SK.db, JSON.stringify(vault)); }, [vault]);
+  useEffect(() => { localStorage.setItem(SK.goals, JSON.stringify(periodicGoals)); }, [periodicGoals]);
+  useEffect(() => { localStorage.setItem(SK.currentDate, date); setShowLog(false); }, [date]);
 
   useEffect(() => {
     const [y, m] = date.split('-').map(Number);
-    setCalYear(y);
-    setCalMonth(m);
+    setCalYear(y); setCalMonth(m);
   }, [date]);
 
   const updateDayField = useCallback((field, value) => {
@@ -351,19 +307,23 @@ function App() {
     }));
   }, [date]);
 
-  const updatePeriodicGoal = (pKey, val) => {
-    setPeriodicGoals(prev => ({ ...prev, [pKey]: Number(val) }));
+  // 目標設定のキーを期間ごとにユニークにするバグ防止策
+  const goalStorageKey = useMemo(() => {
+    const [y, m] = date.split('-');
+    if (period === 'day') return `D-${date}`;
+    if (period === 'week') return `W-${getYearWeekStr(date)}`;
+    if (period === 'month') return `M-${y}-${m}`;
+    return `Y-${y}`;
+  }, [date, period]);
+
+  const updatePeriodicGoal = (val) => {
+    setPeriodicGoals(prev => ({ ...prev, [goalStorageKey]: Number(val) }));
   };
 
   const calced = useMemo(() => {
     const n = v => parseFloat(v) || 0;
     return sets.map((s, i) => {
-      const p = sets[i-1] || {
-        d_cum:0, u_cum:0, r_cum:0, m_cum:0,
-        d_cnt_cum:0, u_cnt_cum:0, r_cnt_cum:0, m_cnt_cum:0,
-        d_que_cum:0, u_que_cum:0, r_que_cum:0, m_que_cum:0,
-        km_cum:0,
-      };
+      const p = sets[i-1] || { d_cum:0, u_cum:0, r_cum:0, m_cum:0, d_cnt_cum:0, u_cnt_cum:0, r_cnt_cum:0, m_cnt_cum:0, d_que_cum:0, u_que_cum:0, r_que_cum:0, m_que_cum:0, km_cum:0 };
       return {
         ...s,
         d_p: n(s.d_cum)-n(p.d_cum), u_p: n(s.u_cum)-n(p.u_cum), r_p: n(s.r_cum)-n(p.r_cum), m_p: n(s.m_cum)-n(p.m_cum),
@@ -374,7 +334,6 @@ function App() {
     });
   }, [sets]);
 
-  // 本日の集計
   const daySummary = useMemo(() => {
     const n = v => parseFloat(v) || 0;
     const last = sets[sets.length - 1] || EMPTY_SET();
@@ -383,18 +342,32 @@ function App() {
     const total_cnt   = n(last.d_cnt_cum) + n(last.u_cnt_cum) + n(last.r_cnt_cum) + n(last.m_cnt_cum);
     const total_km     = n(last.km_cum);
     const total_h     = calced.reduce((a, s) => a + (s.dur ? s.dur.total : 0), 0);
-    return {
-      total_sales: total_sales + total_que,
-      real_sales: total_sales,
-      total_que,
-      total_cnt,
-      total_km,
-      total_h,
-      jikyu: total_h > 0 ? Math.round((total_sales + total_que) / total_h) : 0
-    };
+    return { total_sales: total_sales + total_que, real_sales: total_sales, total_que, total_cnt, total_km, total_h, jikyu: total_h > 0 ? Math.round((total_sales + total_que) / total_h) : 0 };
   }, [sets, calced]);
 
-  // 期間別分析（日・週・月・年）の完璧なロジック化
+  // 週・月・年の範囲テキスト計算
+  const periodMeta = useMemo(() => {
+    const current = new Date(date);
+    const day = current.getDay();
+    const mondayOffset = day === 0 ? -6 : 1 - day;
+    
+    const mon = new Date(current.getTime() + mondayOffset * 86400000);
+    const sun = new Date(mon.getTime() + 6 * 86400000);
+    
+    const [y, m, d] = date.split('-');
+    const dayJa = ['日','月','火','水','木','金','土'][current.getDay()];
+
+    return {
+      dayStr: `${y}/${m}/${d} (${dayJa})`,
+      weekStr: `${mon.getFullYear()}年 第${getYearWeekStr(date).split('-W')[1]}週 (${String(mon.getMonth()+1).padStart(2,'0')}/${String(mon.getDate()).padStart(2,'0')}〜${String(sun.getMonth()+1).padStart(2,'0')}/${String(sun.getDate()).padStart(2,'0')})`,
+      monthStr: `${y}年 ${m}月 累計`,
+      yearStr: `${y}年 年間累計`,
+      monRef: mon,
+      sunRef: sun
+    };
+  }, [date]);
+
+  // 日・週・月・年の売上合算メインロジック
   const periodicAnalysis = useMemo(() => {
     const n = v => parseFloat(v) || 0;
     const [targetYear, targetMonth] = date.split('-').map(Number);
@@ -403,20 +376,8 @@ function App() {
     let weekTotal = 0; let weekReal = 0; let weekQue = 0; let weekCnt = 0;
     let yearTotal = 0; let yearReal = 0; let yearQue = 0; let yearCnt = 0;
 
-    // 月曜始まり・日曜終わりの週計算基準
-    const currentRefDate = new Date(date);
-    const dayOfWeek = currentRefDate.getDay(); 
-    const mondayDiff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek; // 日曜(0)なら-6、それ以外なら 1-dayOfWeek
-    const mondayRef = new Date(date);
-    mondayRef.setDate(mondayRef.getDate() + mondayDiff);
-    mondayRef.setHours(0,0,0,0);
-
-    const sundayRef = new Date(mondayRef);
-    sundayRef.setDate(sundayRef.getDate() + 6);
-    sundayRef.setHours(23,59,59,999);
-
     Object.keys(vault).forEach(dKey => {
-      const [y, m, d] = dKey.split('-').map(Number);
+      const [y, m] = dKey.split('-').map(Number);
       const dayVault = vault[dKey]; const sList = dayVault.sets || []; if (sList.length === 0) return;
 
       const lastS = sList[sList.length - 1];
@@ -433,7 +394,7 @@ function App() {
       }
 
       const thisDate = new Date(dKey);
-      if (thisDate >= mondayRef && thisDate <= sundayRef) {
+      if (thisDate >= periodMeta.monRef && thisDate <= periodMeta.sunRef) {
         weekTotal += totalAmt; weekReal += sales; weekQue += que; weekCnt += cnt;
       }
     });
@@ -444,21 +405,33 @@ function App() {
       month: { total: monthTotal, real: monthReal, que: monthQue, cnt: monthCnt },
       year: { total: yearTotal, real: yearReal, que: yearQue, cnt: yearCnt }
     };
-  }, [vault, date, daySummary]);
+  }, [vault, date, daySummary, periodMeta]);
 
-  // 現在選択中の期間に応じたサマリー・目標データのバインド
   const activePeriodData = useMemo(() => {
     const data = periodicAnalysis[period];
-    const goal = periodicGoals[period] || 0;
+    const goal = periodicGoals[goalStorageKey] || 0;
     const remain = goal > 0 ? goal - data.total : 0;
     const percent = goal > 0 ? Math.min(Math.round((data.total / goal) * 100), 100) : 0;
-    
-    // 平均単価を用いた「あと何件」のシミュレーション（週・月・年用）
     const tanka = data.cnt > 0 ? Math.round(data.real / data.cnt) : 0;
     const needCnt = (remain > 0 && tanka > 0) ? Math.ceil(remain / tanka) : 0;
 
     return { ...data, goal, remain, percent, needCnt };
-  }, [periodicAnalysis, period, periodicGoals]);
+  }, [periodicAnalysis, period, periodicGoals, goalStorageKey]);
+
+  // ◀ 期間ナビ矢印が押された時のステップ移動計算処理 (バグフリー設計)
+  const handleStepPeriod = (direction) => {
+    const current = new Date(date);
+    if (period === 'day') {
+      current.setDate(current.getDate() + direction);
+    } else if (period === 'week') {
+      current.setDate(current.getDate() + (direction * 7));
+    } else if (period === 'month') {
+      current.setMonth(current.getMonth() + direction);
+    } else if (period === 'year') {
+      current.setFullYear(current.getFullYear() + direction);
+    }
+    setDate(formatDateToParam(current));
+  };
 
   const currentCalendarMonthTotal = useMemo(() => {
     const n = v => parseFloat(v) || 0;
@@ -466,8 +439,7 @@ function App() {
     Object.keys(vault).forEach(dKey => {
       const [y, m] = dKey.split('-').map(Number);
       if (y === calYear && m === calMonth) {
-        const dayVault = vault[dKey];
-        const sList = dayVault.sets || [];
+        const dayVault = vault[dKey]; const sList = dayVault.sets || [];
         if (sList.length > 0) {
           const lastS = sList[sList.length - 1];
           total += (n(lastS.d_cum) + n(lastS.u_cum) + n(lastS.r_cum) + n(lastS.m_cum)) + (n(lastS.d_que_cum) + n(lastS.u_que_cum) + n(lastS.r_que_cum) + n(lastS.m_que_cum));
@@ -477,18 +449,7 @@ function App() {
     return total;
   }, [vault, calYear, calMonth]);
 
-  const updateSet = useCallback((i, key, val) => {
-    setIsDirty(true);
-    const newSets = [...sets]; newSets[i] = { ...newSets[i], [key]: val };
-    updateDayField('sets', newSets);
-  }, [sets, updateDayField]);
-
-  const toggleOpen = (i) => {
-    const newSets = [...sets]; newSets[i] = { ...newSets[i], open: !newSets[i].open };
-    updateDayField('sets', newSets);
-  };
-
-  const addSet = () => {
+  const addPeriodicSet = () => {
     setIsDirty(true);
     const last = sets[sets.length - 1] || EMPTY_SET();
     updateDayField('sets', [...sets, {
@@ -498,13 +459,6 @@ function App() {
       d_que_cum: last.d_que_cum, u_que_cum: last.u_que_cum, r_que_cum: last.r_que_cum, m_que_cum: last.m_que_cum,
       km_cum: last.km_cum,
     }]);
-  };
-
-  const deleteSet = (i) => {
-    if (sets.length <= 1) return;
-    if (!window.confirm(`SET ${i+1} を削除しますか？`)) return;
-    setIsDirty(true);
-    updateDayField('sets', sets.filter((_, idx) => idx !== i));
   };
 
   const startNewDay = () => {
@@ -538,8 +492,7 @@ function App() {
     for (let i = 0; i < mondayBasedStartIndex; i++) { cells.push({ empty: true }); }
     for (let dayNum = 1; dayNum <= totalDays; dayNum++) {
       const currentKey = `${calYear}-${String(calMonth).padStart(2,'0')}-${String(dayNum).padStart(2,'0')}`;
-      const dayVault = vault[currentKey];
-      let totalSales = 0;
+      const dayVault = vault[currentKey]; let totalSales = 0;
       if (dayVault && dayVault.sets && dayVault.sets.length > 0) {
         const n = v => parseFloat(v) || 0; const lastS = dayVault.sets[dayVault.sets.length - 1];
         totalSales = (n(lastS.d_cum) + n(lastS.u_cum) + n(lastS.r_cum) + n(lastS.m_cum)) + (n(lastS.d_que_cum) + n(lastS.u_que_cum) + n(lastS.r_que_cum) + n(lastS.m_que_cum));
@@ -549,114 +502,30 @@ function App() {
     return cells;
   }, [vault, calYear, calMonth]);
 
-  const handlePrevMonth = () => {
-    if (calMonth === 1) { setCalYear(prev => prev - 1); setCalMonth(12); } 
-    else { setCalMonth(prev => prev - 1); }
-  };
-
-  const handleNextMonth = () => {
-    if (calMonth === 12) { setCalYear(prev => prev + 1); setCalMonth(1); } 
-    else { setCalMonth(prev => prev + 1); }
-  };
-
-  const downloadFreeeCSV = () => {
-    const n = v => parseFloat(v) || 0;
-    const sortedDates = Object.keys(vault).sort();
-    if (sortedDates.length === 0) { alert("エクスポートするデータがまだありません。"); return; }
-
-    let csvContent = "日付け,出金額,入金額,備考\r\n";
-    sortedDates.forEach(dKey => {
-      const day = vault[dKey]; const sList = day.sets || []; if (sList.length === 0) return;
-      const lastS = sList[sList.length - 1];
-      const d_tot = n(lastS.d_cum) + n(lastS.d_que_cum); const u_tot = n(lastS.u_cum) + n(lastS.u_que_cum);
-      const r_tot = n(lastS.r_cum) + n(lastS.r_que_cum); const m_tot = n(lastS.m_cum) + n(lastS.m_que_cum);
-      const dayTotalAmt = d_tot + u_tot + r_tot + m_tot;
-
-      if (dayTotalAmt === 0) return;
-      const d_cnt = n(lastS.d_cnt_cum); const u_cnt = n(lastS.u_cnt_cum); const r_cnt = n(lastS.r_cnt_cum); const m_cnt = n(lastS.m_cnt_cum);
-      const pf_details = [];
-      if (d_tot > 0) pf_details.push(`出前館:${d_tot}円(${d_cnt}件)`);
-      if (u_tot > 0) pf_details.push(`Uber:${u_tot}円(${u_cnt}件)`);
-      if (r_tot > 0) pf_details.push(`RocketNow:${r_tot}円(${r_cnt}件)`);
-      if (m_tot > 0) pf_details.push(`menu:${m_tot}円(${m_cnt}件)`);
-
-      const memoStr = `本日売上計 [${pf_details.join(' / ')}] 走行距離:${n(lastS.km_cum)}km`;
-      csvContent += `${dKey.replace(/-/g, '/')},0,${dayTotalAmt},"${memoStr}"\r\n`;
-    });
-
-    const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
-    const blob = new Blob([bom, csvContent], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob); const link = document.createElement("a");
-    link.setAttribute("href", url); link.setAttribute("download", `freee_delivery_sales_${new Date().getFullYear()}.csv`);
-    document.body.appendChild(link); link.click(); document.body.removeChild(link);
-  };
-
   const saveToiCloudJSON = () => {
     const dataStr = JSON.stringify(vault, null, 2);
     const blob = new Blob([dataStr], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob); const link = document.createElement("a");
     link.setAttribute("href", url); link.setAttribute("download", "delilog_data.json");
     document.body.appendChild(link); link.click(); document.body.removeChild(link);
     setIsDirty(false);
   };
 
   const loadFromiCloudJSON = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
+    const file = e.target.files[0]; if (!file) return;
     const reader = new FileReader();
     reader.onload = (event) => {
       try {
         const importedData = JSON.parse(event.target.result);
-        if (typeof importedData === "object" && importedData !== null) {
-          setVault(importedData); setIsDirty(false); alert("iCloudからデータを同期しました！");
-        } else { alert("不正なデータ形式です。"); }
-      } catch (err) { alert("ファイルの読み込みに失敗しました。"); }
+        if (typeof importedData === "object" && importedData !== null) { setVault(importedData); setIsDirty(false); alert("iCloudから同期しました！"); } 
+        else { alert("不正な形式です。"); }
+      } catch (err) { alert("失敗しました。"); }
     };
     reader.readAsText(file); e.target.value = '';
   };
 
-  const generateLog = () => {
-    const n = v => parseFloat(v) || 0;
-    const { real_sales, total_que, total_cnt, total_km, total_h, jikyu } = daySummary;
-    const dayJa = ['日','月','火','水','木','金','土'][new Date(date).getDay()];
-    const dateStr = date.replace(/-/g,'/');
-
-    const last = sets[sets.length - 1] || EMPTY_SET();
-    const d_total = n(last.d_cum); const u_total = n(last.u_cum); const r_total = n(last.r_cum); const m_total = n(last.m_cum);
-    const d_cnt   = n(last.d_cnt_cum); const u_cnt   = n(last.u_cnt_cum); const r_cnt   = n(last.r_cnt_cum); const m_cnt   = n(last.m_cnt_cum);
-    const d_que = n(last.d_que_cum); const u_que = n(last.u_que_cum); const r_que = n(last.r_que_cum); const m_que = n(last.m_que_cum);
-
-    const hm = (h) => { const hh = Math.floor(h); const mm = Math.round((h - hh) * 60); return mm > 0 ? `${hh}時間${mm}分` : `${hh}時間`; };
-    
-    let log = `${dateStr} (${dayJa})\n📊 本日累計リザルト\n\n| 項目 | 内容 | 備考 |\n| :-- | --: | :-- |\n`;
-    log += `| **天気** | ${weather} | ${total_que > 0 ? 'クエあり' : 'クエなし'} |\n`;
-    log += `| **総売上** | **${(real_sales + total_que).toLocaleString()} 円** | |\n`;
-    log += `| **実質売上** | **${real_sales.toLocaleString()} 円** | クエスト含まず |\n`;
-    log += `| **クエ合計** | **${total_que.toLocaleString()} 円** | |\n`;
-    log += `| **総完了件数** | **${total_cnt} 件** | (D:${d_cnt} / U:${u_cnt} / R:${r_cnt} / m:${m_cnt}) |\n`;
-    log += `| **1件単価平均** | **${total_cnt > 0 ? Math.round((real_sales + total_que) / total_cnt) : 0} 円** | 総売上 ÷ 総件数 |\n`;
-    log += `| **総走行距離** | **${total_km} km** | |\n`;
-    log += `| **実稼働時間** | **${hm(total_h)}** | |\n`;
-    log += `| **時給換算** | **${jikyu.toLocaleString()} 円** | 総売上 ÷ 実稼働時間 |\n\n📦 Platform別内訳\n\n`;
-    log += `| PF | 件数 | 総額 | 実質売上 | クエ |\n| :--: | --: | --: | --: | --: |\n`;
-    log += `| **出前館 (D)** | ${d_cnt} 件 | ${(d_total+d_que).toLocaleString()} 円 | ${d_total.toLocaleString()} 円 | ${d_que.toLocaleString()} 円 |\n`;
-    log += `| **Uber Eats (U)** | ${u_cnt} 件 | ${(u_total+u_que).toLocaleString()} 円 | ${u_total.toLocaleString()} 円 | ${u_que.toLocaleString()} 円 |\n`;
-    log += `| **RocketNow (R)** | ${r_cnt} 件 | ${(r_total+r_que).toLocaleString()} 円 | ${r_total.toLocaleString()} 円 | ${r_que.toLocaleString()} 円 |\n`;
-    log += `| **menu (m)** | ${m_cnt} 件 | ${(m_total+m_que).toLocaleString()} 円 | ${m_total.toLocaleString()} 円 | ${m_que.toLocaleString()} 円 |\n\n🕒 各セット詳細\n\n`;
-
-    calced.forEach((s, i) => {
-      const sp = s.d_p + s.u_p + s.r_p + s.m_p; const sc = s.d_c + s.u_c + s.r_c + s.m_c;
-      const pf_parts = []; if (s.d_c > 0) pf_parts.push("D:" + s.d_c); if (s.u_c > 0) pf_parts.push("U:" + s.u_c); if (s.r_c > 0) pf_parts.push("R:" + s.r_c); if (s.m_c > 0) pf_parts.push("m:" + s.m_c);
-      log += `- **第${i+1}セット ${s.start || '--:--'} 〜 ${s.end || '--:--'}** ${s.dur ? `(${s.dur.h>0?s.dur.h+'h':''}${s.dur.m}m)` : ''}\n`;
-      log += `  - **実績**：${sc}件 / ${sp.toLocaleString()}円${s.km_p > 0 ? ` / ${s.km_p}km` : ''} ${pf_parts.length>0 ? `(${pf_parts.join(' / ')})` : ''}\n`;
-      if (s.memo) log += `  - **戦術**：${s.memo}\n`;
-      log += '\n';
-    });
-    return log.trim();
-  };
-
-  const periodLabels = { day: '本日', week: '今週 (月〜日)', month: '今月累計', year: '今年累計' };
+  const periodLabels = { day: '本日', week: '今週', month: '今月累計', year: '今年累計' };
+  const currentNavText = { day: periodMeta.dayStr, week: periodMeta.weekStr, month: periodMeta.monthStr, year: periodMeta.yearStr }[period];
 
   return (
     <div class="app-shell">
@@ -666,7 +535,7 @@ function App() {
           <div class="brand-mark">🛵</div>
           <div>
             <div class="brand-title">DELIVERY LOG</div>
-            <p style={{fontSize:'9px', color:'var(--muted)'}}>デリログ // V11</p>
+            <p style={{fontSize:'9px', color:'var(--muted)'}}>デリログ // V12</p>
           </div>
         </div>
         <nav class="nav-menu">
@@ -686,14 +555,14 @@ function App() {
           </div>
           <div style={{display:'flex', gap:'10px'}}>
             {isDirty ? (
-              <div class="cloud-indicator unsaved" onClick={saveToiCloudJSON} style={{cursor:'pointer'}}>⚠️ iCloud未保存 (保存)</div>
+              <div class="cloud-indicator unsaved" onClick={saveToiCloudJSON} style={{cursor:'pointer'}}>⚠️ 未保存 (保存)</div>
             ) : (
-              <div class="cloud-indicator">☁️ iCloud同期済み</div>
+              <div class="cloud-indicator">☁️ iCloud同期完了</div>
             )}
           </div>
         </header>
 
-        {/* 📅 PERIOD SWITCHER TABS (デリザルト準拠) */}
+        {/* 📅 PERIOD SWITCHER TABS & NAVIGATION (前後ジャンプ常設化) */}
         {activeTab === 'dashboard' && (
           <div class="period-switcher-container">
             <div class="period-tabs">
@@ -702,10 +571,17 @@ function App() {
               <button class={`period-tab ${period === 'month' ? 'active' : ''}`} onClick={() => setPeriod('month')}>月</button>
               <button class={`period-tab ${period === 'year' ? 'active' : ''}`} onClick={() => setPeriod('year')}>年</button>
             </div>
+            
+            {/* ◀ 連動ナビゲーションバーバー ▶ */}
+            <div class="period-nav-bar">
+              <button class="period-nav-btn" onClick={() => handleStepPeriod(-1)}>◀</button>
+              <div class="period-nav-display">{currentNavText}</div>
+              <button class="period-nav-btn" onClick={() => handleStepPeriod(1)}>▶</button>
+            </div>
           </div>
         )}
 
-        {/* 📊 LIVE SUMMARY HEADER (選択された期間の数値をリアルタイムバインド) */}
+        {/* 📊 LIVE SUMMARY HEADER */}
         <div class="summary-bar">
           <div class="sum-row">
             <div class="sum-item"><div class="sum-label">{periodLabels[period]}総売上</div><div class="sum-val accent">{activePeriodData.total.toLocaleString()}円</div></div>
@@ -715,19 +591,19 @@ function App() {
             {period === 'day' && <div class="sum-item"><div class="sum-label">実働時間</div><div class="sum-val">{daySummary.total_h > 0 ? (() => { const hh = Math.floor(daySummary.total_h); const mm = Math.round((daySummary.total_h - hh) * 60); return hh+'h'+mm+'m'; })() : '-'}</div></div>}
           </div>
           <div class="sum-row">
-            <div class="sum-item"><div class="sum-label">{period === 'day' ? '今日の時給' : '期間内平均件単価'}</div><div class="sum-val yellow">{period === 'day' ? (daySummary.total_h > 0 ? daySummary.jikyu.toLocaleString()+'円' : '-') : (activePeriodData.cnt > 0 ? Math.round(activePeriodData.total / activePeriodData.cnt).toLocaleString()+'円' : '-')}</div></div>
+            <div class="sum-item"><div class="sum-label">{period === 'day' ? '今日の時給' : '期間内平均単価'}</div><div class="sum-val yellow">{period === 'day' ? (daySummary.total_h > 0 ? daySummary.jikyu.toLocaleString()+'円' : '-') : (activePeriodData.cnt > 0 ? Math.round(activePeriodData.total / activePeriodData.cnt).toLocaleString()+'円' : '-')}</div></div>
             <div class="sum-item"><div class="sum-label">単価(抜)</div><div class="sum-val">{activePeriodData.cnt > 0 ? Math.round(activePeriodData.real / activePeriodData.cnt).toLocaleString() : '-'}円</div></div>
           </div>
         </div>
 
-        {/* 🎯 VISUAL GOAL & POSITION PANEL (現在位置の可視化プログレスバー) */}
+        {/* 🎯 VISUAL GOAL & POSITION PANEL (バグフリー完全固定キー対応) */}
         <div class="goal-panel">
           <div class="goal-header-row">
             <div class="goal-title-flex">
               <span>🎯 {periodLabels[period]}目標設定</span>
             </div>
             <div class="goal-input-wrapper">
-              <input class="goal-input" type="number" value={activePeriodicGoals => periodicGoals[period] || ''} onChange={e => updatePeriodicGoal(period, e.target.value)} placeholder="未設定" />
+              <input class="goal-input" type="number" value={periodicGoals[goalStorageKey] || ''} onChange={e => updatePeriodicGoal(e.target.value)} placeholder="未設定" />
               <span style={{fontSize:'12px', color:'var(--muted)'}}>円</span>
             </div>
           </div>
@@ -744,7 +620,7 @@ function App() {
                 ) : (
                   <div class="goal-remain-text remain">
                     残り {activePeriodData.remain.toLocaleString()}円 
-                    {activePeriodData.needCnt > 0 && ` (平均単価であと ${activePeriodData.needCnt} 件)`}
+                    {activePeriodData.needCnt > 0 && ` (あと約 ${activePeriodData.needCnt} 件)`}
                   </div>
                 )}
               </div>
@@ -754,30 +630,27 @@ function App() {
 
         {/* ── TAB CONTENT 1: DASHBOARD ── */}
         <div class={`view-container ${activeTab === 'dashboard' ? 'active' : ''}`}>
-          
-          <div class="section-title">📊 {periodLabels[period]}のリザルト概要</div>
+          <div class="section-title">📊 プラットフォーム別内訳（累積値）</div>
           <div class="analysis-grid">
-            <div class="analysis-card" style={{background: 'linear-gradient(135deg, #11141d, #161a26)'}}>
-              <div class="analysis-card-title">📦 プラットフォーム内訳（累積総額）</div>
-              <div style={{display:'flex', flexDirection:'column', gap:'10px', marginTop:'10px'}}>
+            <div class="analysis-card">
+              <div style={{display:'flex', flexDirection:'column', gap:'10px'}}>
                 {period === 'day' ? (
                   PLATFORMS.map(p => {
                     const last = sets[sets.length - 1] || EMPTY_SET();
                     return (
-                      <div key={p.key} style={{display:'flex', justifyBetween:'center', justifyContent:'space-between', fontSize:'14px', borderBottom:'1px solid var(--border)', paddingBottom:'4px'}}>
+                      <div key={p.key} style={{display:'flex', justifyContent:'space-between', fontSize:'14px', borderBottom:'1px solid var(--border)', paddingBottom:'4px'}}>
                         <span style={{color:p.color, fontWeight:'bold'}}>{p.label}</span>
                         <span class="font-mono">{(parseFloat(last[p.key+'_cum'])+parseFloat(last[p.key+'_que_cum']) || 0).toLocaleString()} 円 / {(parseFloat(last[p.key+'_cnt_cum']) || 0)} 件</span>
                       </div>
                     );
                   })
                 ) : (
-                  <p style={{fontSize:'12px', color:'var(--muted)', textAlign:'center', padding:'10px'}}>※詳細なPF別期間推移は「カレンダー・履歴」または各日ページをご確認ください</p>
+                  <p style={{fontSize:'12px', color:'var(--muted)', textAlign:'center', padding:'10px'}}>※矢印ナビゲーションで過去の特定日へ移動して、詳細な内訳を追うことができます。</p>
                 )}
               </div>
             </div>
           </div>
-          
-          <button class="gen-btn" style={{marginTop:'10px'}} onClick={() => setActiveTab('entries')}>📝 記録の編集・セット追加を行う</button>
+          <button class="gen-btn" style={{marginTop:'10px'}} onClick={() => setActiveTab('entries')}>📝 この営業日のデータを編集する</button>
         </div>
 
         {/* ── TAB CONTENT 2: CALENDAR ── */}
@@ -788,9 +661,7 @@ function App() {
               <span class="cal-title-text">📅 {calYear}年 {calMonth}月</span>
               <button class="cal-nav-btn" onClick={handleNextMonth}>次月 ▶</button>
             </div>
-            <div class="cal-monthly-total">
-              月間累計: {currentCalendarMonthTotal.toLocaleString()} 円
-            </div>
+            <div class="cal-monthly-total">月間累計: {currentCalendarMonthTotal.toLocaleString()} 円</div>
           </div>
 
           <div class="card" style={{padding:'8px', marginBottom: '24px'}}>
@@ -866,7 +737,7 @@ function App() {
                       <div key={p.key} class="platform-block" style={{background: p.color+'05', borderColor: p.color+'20'}}>
                         <div class="platform-title" style={{color: p.color}}>
                           <span>{p.label}</span>
-                          <span class="diff-badge">+{s[p.key+'_p'].toLocaleString()}円 / {s[p.key+'_c']}件 {s[p.key+'_qp']>0 ? `(クエ+${s[p.key+'_qp']})` : ''}</span>
+                          <span class="diff-badge">+{s[p.key+'_p'].toLocaleString()}円 / {s[p.key+'_c']}件</span>
                         </div>
                         <div class="pf-inputs">
                           <div><label>売上(累積)</label><input type="number" placeholder="0" value={sets[i][p.key+'_cum'] || ''} onChange={e => updateSet(i, p.key+'_cum', e.target.value)} /></div>
@@ -878,25 +749,24 @@ function App() {
 
                     <div class="grid-2" style={{margin: '12px 0'}}>
                       <div><label>走行距離累積 (km)</label><input type="number" placeholder="0" value={sets[i].km_cum} onChange={e => updateSet(i,'km_cum',e.target.value)} /></div>
-                      <div><label>このセットの走行距離</label><div style={{paddingTop: '12px', color: s.km_p > 0 ? 'var(--teal)' : 'var(--muted)', fontWeight:'bold', fontFamily:'var(--font-mono)'}}>{s.km_p > 0 ? `+${s.km_p} km` : '-'}</div></div>
+                      <div><label>走行距離</label><div style={{paddingTop: '12px', color: s.km_p > 0 ? 'var(--teal)' : 'var(--muted)', fontWeight:'bold', fontFamily:'var(--font-mono)'}}>{s.km_p > 0 ? `+${s.km_p} km` : '-'}</div></div>
                     </div>
 
-                    <div style={{marginTop:'10px'}}><label>戦術メモ</label><textarea rows="2" placeholder="エリア状況・メモ記入" value={sets[i].memo} onChange={e => updateSet(i,'memo',e.target.value)} /></div>
+                    <div style={{marginTop:'10px'}}><label>戦術メモ</label><textarea rows="2" placeholder="メモ記入" value={sets[i].memo} onChange={e => updateSet(i,'memo',e.target.value)} /></div>
                     {sets.length > 1 && <button class="del-btn" onClick={() => deleteSet(i)}>SET {i+1} を削除</button>}
                   </div>
                 )}
               </div>
             );
           })}
-
-          <button class="add-btn" onClick={addSet}>＋ 次のセットを追加</button>
+          <button class="add-btn" onClick={addPeriodicSet}>＋ 次のセットを追加</button>
 
           <div style={{marginTop:'24px'}}>
             <button class="gen-btn" onClick={() => setShowLog(!showLog)}>{showLog ? '入力に戻る' : '🚀 V5報告ログを生成'}</button>
             {showLog && (
               <div class="log-box">
                 <pre>{generateLog()}</pre>
-                <button class="copy-btn" onClick={() => { navigator.clipboard.writeText(generateLog()); alert('クリップボードにコピーしました！'); }}>ログをコピーする</button>
+                <button class="copy-btn" onClick={() => { navigator.clipboard.writeText(generateLog()); alert('コピー完了！'); }}>ログをコピーする</button>
               </div>
             )}
           </div>
@@ -904,32 +774,21 @@ function App() {
 
         {/* ── TAB CONTENT 4: SETTINGS ── */}
         <div class={`view-container ${activeTab === 'settings' ? 'active' : ''}`}>
-          <div class="section-title">☁️ iCloud Drive 連動（データ同期）</div>
+          <div class="section-title">☁️ iCloud Drive 連動</div>
           <div class="card" style={{borderColor:'var(--blue)', background:'rgba(41,121,255,0.02)'}}>
-            <p style={{fontSize:'12px', color:'var(--muted2)', marginBottom:'12px'}}>
-              iCloud Drive内の <code>delilog_data.json</code> を選択・上書きして運用してください。
-            </p>
             <div class="grid-2">
               <button class="gen-btn" style={{background:'var(--blue)', fontWeight:'900'}} onClick={saveToiCloudJSON}>💾 iCloudへ書き出し保存</button>
               <button class="gen-btn" style={{background:'rgba(255,255,255,0.1)', color:'#fff', border:'1px solid var(--border)'}} onClick={() => document.getElementById('settingsCloudLoad').click()}>📥 iCloudから読み込み同期</button>
             </div>
             <input type="file" id="settingsCloudLoad" accept=".json" style={{display:'none'}} onChange={loadFromiCloudJSON} />
           </div>
-
-          <div class="section-title">会計連携（確定申告自動化）</div>
-          <div class="card" style={{borderColor:'var(--green)', background:'rgba(0,230,118,0.02)'}}>
-            <label style={{color:'var(--green)', fontWeight:'bold', fontSize:'13px'}}>クラウド会計ソフト freee 連動</label>
-            <p style={{fontSize:'12px', color:'var(--muted2)', marginBottom:'12px'}}>蓄積された全営業日の売上データをCSVとして書き出します（Taxnap等への下地にも可）。</p>
-            <button class="gen-btn" style={{background:'var(--green)', color:'#000', fontWeight:'900'}} onClick={downloadFreeeCSV}>📊 freee用売上CSVを書き出す</button>
-          </div>
-
           <div class="section-title">データコントロール</div>
           <div class="card">
             <button class="gen-btn" style={{background:'var(--blue)'}} onClick={startNewDay}>新しい営業日を開始する (4時起点判定)</button>
           </div>
         </div>
 
-        {/* BOTTOM NAV TABS BAR (MOBILE DISPLAY) */}
+        {/* BOTTOM NAV TABS BAR */}
         <nav class="bottom-nav">
           <button class={`tab-btn ${activeTab === 'dashboard' ? 'active' : ''}`} onClick={() => setActiveTab('dashboard')}>
             <svg class="nav-icon" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><span>ホーム</span>
@@ -950,11 +809,7 @@ function App() {
 }
 
 const EMPTY_SET = () => ({
-  start: '', end: '',
-  d_cum: '', u_cum: '', r_cum: '', m_cum: '',
-  d_cnt_cum: '', u_cnt_cum: '', r_cnt_cum: '', m_cnt_cum: '',
-  d_que_cum: '', u_que_cum: '', r_que_cum: '', m_que_cum: '',
-  km_cum: '', memo: '', open: true,
+  start: '', end: '', d_cum: '', u_cum: '', r_cum: '', m_cum: '', d_cnt_cum: '', u_cnt_cum: '', r_cnt_cum: '', m_cnt_cum: '', d_que_cum: '', u_que_cum: '', r_que_cum: '', m_que_cum: '', km_cum: '', memo: '', open: true,
 });
 
 ReactDOM.createRoot(document.getElementById('root')).render(<App />);

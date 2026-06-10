@@ -151,7 +151,7 @@
     .history-date { font-weight: 700; font-size: 15px; }
     .history-summary { font-family: var(--font-mono); font-size: 14px; color: var(--muted2); }
 
-    /* CALENDAR GRID VIEW (月曜始まり対応用) */
+    /* CALENDAR GRID VIEW (レスポンシブ崩れ・ハミ出し徹底防止用) */
     .cal-header-container { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
     .cal-title-nav { display: flex; align-items: center; gap: 16px; }
     .cal-nav-btn { background: rgba(255,255,255,0.06); border: 1px solid var(--border); color: #fff; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 14px; }
@@ -159,15 +159,49 @@
     .cal-title-text { font-size: 18px; font-weight: 900; }
     .cal-monthly-total { font-family: var(--font-mono); font-size: 16px; font-weight: 700; color: var(--accent); background: rgba(255,92,26,0.08); padding: 6px 14px; border-radius: 20px; border: 1px solid rgba(255,92,26,0.2); }
 
-    .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-top: 10px; }
-    .cal-head-cell { text-align: center; font-size: 11px; color: var(--muted); font-weight: 700; padding: 6px 0; }
-    .cal-day-cell { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; min-height: 85px; padding: 6px; cursor: pointer; display: flex; flex-direction: column; justify-content: space-between; }
+    /* 🛠️ グリッド幅を 1fr ではなく「均等14.28%（7等分）」かつ幅固定を解除 */
+    .cal-grid { 
+      display: grid; 
+      grid-template-columns: repeat(7, minmax(0, 1fr)); 
+      gap: 4px; 
+      margin-top: 10px;
+      width: 100%;
+    }
+    .cal-head-cell { text-align: center; font-size: 11px; color: var(--muted); font-weight: 700; padding: 4px 0; }
+    
+    /* 🛠️ セルが文字数で外に広がらないよう box-sizing と overflow を徹底指定 */
+    .cal-day-cell { 
+      background: var(--surface); 
+      border: 1px solid var(--border); 
+      border-radius: 8px; 
+      min-height: 75px; 
+      padding: 5px; 
+      cursor: pointer; 
+      display: flex; 
+      flex-direction: column; 
+      justify-content: space-between;
+      min-width: 0; /* フレックスコンテナ内のハミ出し防止 */
+      word-break: break-all;
+    }
     .cal-day-cell:hover { background: var(--surface2); border-color: var(--muted2); }
     .cal-day-cell.empty { background: transparent; border: none; cursor: default; }
     .cal-day-cell.selected { border-color: var(--accent); background: rgba(255,92,26,0.05); }
-    .cal-day-num { font-size: 12px; font-weight: 700; font-family: var(--font-mono); color: var(--muted2); }
+    .cal-day-num { font-size: 11px; font-weight: 700; font-family: var(--font-mono); color: var(--muted2); }
     .cal-day-num.current-month { color: #fff; }
-    .cal-day-amt { font-size: 10px; font-family: var(--font-mono); font-weight: 700; text-align: right; color: var(--accent); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: auto; }
+    
+    /* 🛠️ スマホ画面でも文字がはみ出さないようにサイズを縮小調整 */
+    .cal-day-amt { 
+      font-size: 9px; 
+      font-family: var(--font-mono); 
+      font-weight: 700; 
+      text-align: right; 
+      color: var(--accent); 
+      white-space: nowrap; 
+      overflow: hidden; 
+      text-overflow: ellipsis; 
+      margin-top: auto;
+      width: 100%;
+    }
 
     /* BOTTOM NAV TABS (MOBILE ONLY) */
     .bottom-nav {
@@ -193,12 +227,14 @@
       .sidebar { display: none; }
       .bottom-nav { display: flex; }
       .topbar { padding: 14px 16px; }
-      .view-container { padding: 16px; }
+      .view-container { padding: 12px; } /* スマホ時は少し余白を詰める */
       .summary-bar { padding: 12px 16px; }
       .goal-bar { padding: 10px 16px; }
       .grid-3 { grid-template-columns: 1fr; gap: 12px; }
       .analysis-grid { grid-template-columns: 1fr; }
       .cal-header-container { flex-direction: column; align-items: flex-start; gap: 10px; }
+      .cal-day-cell { min-height: 65px; padding: 4px; } /* スマホ用にセルの高さを最適化 */
+      .cal-day-amt { font-size: 8.5px; }
     }
   </style>
 </head>
@@ -264,7 +300,6 @@ function App() {
   const [showLog, setShowLog] = useState(false);
   const [isDirty, setIsDirty] = useState(false);
 
-  // カレンダー閲覧用の年月ステート (初期値は選択中の営業日の年月)
   const [calYear, setCalYear] = useState(() => Number(loadInitialDate().split('-')[0]));
   const [calMonth, setCalMonth] = useState(() => Number(loadInitialDate().split('-')[1]));
 
@@ -283,7 +318,6 @@ function App() {
     setShowLog(false); 
   }, [date]);
 
-  // 営業日が直接変更された際、カレンダーの閲覧年月も連動させる
   useEffect(() => {
     const [y, m] = date.split('-').map(Number);
     setCalYear(y);
@@ -379,7 +413,6 @@ function App() {
     return { monthTotal, monthReal, monthQue, monthCnt, weekTotal, weekReal, weekQue, weekCnt };
   }, [vault, date]);
 
-  // ☁️ カレンダー表示中の月の「月間累計売上」を自動集計するロジック
   const currentCalendarMonthTotal = useMemo(() => {
     const n = v => parseFloat(v) || 0;
     let total = 0;
@@ -448,19 +481,13 @@ function App() {
     });
   }, [vault]);
 
-  // 📅 月曜始まりカレンダーグリッド計算ロジック
   const calendarDays = useMemo(() => {
-    const firstDayIndex = new Date(calYear, calMonth - 1, 1).getDay(); // 0:日, 1:月...
+    const firstDayIndex = new Date(calYear, calMonth - 1, 1).getDay();
     const totalDays = new Date(calYear, calMonth, 0).getDate();
-    
-    // 日曜始まり(0)を月曜始まり(0)のインデックスに変換する計算
-    // 日(0) -> 6, 月(1) -> 0, 火(2) -> 1, 水(3) -> 2, 木(4) -> 3, 金(5) -> 4, 土(6) -> 5
     const mondayBasedStartIndex = firstDayIndex === 0 ? 6 : firstDayIndex - 1;
 
     const cells = [];
-    // 頭の空セルを追加
     for (let i = 0; i < mondayBasedStartIndex; i++) { cells.push({ empty: true }); }
-    // 日付セルを追加
     for (let dayNum = 1; dayNum <= totalDays; dayNum++) {
       const currentKey = `${calYear}-${String(calMonth).padStart(2,'0')}-${String(dayNum).padStart(2,'0')}`;
       const dayVault = vault[currentKey];
@@ -474,7 +501,6 @@ function App() {
     return cells;
   }, [vault, calYear, calMonth]);
 
-  // カレンダーの月移動処理
   const handlePrevMonth = () => {
     if (calMonth === 1) {
       setCalYear(prev => prev - 1);
@@ -525,7 +551,6 @@ function App() {
     document.body.appendChild(link); link.click(); document.body.removeChild(link);
   };
 
-  /* ☁️ iCloud Drive 連動：セーブ */
   const saveToiCloudJSON = () => {
     const dataStr = JSON.stringify(vault, null, 2);
     const blob = new Blob([dataStr], { type: "application/json" });
@@ -539,7 +564,6 @@ function App() {
     setIsDirty(false);
   };
 
-  /* ☁️ iCloud Drive 連動：ロード */
   const loadFromiCloudJSON = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -636,7 +660,6 @@ function App() {
             <p>Target Date // {date.replace(/-/g,'/')}</p>
             <h1>🛵 DELIVERY LOG</h1>
           </div>
-          {/* iCloud保存状況インジケーター */}
           <div style={{display:'flex', gap:'10px'}}>
             {isDirty ? (
               <div class="cloud-indicator unsaved" onClick={saveToiCloudJSON} style={{cursor:'pointer'}}>⚠️ iCloud未保存 (タップセーブ)</div>
@@ -742,7 +765,7 @@ function App() {
           <button class="gen-btn" style={{marginTop:'10px'}} onClick={() => setActiveTab('entries')}>📝 記録の編集・セット追加を行う</button>
         </div>
 
-        {/* ── TAB CONTENT 2: CALENDAR (月曜始まり & ページング & 累計対応) ── */}
+        {/* ── TAB CONTENT 2: CALENDAR (ハミ出しバグ修正版) ── */}
         <div class={`view-container ${activeTab === 'calendar' ? 'active' : ''}`}>
           
           <div class="cal-header-container">
@@ -751,15 +774,13 @@ function App() {
               <span class="cal-title-text">📅 {calYear}年 {calMonth}月</span>
               <button class="cal-nav-btn" onClick={handleNextMonth}>次月 ▶</button>
             </div>
-            {/* 月間累計売上バッジ */}
             <div class="cal-monthly-total">
               月間累計: {currentCalendarMonthTotal.toLocaleString()} 円
             </div>
           </div>
 
-          <div class="card" style={{padding:'10px'}}>
+          <div class="card" style={{padding:'8px'}}>
             <div class="cal-grid">
-              {/* 月曜始まり（月〜日）のヘッダーラベル */}
               {['月','火','水','木','金','土','日'].map(w => <div key={w} class="cal-head-cell">{w}</div>)}
               {calendarDays.map((c, idx) => c.empty ? <div key={idx} class="cal-day-cell empty" /> : (
                 <div key={idx} class={`cal-day-cell ${date === c.dateKey ? 'selected' : ''}`} onClick={() => { setDate(c.dateKey); setActiveTab('dashboard'); }}>

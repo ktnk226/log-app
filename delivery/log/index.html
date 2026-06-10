@@ -427,7 +427,6 @@ function App() {
     setDate(formatDateToParam(current));
   };
 
-  // 📅 カレンダー専用の月移動ロジック（ここを完全にバグ修正しました）
   const handleCalendarMonthChange = (direction) => {
     let nextMonth = calMonth + direction;
     let nextYear = calYear;
@@ -435,6 +434,17 @@ function App() {
     else if (nextMonth > 12) { nextMonth = 1; nextYear += 1; }
     setCalYear(nextYear);
     setCalMonth(nextMonth);
+  };
+
+  // 🛠️ 復活ロジック：消えていた startNewDay 処理を完全復帰
+  const startNewDay = () => {
+    const targetDate = getBusinessDateStr();
+    if (date === targetDate) {
+      if (!window.confirm('現在の最新営業日データを完全にクリアしてリセットしますか？')) return;
+      setIsDirty(true);
+      setVault(prev => ({ ...prev, [targetDate]: { weather: '晴', goalAmt: 0, sets: [EMPTY_SET()] } }));
+    } else { setDate(targetDate); }
+    setActiveTab('entries');
   };
 
   const currentCalendarMonthTotal = useMemo(() => {
@@ -651,10 +661,8 @@ function App() {
         <div class={`view-container ${activeTab === 'calendar' ? 'active' : ''}`}>
           <div class="cal-header-container">
             <div class="cal-title-nav">
-              {/* 🛠️ ここを修正：handlePrevMonth から handleCalendarMonthChange(-1) へ変更 */}
               <button class="cal-nav-btn" onClick={() => handleCalendarMonthChange(-1)}>◀ 前月</button>
               <span class="cal-title-text">📅 {calYear}年 {calMonth}月</span>
-              {/* 🛠️ ここを修正：handleNextMonth から handleCalendarMonthChange(1) へ変更 */}
               <button class="cal-nav-btn" onClick={() => handleCalendarMonthChange(1)}>次月 ▶</button>
             </div>
             <div class="cal-monthly-total">月間累計: {currentCalendarMonthTotal.toLocaleString()} 円</div>
@@ -780,6 +788,7 @@ function App() {
           </div>
           <div class="section-title">データコントロール</div>
           <div class="card">
+            {/* 🛠️ ここが原因でした：startNewDay を再バインドして復旧 */}
             <button class="gen-btn" style={{background:'var(--blue)'}} onClick={startNewDay}>新しい営業日を開始する (4時起点判定)</button>
           </div>
         </div>

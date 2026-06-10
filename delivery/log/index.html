@@ -201,7 +201,7 @@ const { useState, useMemo, useEffect, useCallback } = React;
 const SK = {
   db: 'delivery_log_vault_v9',
   currentDate: 'delivery_log_current_date_v9',
-  goals: 'delivery_log_periodic_goals_v12', // 移動バグを防ぐため新構造で定義
+  goals: 'delivery_log_periodic_goals_v12', 
 };
 
 const PLATFORMS = [
@@ -249,16 +249,14 @@ function loadInitialDate() {
 
 function loadInitialGoals() {
   const saved = localStorage.getItem(SK.goals);
-  return saved ? JSON.parse(saved) : {}; // { "2026-W24": 150000, "2026-06": 500000, "2026": 6000000 } のような構造にバグ対策化
+  return saved ? JSON.parse(saved) : {}; 
 }
 
-// 週番号(ISO基準に近く月曜始まり)を取得
 function getYearWeekStr(dateStr) {
   const d = new Date(dateStr);
   const day = d.getDay();
   const mondayOffset = day === 0 ? -6 : 1 - day;
   const mon = new Date(d.getTime() + mondayOffset * 86400000);
-  // 月曜基準の年と週
   const year = mon.getFullYear();
   const startOfYear = new Date(year, 0, 1);
   const weekNum = Math.ceil((((mon - startOfYear) / 86400000) + startOfYear.getDay() + 1) / 7);
@@ -307,7 +305,6 @@ function App() {
     }));
   }, [date]);
 
-  // 目標設定のキーを期間ごとにユニークにするバグ防止策
   const goalStorageKey = useMemo(() => {
     const [y, m] = date.split('-');
     if (period === 'day') return `D-${date}`;
@@ -345,7 +342,6 @@ function App() {
     return { total_sales: total_sales + total_que, real_sales: total_sales, total_que, total_cnt, total_km, total_h, jikyu: total_h > 0 ? Math.round((total_sales + total_que) / total_h) : 0 };
   }, [sets, calced]);
 
-  // 週・月・年の範囲テキスト計算
   const periodMeta = useMemo(() => {
     const current = new Date(date);
     const day = current.getDay();
@@ -367,7 +363,6 @@ function App() {
     };
   }, [date]);
 
-  // 日・週・月・年の売上合算メインロジック
   const periodicAnalysis = useMemo(() => {
     const n = v => parseFloat(v) || 0;
     const [targetYear, targetMonth] = date.split('-').map(Number);
@@ -418,7 +413,6 @@ function App() {
     return { ...data, goal, remain, percent, needCnt };
   }, [periodicAnalysis, period, periodicGoals, goalStorageKey]);
 
-  // ◀ 期間ナビ矢印が押された時のステップ移動計算処理 (バグフリー設計)
   const handleStepPeriod = (direction) => {
     const current = new Date(date);
     if (period === 'day') {
@@ -431,6 +425,16 @@ function App() {
       current.setFullYear(current.getFullYear() + direction);
     }
     setDate(formatDateToParam(current));
+  };
+
+  // 📅 カレンダー専用の月移動ロジック（ここを完全にバグ修正しました）
+  const handleCalendarMonthChange = (direction) => {
+    let nextMonth = calMonth + direction;
+    let nextYear = calYear;
+    if (nextMonth < 1) { nextMonth = 12; nextYear -= 1; }
+    else if (nextMonth > 12) { nextMonth = 1; nextYear += 1; }
+    setCalYear(nextYear);
+    setCalMonth(nextMonth);
   };
 
   const currentCalendarMonthTotal = useMemo(() => {
@@ -459,16 +463,6 @@ function App() {
       d_que_cum: last.d_que_cum, u_que_cum: last.u_que_cum, r_que_cum: last.r_que_cum, m_que_cum: last.m_que_cum,
       km_cum: last.km_cum,
     }]);
-  };
-
-  const startNewDay = () => {
-    const targetDate = getBusinessDateStr();
-    if (date === targetDate) {
-      if (!window.confirm('現在の最新営業日データを完全にクリアしてリセットしますか？')) return;
-      setIsDirty(true);
-      setVault(prev => ({ ...prev, [targetDate]: { weather: '晴', goalAmt: 0, sets: [EMPTY_SET()] } }));
-    } else { setDate(targetDate); }
-    setActiveTab('entries');
   };
 
   const historyList = useMemo(() => {
@@ -562,7 +556,7 @@ function App() {
           </div>
         </header>
 
-        {/* 📅 PERIOD SWITCHER TABS & NAVIGATION (前後ジャンプ常設化) */}
+        {/* 📅 PERIOD SWITCHER TABS & NAVIGATION */}
         {activeTab === 'dashboard' && (
           <div class="period-switcher-container">
             <div class="period-tabs">
@@ -572,7 +566,7 @@ function App() {
               <button class={`period-tab ${period === 'year' ? 'active' : ''}`} onClick={() => setPeriod('year')}>年</button>
             </div>
             
-            {/* ◀ 連動ナビゲーションバーバー ▶ */}
+            {/* ◀ 連動ナビゲーションバー ▶ */}
             <div class="period-nav-bar">
               <button class="period-nav-btn" onClick={() => handleStepPeriod(-1)}>◀</button>
               <div class="period-nav-display">{currentNavText}</div>
@@ -596,7 +590,7 @@ function App() {
           </div>
         </div>
 
-        {/* 🎯 VISUAL GOAL & POSITION PANEL (バグフリー完全固定キー対応) */}
+        {/* 🎯 VISUAL GOAL & POSITION PANEL */}
         <div class="goal-panel">
           <div class="goal-header-row">
             <div class="goal-title-flex">
@@ -657,9 +651,11 @@ function App() {
         <div class={`view-container ${activeTab === 'calendar' ? 'active' : ''}`}>
           <div class="cal-header-container">
             <div class="cal-title-nav">
-              <button class="cal-nav-btn" onClick={handlePrevMonth}>◀ 前月</button>
+              {/* 🛠️ ここを修正：handlePrevMonth から handleCalendarMonthChange(-1) へ変更 */}
+              <button class="cal-nav-btn" onClick={() => handleCalendarMonthChange(-1)}>◀ 前月</button>
               <span class="cal-title-text">📅 {calYear}年 {calMonth}月</span>
-              <button class="cal-nav-btn" onClick={handleNextMonth}>次月 ▶</button>
+              {/* 🛠️ ここを修正：handleNextMonth から handleCalendarMonthChange(1) へ変更 */}
+              <button class="cal-nav-btn" onClick={() => handleCalendarMonthChange(1)}>次月 ▶</button>
             </div>
             <div class="cal-monthly-total">月間累計: {currentCalendarMonthTotal.toLocaleString()} 円</div>
           </div>

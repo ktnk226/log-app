@@ -168,7 +168,7 @@
     .tab-btn { display: flex; flex-direction: column; align-items: center; justify-content: center; background: transparent; border: none; color: var(--muted); gap: 4px; font-size: 10px; font-weight: 500; cursor: pointer; width: 60px; }
     .tab-btn.active { color: var(--accent); font-weight: 700; }
     
-    /* 🛠️ SVGアイコン用のカラー制御スタイルを追加 */
+    /* SVGアイコン用スタイル */
     .nav-icon { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; transition: color 0.2s; }
     .tab-btn.active .nav-icon { stroke: var(--accent); }
 
@@ -439,7 +439,7 @@ function App() {
       day: { total: daySummary.total_sales, real: daySummary.real_sales, que: daySummary.total_que, cnt: daySummary.total_cnt, pf: dayPf },
       week: { total: weekTotal, real: weekReal, que: weekQue, cnt: weekCnt, pf: weekPf },
       month: { total: monthTotal, real: monthReal, que: monthQue, cnt: monthCnt, pf: monthPf },
-      year: { total: yearTotal, real: yearReal, que: yearQue, cnt: yearCnt, pf: yearPf }
+      year: { total: yearTotal, real: yearReal, yearQue += que; yearCnt += cnt; pf: yearPf }
     };
   }, [vault, date, daySummary, periodMeta, sets]);
 
@@ -664,8 +664,7 @@ function App() {
               <div class="cloud-indicator unsaved" onClick={saveToiCloudJSON} style={{cursor:'pointer'}}>⚠️ 未保存 (保存)</div>
             ) : (
               <div class="cloud-indicator">☁️ iCloud同期完了</div>
-            )
-          )}
+            )}
           </div>
         </header>
 

@@ -167,6 +167,10 @@
     .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 68px; background: rgba(15,17,23,0.92); backdrop-filter: blur(20px); border-top: 1px solid var(--border); display: none; justify-content: space-around; align-items: center; z-index: 500; }
     .tab-btn { display: flex; flex-direction: column; align-items: center; justify-content: center; background: transparent; border: none; color: var(--muted); gap: 4px; font-size: 10px; font-weight: 500; cursor: pointer; width: 60px; }
     .tab-btn.active { color: var(--accent); font-weight: 700; }
+    
+    /* 🛠️ SVGアイコン用のカラー制御スタイルを追加 */
+    .nav-icon { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; transition: color 0.2s; }
+    .tab-btn.active .nav-icon { stroke: var(--accent); }
 
     .cloud-indicator { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: bold; padding: 6px 12px; border-radius: 20px; background: rgba(41,121,255,0.1); color: var(--blue); }
     .cloud-indicator.unsaved { background: rgba(255,214,0,0.1); color: var(--yellow); }
@@ -300,7 +304,6 @@ function App() {
     }));
   }, [date]);
 
-  // 🛠️ 復活ロジック：消えていた updateSet 関数を完全に定義・再配置
   const updateSet = useCallback((i, key, val) => {
     setIsDirty(true);
     const newSets = [...sets];
@@ -661,7 +664,8 @@ function App() {
               <div class="cloud-indicator unsaved" onClick={saveToiCloudJSON} style={{cursor:'pointer'}}>⚠️ 未保存 (保存)</div>
             ) : (
               <div class="cloud-indicator">☁️ iCloud同期完了</div>
-            )}
+            )
+          )}
           </div>
         </header>
 

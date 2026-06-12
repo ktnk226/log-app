@@ -439,7 +439,7 @@ function App() {
       day: { total: daySummary.total_sales, real: daySummary.real_sales, que: daySummary.total_que, cnt: daySummary.total_cnt, pf: dayPf },
       week: { total: weekTotal, real: weekReal, que: weekQue, cnt: weekCnt, pf: weekPf },
       month: { total: monthTotal, real: monthReal, que: monthQue, cnt: monthCnt, pf: monthPf },
-      year: { total: yearTotal, real: yearReal, yearQue += que; yearCnt += cnt; pf: yearPf }
+      year: { total: yearTotal, real: yearReal, que: yearQue, cnt: yearCnt, pf: yearPf }
     };
   }, [vault, date, daySummary, periodMeta, sets]);
 

@@ -378,9 +378,9 @@ function App() {
     const n = v => parseFloat(v) || 0;
     const [targetYear, targetMonth] = date.split('-').map(Number);
     
-    let monthTotal = 0; let monthReal = 0; let monthQue = 0; let monthCnt = 0;
-    let weekTotal = 0; let weekReal = 0; let weekQue = 0; let weekCnt = 0;
-    let yearTotal = 0; let yearReal = 0; let yearQue = 0; let yearCnt = 0;
+    let monthTotal = 0; let monthReal = 0; let monthQue = 0; let monthCnt = 0; let monthHours = 0;
+    let weekTotal = 0; let weekReal = 0; let weekQue = 0; let weekCnt = 0; let weekHours = 0;
+    let yearTotal = 0; let yearReal = 0; let yearQue = 0; let yearCnt = 0; let yearHours = 0;
 
     const createPfBuffer = () => ({ d: { s:0, c:0 }, u: { s:0, c:0 }, r: { s:0, c:0 }, m: { s:0, c:0 } });
     const weekPf = createPfBuffer();
@@ -397,20 +397,27 @@ function App() {
       const cnt = n(lastS.d_cnt_cum) + n(lastS.u_cnt_cum) + n(lastS.r_cnt_cum) + n(lastS.m_cnt_cum);
       const totalAmt = sales + que;
 
+      // 日ごとの稼働時間合計を算出
+      const dayCalced = sList.map((s, idx) => {
+        const p = sList[idx-1] || { d_cum:0, u_cum:0, r_cum:0, m_cum:0 };
+        return { dur: calcDuration(s.start, s.end) };
+      });
+      const dayTotalHours = dayCalced.reduce((a, s) => a + (s.dur ? s.dur.total : 0), 0);
+
       const getPfData = (k) => ({
         sales: n(lastS[k+'_cum']) + n(lastS[k+'_que_cum']),
         cnt: n(lastS[k+'_cnt_cum'])
       });
 
       if (y === targetYear) {
-        yearTotal += totalAmt; yearReal += sales; yearQue += que; yearCnt += cnt;
+        yearTotal += totalAmt; yearReal += sales; yearQue += que; yearCnt += cnt; yearHours += dayTotalHours;
         PLATFORMS.forEach(p => {
           const pData = getPfData(p.key);
           yearPf[p.key].s += pData.sales; yearPf[p.key].c += pData.cnt;
         });
 
         if (m === targetMonth) {
-          monthTotal += totalAmt; monthReal += sales; monthQue += que; monthCnt += cnt;
+          monthTotal += totalAmt; monthReal += sales; monthQue += que; monthCnt += cnt; monthHours += dayTotalHours;
           PLATFORMS.forEach(p => {
             const pData = getPfData(p.key);
             monthPf[p.key].s += pData.sales; monthPf[p.key].c += pData.cnt;
@@ -420,7 +427,7 @@ function App() {
 
       const thisDate = new Date(dKey);
       if (thisDate >= periodMeta.monRef && thisDate <= periodMeta.sunRef) {
-        weekTotal += totalAmt; weekReal += sales; weekQue += que; weekCnt += cnt;
+        weekTotal += totalAmt; weekReal += sales; weekQue += que; weekCnt += cnt; weekHours += dayTotalHours;
         PLATFORMS.forEach(p => {
           const pData = getPfData(p.key);
           weekPf[p.key].s += pData.sales; weekPf[p.key].c += pData.cnt;
@@ -436,10 +443,10 @@ function App() {
     });
 
     return { 
-      day: { total: daySummary.total_sales, real: daySummary.real_sales, que: daySummary.total_que, cnt: daySummary.total_cnt, pf: dayPf },
-      week: { total: weekTotal, real: weekReal, que: weekQue, cnt: weekCnt, pf: weekPf },
-      month: { total: monthTotal, real: monthReal, que: monthQue, cnt: monthCnt, pf: monthPf },
-      year: { total: yearTotal, real: yearReal, que: yearQue, cnt: yearCnt, pf: yearPf }
+      day: { total: daySummary.total_sales, real: daySummary.real_sales, que: daySummary.total_que, cnt: daySummary.total_cnt, hours: daySummary.total_h, pf: dayPf },
+      week: { total: weekTotal, real: weekReal, que: weekQue, cnt: weekCnt, hours: weekHours, pf: weekPf },
+      month: { total: monthTotal, real: monthReal, que: monthQue, cnt: monthCnt, hours: monthHours, pf: monthPf },
+      year: { total: yearTotal, real: yearReal, que: yearQue, cnt: yearCnt, hours: yearHours, pf: yearPf }
     };
   }, [vault, date, daySummary, periodMeta, sets]);
 
@@ -473,7 +480,10 @@ function App() {
       }
     }
 
-    return { ...data, goal, remain, percent, needCnt, dailyNorma };
+    // 期間内の総売上 ÷ 期間内の総時間で「時給換算」を計算
+    const periodJikyu = data.hours > 0 ? Math.round(data.total / data.hours) : 0;
+
+    return { ...data, goal, remain, percent, needCnt, dailyNorma, periodJikyu };
   }, [periodicAnalysis, period, periodicGoals, goalStorageKey, date]);
 
   const handleStepPeriod = (direction) => {
@@ -697,7 +707,9 @@ function App() {
             {period === 'day' && <div class="sum-item"><div class="sum-label">実働時間</div><div class="sum-val">{daySummary.total_h > 0 ? (() => { const hh = Math.floor(daySummary.total_h); const mm = Math.round((daySummary.total_h - hh) * 60); return hh+'h'+mm+'m'; })() : '-'}</div></div>}
           </div>
           <div class="sum-row">
-            <div class="sum-item"><div class="sum-label">{period === 'day' ? '今日の時給' : '期間内平均単価'}</div><div class="sum-val yellow">{period === 'day' ? (daySummary.total_h > 0 ? daySummary.jikyu.toLocaleString()+'円' : '-') : (activePeriodData.cnt > 0 ? Math.round(activePeriodData.total / activePeriodData.cnt).toLocaleString()+'円' : '-')}</div></div>
+            {/* 🛠️ 日・週・月・年すべてで共通の「時給換算（総売上÷実働時間）」を表示するように変更 */}
+            <div class="sum-item"><div class="sum-label">時給換算</div><div class="sum-val yellow">{activePeriodData.hours > 0 ? activePeriodData.periodJikyu.toLocaleString()+'円' : '-'}</div></div>
+            <div class="sum-item"><div class="sum-label">期間内平均単価</div><div class="sum-val">{activePeriodData.cnt > 0 ? Math.round(activePeriodData.total / activePeriodData.cnt).toLocaleString()+'円' : '-'}</div></div>
             <div class="sum-item"><div class="sum-label">単価(抜)</div><div class="sum-val">{activePeriodData.cnt > 0 ? Math.round(activePeriodData.real / activePeriodData.cnt).toLocaleString() : '-'}円</div></div>
           </div>
         </div>

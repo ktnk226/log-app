@@ -67,22 +67,20 @@
     .period-nav-btn:hover { color: #fff; }
     .period-nav-display { font-size: 13px; font-weight: 700; font-family: var(--font-mono); color: #fff; text-align: center; }
 
-    /* SUMMARY BAR */
+    /* SUMMARY BAR (4段・各2項目構成) */
     .summary-bar {
       background: var(--surface); border-bottom: 1px solid var(--border);
-      padding: 14px 24px; display: flex; flex-direction: column; gap: 10px;
+      padding: 12px 16px; display: flex; flex-direction: column; gap: 8px;
     }
-    .sum-row { display: flex; gap: 0; overflow-x: auto; }
-    .sum-row::-webkit-scrollbar { display: none; }
-    .sum-item { flex-shrink: 0; padding: 0 20px 0 0; border-right: 1px solid var(--border); margin-right: 20px; }
-    .sum-item:last-child { border-right: none; margin-right: 0; }
-    .sum-label { font-size: 10px; color: var(--muted); margin-bottom: 3px; }
-    .sum-val { font-size: 20px; font-family: var(--font-mono); font-weight: 700; }
+    .sum-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .sum-item { padding: 0; min-width: 0; }
+    .sum-label { font-size: 10px; color: var(--muted); margin-bottom: 2px; white-space: nowrap; }
+    .sum-val { font-size: 18px; font-family: var(--font-mono); font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .sum-val.accent { color: var(--accent); }
     .sum-val.green { color: var(--green); }
     .sum-val.yellow { color: var(--yellow); }
     .sum-val.teal { color: var(--teal); }
-    .sum-row + .sum-row { border-top: 1px solid var(--border); padding-top: 10px; }
+    .sum-row + .sum-row { border-top: 1px solid var(--border); padding-top: 8px; }
 
     /* VISUAL TARGET POSITION PANEL */
     .goal-panel { background: var(--surface); border-bottom: 1px solid var(--border); padding: 14px 24px; }
@@ -119,7 +117,6 @@
 
     .analysis-grid { display: grid; grid-template-columns: 1fr; gap: 12px; margin-bottom: 16px; }
     .analysis-card { background: linear-gradient(135deg, #11141d, #161a26); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; }
-    .analysis-card-title { font-size: 12px; font-weight: bold; color: var(--muted2); margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
 
     .set-card { background: rgba(255,255,255,0.02); border: 1.5px solid var(--border); border-radius: var(--radius); margin-bottom: 14px; overflow: hidden; }
     .set-header { padding: 14px 18px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; user-select: none; }
@@ -136,6 +133,14 @@
     .stamp-btn { padding: 0 12px; background: var(--accent); color: #fff; border-radius: 6px; font-size: 11px; font-weight: 900; border: none; cursor: pointer; min-height: 42px; }
     .stamp-btn.secondary { background: rgba(255,255,255,0.15); }
     .time-duration { font-size: 11px; color: var(--teal); font-family: var(--font-mono); margin-top: 4px; }
+
+    .platform-block { border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px; margin-bottom: 10px; }
+    .platform-title { font-weight: 700; font-size: 13px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+    .diff-badge { font-size: 11px; font-family: var(--font-mono); opacity: 0.9; }
+    .pf-inputs { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+
+    .del-btn { width: 100%; padding: 10px; background: rgba(255,50,50,0.15); color: #ff5555; border: 1px solid rgba(255,50,50,0.3); border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+    .add-btn { width: 100%; padding: 14px; background: rgba(255,255,255,0.05); color: #fff; border: 1px dashed var(--border2); border-radius: var(--radius); font-weight: bold; cursor: pointer; font-size: 14px; }
 
     .log-box { background: #000; border: 1px solid var(--border); border-radius: var(--radius); margin-top: 14px; padding: 16px; font-family: var(--font-mono); font-size: 12px; white-space: pre-wrap; line-height: 1.7; color: #ccc; }
     .copy-btn { width: 100%; margin-top: 10px; padding: 12px; background: var(--green); color: #000; font-weight: bold; border-radius: 8px; border: none; cursor: pointer; font-size: 14px; }
@@ -168,7 +173,6 @@
     .tab-btn { display: flex; flex-direction: column; align-items: center; justify-content: center; background: transparent; border: none; color: var(--muted); gap: 4px; font-size: 10px; font-weight: 500; cursor: pointer; width: 60px; }
     .tab-btn.active { color: var(--accent); font-weight: 700; }
     
-    /* SVGアイコン用スタイル */
     .nav-icon { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; transition: color 0.2s; }
     .tab-btn.active .nav-icon { stroke: var(--accent); }
 
@@ -348,7 +352,7 @@ function App() {
     const total_sales = n(last.d_cum) + n(last.u_cum) + n(last.r_cum) + n(last.m_cum);
     const total_que   = n(last.d_que_cum) + n(last.u_que_cum) + n(last.r_que_cum) + n(last.m_que_cum);
     const total_cnt   = n(last.d_cnt_cum) + n(last.u_cnt_cum) + n(last.r_cnt_cum) + n(last.m_cnt_cum);
-    const total_km     = n(last.km_cum);
+    const total_km    = n(last.km_cum);
     const total_h     = calced.reduce((a, s) => a + (s.dur ? s.dur.total : 0), 0);
     return { total_sales: total_sales + total_que, real_sales: total_sales, total_que, total_cnt, total_km, total_h, jikyu: total_h > 0 ? Math.round((total_sales + total_que) / total_h) : 0 };
   }, [sets, calced]);
@@ -397,9 +401,7 @@ function App() {
       const cnt = n(lastS.d_cnt_cum) + n(lastS.u_cnt_cum) + n(lastS.r_cnt_cum) + n(lastS.m_cnt_cum);
       const totalAmt = sales + que;
 
-      // 日ごとの稼働時間合計を算出
       const dayCalced = sList.map((s, idx) => {
-        const p = sList[idx-1] || { d_cum:0, u_cum:0, r_cum:0, m_cum:0 };
         return { dur: calcDuration(s.start, s.end) };
       });
       const dayTotalHours = dayCalced.reduce((a, s) => a + (s.dur ? s.dur.total : 0), 0);
@@ -456,7 +458,8 @@ function App() {
     const remain = goal > 0 ? goal - data.total : 0;
     const percent = goal > 0 ? Math.min(Math.round((data.total / goal) * 100), 100) : 0;
     
-    const tanka = data.cnt > 0 ? Math.round(data.real / data.cnt) : 0;
+    const tanka = data.cnt > 0 ? Math.round(data.total / data.cnt) : 0;
+    const realTanka = data.cnt > 0 ? Math.round(data.real / data.cnt) : 0;
     const needCnt = (remain > 0 && tanka > 0) ? Math.ceil(remain / tanka) : 0;
 
     let dailyNorma = 0;
@@ -480,10 +483,10 @@ function App() {
       }
     }
 
-    // 期間内の総売上 ÷ 期間内の総時間で「時給換算」を計算
     const periodJikyu = data.hours > 0 ? Math.round(data.total / data.hours) : 0;
+    const uph = data.hours > 0 ? (data.cnt / data.hours).toFixed(1) : '0.0';
 
-    return { ...data, goal, remain, percent, needCnt, dailyNorma, periodJikyu };
+    return { ...data, goal, remain, percent, needCnt, dailyNorma, periodJikyu, tanka, realTanka, uph };
   }, [periodicAnalysis, period, periodicGoals, goalStorageKey, date]);
 
   const handleStepPeriod = (direction) => {
@@ -697,20 +700,32 @@ function App() {
           </div>
         )}
 
-        {/* 📊 LIVE SUMMARY HEADER */}
+        {/* 📊 LIVE SUMMARY HEADER (4段・各2項目構成) */}
         <div class="summary-bar">
+          {/* 【1段目】実質売上 / クエ合計 */}
           <div class="sum-row">
-            <div class="sum-item"><div class="sum-label">{periodLabels[period]}総売上</div><div class="sum-val accent">{activePeriodData.total.toLocaleString()}円</div></div>
-            <div class="sum-item"><div class="sum-label">実質売上</div><div class="sum-val">{activePeriodData.real.toLocaleString()}円</div></div>
+            <div class="sum-item"><div class="sum-label">実質売上</div><div class="sum-val accent">{activePeriodData.real.toLocaleString()}円</div></div>
             <div class="sum-item"><div class="sum-label">クエ合計</div><div class="sum-val teal">{activePeriodData.que.toLocaleString()}円</div></div>
-            <div class="sum-item"><div class="sum-label">件数</div><div class="sum-val green">{activePeriodData.cnt}件</div></div>
-            {period === 'day' && <div class="sum-item"><div class="sum-label">実働時間</div><div class="sum-val">{daySummary.total_h > 0 ? (() => { const hh = Math.floor(daySummary.total_h); const mm = Math.round((daySummary.total_h - hh) * 60); return hh+'h'+mm+'m'; })() : '-'}</div></div>}
           </div>
+          {/* 【2段目】件数 / UPH */}
           <div class="sum-row">
-            {/* 🛠️ 日・週・月・年すべてで共通の「時給換算（総売上÷実働時間）」を表示するように変更 */}
+            <div class="sum-item"><div class="sum-label">件数</div><div class="sum-val green">{activePeriodData.cnt}件</div></div>
+            <div class="sum-item"><div class="sum-label">UPH</div><div class="sum-val">{activePeriodData.uph}</div></div>
+          </div>
+          {/* 【3段目】1件単価 / クエ抜き単価 */}
+          <div class="sum-row">
+            <div class="sum-item"><div class="sum-label">1件単価</div><div class="sum-val">{activePeriodData.cnt > 0 ? activePeriodData.tanka.toLocaleString()+'円' : '-'}</div></div>
+            <div class="sum-item"><div class="sum-label">クエ抜き単価</div><div class="sum-val">{activePeriodData.cnt > 0 ? activePeriodData.realTanka.toLocaleString()+'円' : '-'}</div></div>
+          </div>
+          {/* 【4段目】実働時間 / 時給換算 */}
+          <div class="sum-row">
+            <div class="sum-item">
+              <div class="sum-label">実働時間</div>
+              <div class="sum-val">
+                {activePeriodData.hours > 0 ? (() => { const hh = Math.floor(activePeriodData.hours); const mm = Math.round((activePeriodData.hours - hh) * 60); return hh+'h'+mm+'m'; })() : '-'}
+              </div>
+            </div>
             <div class="sum-item"><div class="sum-label">時給換算</div><div class="sum-val yellow">{activePeriodData.hours > 0 ? activePeriodData.periodJikyu.toLocaleString()+'円' : '-'}</div></div>
-            <div class="sum-item"><div class="sum-label">期間内平均単価</div><div class="sum-val">{activePeriodData.cnt > 0 ? Math.round(activePeriodData.total / activePeriodData.cnt).toLocaleString()+'円' : '-'}</div></div>
-            <div class="sum-item"><div class="sum-label">単価(抜)</div><div class="sum-val">{activePeriodData.cnt > 0 ? Math.round(activePeriodData.real / activePeriodData.cnt).toLocaleString() : '-'}円</div></div>
           </div>
         </div>
 
@@ -925,7 +940,7 @@ function App() {
             <svg class="nav-icon" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg><span>記録入力</span>
           </button>
           <button class={`tab-btn ${activeTab === 'settings' ? 'active' : ''}`} onClick={() => setActiveTab('settings')}>
-            <svg class="nav-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg><span>設定</span>
+            <svg class="nav-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg><span>設定</span>
           </button>
         </nav>
       </div>

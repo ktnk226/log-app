@@ -118,7 +118,7 @@
     .analysis-grid { display: grid; grid-template-columns: 1fr; gap: 12px; margin-bottom: 16px; }
     .analysis-card { background: linear-gradient(135deg, #11141d, #161a26); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; }
 
-    /* SET CARD (ヘッダー領域をゆったりに拡張) */
+    /* SET CARD */
     .set-card { background: rgba(255,255,255,0.02); border: 1.5px solid var(--border); border-radius: var(--radius); margin-bottom: 14px; overflow: hidden; }
     .set-header { padding: 16px 18px; display: flex; flex-direction: column; gap: 6px; cursor: pointer; user-select: none; }
     .set-header:hover { background: rgba(255,255,255,0.02); }
@@ -780,10 +780,10 @@ function App() {
           )}
         </div>
 
-        {/* ── TAB CONTENT 1: DASHBOARD (「日」選択時は記録フォームを統合) ── */}
+        {/* ── TAB CONTENT 1: DASHBOARD ── */}
         <div class={`view-container ${activeTab === 'dashboard' ? 'active' : ''}`}>
           
-          {/* 【日モード選択時のみ表示される記録入力フォーム】 */}
+          {/* 【日モード選択時：基本概要設定】 */}
           {period === 'day' && (
             <>
               <div class="section-title">📝 本日の基本概要設定</div>
@@ -792,14 +792,43 @@ function App() {
                 <div><label>天気状況</label><select value={weather} onChange={e => updateDayField('weather', e.target.value)}>{WEATHERS.map(w => <option key={w}>{w}</option>)}</select></div>
                 <div><label>総走行距離</label><div style={{padding:'11px 12px', background:'rgba(255,255,255,0.02)', border:'1.5px solid var(--border)', borderRadius:'var(--radius-sm)', fontSize:'14px', fontFamily:'var(--font-mono)'}}>{daySummary.total_km} km</div></div>
               </div>
+            </>
+          )}
 
+          {/* 【プラットフォーム別内訳（1件単価を追加して入力欄の上に配置）】 */}
+          <div class="section-title">📊 {periodLabels[period]}のプラットフォーム別内訳</div>
+          <div class="analysis-grid">
+            <div class="analysis-card">
+              <div style={{display:'flex', flexDirection:'column', gap:'12px'}}>
+                {PLATFORMS.map(p => {
+                  const targetPf = activePeriodData.pf?.[p.key] || { s: 0, c: 0 };
+                  const pfTanka = targetPf.c > 0 ? Math.round(targetPf.s / targetPf.c) : 0;
+                  return (
+                    <div key={p.key} style={{display:'flex', justifycontent:'space-between', alignItems:'center', fontSize:'14px', borderBottom:'1px solid var(--border)', paddingBottom:'6px'}}>
+                      <span style={{color: p.color, fontWeight:'bold', display:'flex', alignItems:'center', gap:'6px'}}>
+                        <span>{p.label}</span>
+                      </span>
+                      <span class="font-mono" style={{fontWeight: '700'}}>
+                        {targetPf.s.toLocaleString()} 円 
+                        <span style={{fontSize:'11px', color:'var(--muted2)', marginLeft:'6px'}}>{targetPf.c} 件</span>
+                        <span style={{fontSize:'11px', color:'var(--teal)', marginLeft:'8px'}}>(単価: {pfTanka > 0 ? pfTanka.toLocaleString() + '円' : '-'})</span>
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+
+          {/* 【日モード選択時：稼働セットごとの詳細入力】 */}
+          {period === 'day' && (
+            <>
               <div class="section-title">⏱️ 稼働セットごとの詳細入力</div>
               {calced.map((s, i) => {
                 const durText = s.dur ? `${s.dur.h > 0 ? s.dur.h + '時間' : ''}${s.dur.m}分` : '時間未入力';
 
                 return (
                   <div key={i} class="set-card">
-                    {/* ヘッダー領域（折りたたみ時も時間・件数・売上・時給・単価を表示） */}
                     <div class="set-header" onClick={() => toggleOpen(i)}>
                       <div class="set-header-top">
                         <div class="set-title">
@@ -810,7 +839,6 @@ function App() {
                         <span class={`chevron ${s.open ? 'open' : ''}`}>▼</span>
                       </div>
 
-                      {/* 概要・実績表示エリア */}
                       <div class="set-summary-row1">
                         {s.sc} 件 / {s.sp.toLocaleString()} 円
                       </div>
@@ -881,27 +909,6 @@ function App() {
             </>
           )}
 
-          {/* 【プラットフォーム別内訳（全期間共通）】 */}
-          <div class="section-title">📊 {periodLabels[period]}のプラットフォーム別内訳</div>
-          <div class="analysis-grid">
-            <div class="analysis-card">
-              <div style={{display:'flex', flexDirection:'column', gap:'12px'}}>
-                {PLATFORMS.map(p => {
-                  const targetPf = activePeriodData.pf?.[p.key] || { s: 0, c: 0 };
-                  return (
-                    <div key={p.key} style={{display:'flex', justifyContent:'space-between', alignItems:'center', fontSize:'14px', borderBottom:'1px solid var(--border)', paddingBottom:'6px'}}>
-                      <span style={{color: p.color, fontWeight:'bold', display:'flex', alignItems:'center', gap:'6px'}}>
-                        <span>{p.label}</span>
-                      </span>
-                      <span class="font-mono" style={{fontWeight: '700'}}>
-                        {targetPf.s.toLocaleString()} 円 <span style={{fontSize:'11px', color:'var(--muted2)', marginLeft:'6px'}}>{targetPf.c} 件</span>
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
         </div>
 
         {/* ── TAB CONTENT 2: CALENDAR ── */}

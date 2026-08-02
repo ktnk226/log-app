@@ -170,7 +170,7 @@
     .cal-day-amt { font-size: 12px; font-family: var(--font-mono); font-weight: 700; text-align: right; color: var(--accent); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: auto; padding-top: 4px; width: 100%; }
 
     .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 68px; background: rgba(15,17,23,0.92); backdrop-filter: blur(20px); border-top: 1px solid var(--border); display: none; justify-content: space-around; align-items: center; z-index: 500; }
-    .tab-btn { display: flex; flex-direction: column; align-items: center; justify-content: center; background: transparent; border: none; color: var(--muted); gap: 4px; font-size: 10px; font-weight: 500; cursor: pointer; width: 60px; }
+    .tab-btn { display: flex; flex-direction: column; align-items: center; justify-content: center; background: transparent; border: none; color: var(--muted); gap: 4px; font-size: 10px; font-weight: 500; cursor: pointer; width: 80px; }
     .tab-btn.active { color: var(--accent); font-weight: 700; }
     
     .nav-icon { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; transition: color 0.2s; }
@@ -401,7 +401,7 @@ function App() {
       const cnt = n(lastS.d_cnt_cum) + n(lastS.u_cnt_cum) + n(lastS.r_cnt_cum) + n(lastS.m_cnt_cum);
       const totalAmt = sales + que;
 
-      const dayCalced = sList.map((s, idx) => {
+      const dayCalced = sList.map((s) => {
         return { dur: calcDuration(s.start, s.end) };
       });
       const dayTotalHours = dayCalced.reduce((a, s) => a + (s.dur ? s.dur.total : 0), 0);
@@ -512,7 +512,8 @@ function App() {
       setIsDirty(true);
       setVault(prev => ({ ...prev, [targetDate]: { weather: '晴', goalAmt: 0, sets: [EMPTY_SET()] } }));
     } else { setDate(targetDate); }
-    setActiveTab('entries');
+    setActiveTab('dashboard');
+    setPeriod('day');
   };
 
   const deleteSet = (i) => {
@@ -660,7 +661,6 @@ function App() {
         <nav class="nav-menu">
           <button class={`nav-item ${activeTab === 'dashboard' ? 'active' : ''}`} onClick={() => setActiveTab('dashboard')}>📊 ホーム</button>
           <button class={`nav-item ${activeTab === 'calendar' ? 'active' : ''}`} onClick={() => setActiveTab('calendar')}>📅 カレンダー</button>
-          <button class={`nav-item ${activeTab === 'entries' ? 'active' : ''}`} onClick={() => setActiveTab('entries')}>📝 記録入力</button>
           <button class={`nav-item ${activeTab === 'settings' ? 'active' : ''}`} onClick={() => setActiveTab('settings')}>⚙️ 設定・データ</button>
         </nav>
       </aside>
@@ -768,8 +768,97 @@ function App() {
           )}
         </div>
 
-        {/* ── TAB CONTENT 1: DASHBOARD ── */}
+        {/* ── TAB CONTENT 1: DASHBOARD (「日」選択時は記録フォームを統合) ── */}
         <div class={`view-container ${activeTab === 'dashboard' ? 'active' : ''}`}>
+          
+          {/* 【日モード選択時のみ表示される記録入力フォーム】 */}
+          {period === 'day' && (
+            <>
+              <div class="section-title">📝 本日の基本概要設定</div>
+              <div class="card grid-3">
+                <div><label>選択中営業日</label><input type="date" value={date} onChange={e => setDate(e.target.value)} style={{borderColor:'var(--teal)'}} /></div>
+                <div><label>天気状況</label><select value={weather} onChange={e => updateDayField('weather', e.target.value)}>{WEATHERS.map(w => <option key={w}>{w}</option>)}</select></div>
+                <div><label>総走行距離</label><div style={{padding:'11px 12px', background:'rgba(255,255,255,0.02)', border:'1.5px solid var(--border)', borderRadius:'var(--radius-sm)', fontSize:'14px', fontFamily:'var(--font-mono)'}}>{daySummary.total_km} km</div></div>
+              </div>
+
+              <div class="section-title">⏱️ 稼働セットごとの詳細入力</div>
+              {calced.map((s, i) => {
+                const sp = s.d_p + s.u_p + s.r_p + s.m_p; const sc = s.d_c + s.u_c + s.r_c + s.m_c;
+                return (
+                  <div key={i} class="set-card">
+                    <div class="set-header" onClick={() => toggleOpen(i)}>
+                      <div class="set-title">
+                        <span>SET {i+1}</span>
+                        {s.start && !s.end && <span class="set-badge active">稼働中</span>}
+                        {s.start && s.end && <span class="set-badge done">完了</span>}
+                      </div>
+                      <div style={{display:'flex', alignItems:'center', gap:'10px'}}>
+                        {(sp > 0 || sc > 0) && <span class="set-summary">{sc}件 / {sp.toLocaleString()}円</span>}
+                        <span class={`chevron ${s.open ? 'open' : ''}`}>▼</span>
+                      </div>
+                    </div>
+
+                    {s.open && (
+                      <div class="set-body">
+                        <div class="time-row">
+                          <div>
+                            <label>開始時刻</label>
+                            <div class="time-field">
+                              <input type="time" value={sets[i].start} onChange={e => updateSet(i,'start',e.target.value)} />
+                              <button class="stamp-btn" onClick={() => updateSet(i,'start',getNow())}>NOW</button>
+                            </div>
+                          </div>
+                          <div>
+                            <label>終了時刻</label>
+                            <div class="time-field">
+                              <input type="time" value={sets[i].end} onChange={e => updateSet(i,'end',e.target.value)} />
+                              <button class="stamp-btn secondary" onClick={() => updateSet(i,'end',getNow())}>FIN</button>
+                            </div>
+                          </div>
+                        </div>
+                        {s.dur && <div class="time-duration">セット稼働時間: {s.dur.h > 0 ? `${s.dur.h}時間` : ''}{s.dur.m}分</div>}
+
+                        {PLATFORMS.map(p => (
+                          <div key={p.key} class="platform-block" style={{background: p.color+'05', borderColor: p.color+'20'}}>
+                            <div class="platform-title" style={{color: p.color}}>
+                              <span>{p.label}</span>
+                              <span class="diff-badge">+{s[p.key+'_p'].toLocaleString()}円 / {s[p.key+'_c']}件</span>
+                            </div>
+                            <div class="pf-inputs">
+                              <div><label>売上(累積)</label><input type="number" placeholder="0" value={sets[i][p.key+'_cum'] || ''} onChange={e => updateSet(i, p.key+'_cum', e.target.value)} /></div>
+                              <div><label>件数(累積)</label><input type="number" placeholder="0" value={sets[i][p.key+'_cnt_cum'] || ''} onChange={e => updateSet(i, p.key+'_cnt_cum', e.target.value)} /></div>
+                              <div><label>クエ累積</label><input type="number" placeholder="0" value={sets[i][p.key+'_que_cum'] || ''} onChange={e => updateSet(i, p.key+'_que_cum', e.target.value)} /></div>
+                            </div>
+                          </div>
+                        ))}
+
+                        <div class="grid-2" style={{margin: '12px 0'}}>
+                          <div><label>走行距離累積 (km)</label><input type="number" placeholder="0" value={sets[i].km_cum} onChange={e => updateSet(i,'km_cum',e.target.value)} /></div>
+                          <div><label>走行距離</label><div style={{paddingTop: '12px', color: s.km_p > 0 ? 'var(--teal)' : 'var(--muted)', fontWeight:'bold', fontFamily:'var(--font-mono)'}}>{s.km_p > 0 ? `+${s.km_p} km` : '-'}</div></div>
+                        </div>
+
+                        <div style={{marginTop:'10px'}}><label>戦術メモ</label><textarea rows="2" placeholder="メモ記入" value={sets[i].memo} onChange={e => updateSet(i,'memo',e.target.value)} /></div>
+                        {sets.length > 1 && <button class="del-btn" onClick={() => deleteSet(i)}>SET {i+1} を削除</button>}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+              <button class="add-btn" onClick={addPeriodicSet}>＋ 次のセットを追加</button>
+
+              <div style={{marginTop:'24px', marginBottom:'24px'}}>
+                <button class="gen-btn" onClick={() => setShowLog(!showLog)}>{showLog ? '報告ログを閉じる' : '🚀 V5報告ログを生成'}</button>
+                {showLog && (
+                  <div class="log-box">
+                    <pre>{generateLog()}</pre>
+                    <button class="copy-btn" onClick={() => { navigator.clipboard.writeText(generateLog()); alert('コピー完了！'); }}>ログをコピーする</button>
+                  </div>
+                )}
+              </div>
+            </>
+          )}
+
+          {/* 【プラットフォーム別内訳（全期間共通）】 */}
           <div class="section-title">📊 {periodLabels[period]}のプラットフォーム別内訳</div>
           <div class="analysis-grid">
             <div class="analysis-card">
@@ -790,7 +879,6 @@ function App() {
               </div>
             </div>
           </div>
-          <button class="gen-btn" style={{marginTop:'10px'}} onClick={() => setActiveTab('entries')}>📝 この営業日のデータを編集する</button>
         </div>
 
         {/* ── TAB CONTENT 2: CALENDAR ── */}
@@ -808,7 +896,7 @@ function App() {
             <div class="cal-grid">
               {['月','火','水','木','金','土','日'].map(w => <div key={w} class="cal-head-cell">{w}</div>)}
               {calendarDays.map((c, idx) => c.empty ? <div key={idx} class="cal-day-cell empty" /> : (
-                <div key={idx} class={`cal-day-cell ${date === c.dateKey ? 'selected' : ''}`} onClick={() => { setDate(c.dateKey); setActiveTab('dashboard'); }}>
+                <div key={idx} class={`cal-day-cell ${date === c.dateKey ? 'selected' : ''}`} onClick={() => { setDate(c.dateKey); setPeriod('day'); setActiveTab('dashboard'); }}>
                   <span class="cal-day-num current-month">{c.dayNum}</span>
                   {c.amt > 0 && <span class="cal-day-amt">¥{c.amt.toLocaleString()}</span>}
                 </div>
@@ -819,7 +907,7 @@ function App() {
           <div class="section-title">📜 過去の営業日データ履歴</div>
           {historyList.length === 0 ? <div style={{textAlign:'center', padding:'20px', fontSize:'13px', color:'var(--muted)'}}>データがありません</div> : (
             historyList.map(h => (
-              <div key={h.dateKey} class="history-card" style={{borderColor: date === h.dateKey ? 'var(--accent)' : ''}} onClick={() => { setDate(h.dateKey); setActiveTab('dashboard'); }}>
+              <div key={h.dateKey} class="history-card" style={{borderColor: date === h.dateKey ? 'var(--accent)' : ''}} onClick={() => { setDate(h.dateKey); setPeriod('day'); setActiveTab('dashboard'); }}>
                 <span class="history-date">{h.dateKey.replace(/-/g,'/')}</span>
                 <span class="history-summary">{h.count} 件 / {h.total.toLocaleString()} 円</span>
               </div>
@@ -827,92 +915,7 @@ function App() {
           )}
         </div>
 
-        {/* ── TAB CONTENT 3: ENTRIES ── */}
-        <div class={`view-container ${activeTab === 'entries' ? 'active' : ''}`}>
-          <div class="section-title">基本概要設定</div>
-          <div class="card grid-3">
-            <div><label>選択中営業日</label><input type="date" value={date} onChange={e => setDate(e.target.value)} style={{borderColor:'var(--teal)'}} /></div>
-            <div><label>天気状況</label><select value={weather} onChange={e => updateDayField('weather', e.target.value)}>{WEATHERS.map(w => <option key={w}>{w}</option>)}</select></div>
-            <div><label>総走行距離</label><div style={{padding:'11px 12px', background:'rgba(255,255,255,0.02)', border:'1.5px solid var(--border)', borderRadius:'var(--radius-sm)', fontSize:'14px', fontFamily:'var(--font-mono)'}}>{daySummary.total_km} km</div></div>
-          </div>
-
-          <div class="section-title">稼働セットごとの詳細入力 (4時起点自動保存)</div>
-          {calced.map((s, i) => {
-            const sp = s.d_p + s.u_p + s.r_p + s.m_p; const sc = s.d_c + s.u_c + s.r_c + s.m_c;
-            return (
-              <div key={i} class="set-card">
-                <div class="set-header" onClick={() => toggleOpen(i)}>
-                  <div class="set-title">
-                    <span>SET {i+1}</span>
-                    {s.start && !s.end && <span class="set-badge active">稼働中</span>}
-                    {s.start && s.end && <span class="set-badge done">完了</span>}
-                  </div>
-                  <div style={{display:'flex', alignItems:'center', gap:'10px'}}>
-                    {(sp > 0 || sc > 0) && <span class="set-summary">{sc}件 / {sp.toLocaleString()}円</span>}
-                    <span class={`chevron ${s.open ? 'open' : ''}`}>▼</span>
-                  </div>
-                </div>
-
-                {s.open && (
-                  <div class="set-body">
-                    <div class="time-row">
-                      <div>
-                        <label>開始時刻</label>
-                        <div class="time-field">
-                          <input type="time" value={sets[i].start} onChange={e => updateSet(i,'start',e.target.value)} />
-                          <button class="stamp-btn" onClick={() => updateSet(i,'start',getNow())}>NOW</button>
-                        </div>
-                      </div>
-                      <div>
-                        <label>終了時刻</label>
-                        <div class="time-field">
-                          <input type="time" value={sets[i].end} onChange={e => updateSet(i,'end',e.target.value)} />
-                          <button class="stamp-btn secondary" onClick={() => updateSet(i,'end',getNow())}>FIN</button>
-                        </div>
-                      </div>
-                    </div>
-                    {s.dur && <div class="time-duration">セット稼働時間: {s.dur.h > 0 ? `${s.dur.h}時間` : ''}{s.dur.m}分</div>}
-
-                    {PLATFORMS.map(p => (
-                      <div key={p.key} class="platform-block" style={{background: p.color+'05', borderColor: p.color+'20'}}>
-                        <div class="platform-title" style={{color: p.color}}>
-                          <span>{p.label}</span>
-                          <span class="diff-badge">+{s[p.key+'_p'].toLocaleString()}円 / {s[p.key+'_c']}件</span>
-                        </div>
-                        <div class="pf-inputs">
-                          <div><label>売上(累積)</label><input type="number" placeholder="0" value={sets[i][p.key+'_cum'] || ''} onChange={e => updateSet(i, p.key+'_cum', e.target.value)} /></div>
-                          <div><label>件数(累積)</label><input type="number" placeholder="0" value={sets[i][p.key+'_cnt_cum'] || ''} onChange={e => updateSet(i, p.key+'_cnt_cum', e.target.value)} /></div>
-                          <div><label>クエ累積</label><input type="number" placeholder="0" value={sets[i][p.key+'_que_cum'] || ''} onChange={e => updateSet(i, p.key+'_que_cum', e.target.value)} /></div>
-                        </div>
-                      </div>
-                    ))}
-
-                    <div class="grid-2" style={{margin: '12px 0'}}>
-                      <div><label>走行距離累積 (km)</label><input type="number" placeholder="0" value={sets[i].km_cum} onChange={e => updateSet(i,'km_cum',e.target.value)} /></div>
-                      <div><label>走行距離</label><div style={{paddingTop: '12px', color: s.km_p > 0 ? 'var(--teal)' : 'var(--muted)', fontWeight:'bold', fontFamily:'var(--font-mono)'}}>{s.km_p > 0 ? `+${s.km_p} km` : '-'}</div></div>
-                    </div>
-
-                    <div style={{marginTop:'10px'}}><label>戦術メモ</label><textarea rows="2" placeholder="メモ記入" value={sets[i].memo} onChange={e => updateSet(i,'memo',e.target.value)} /></div>
-                    {sets.length > 1 && <button class="del-btn" onClick={() => deleteSet(i)}>SET {i+1} を削除</button>}
-                  </div>
-                )}
-              </div>
-            );
-          })}
-          <button class="add-btn" onClick={addPeriodicSet}>＋ 次のセットを追加</button>
-
-          <div style={{marginTop:'24px'}}>
-            <button class="gen-btn" onClick={() => setShowLog(!showLog)}>{showLog ? '入力に戻る' : '🚀 V5報告ログを生成'}</button>
-            {showLog && (
-              <div class="log-box">
-                <pre>{generateLog()}</pre>
-                <button class="copy-btn" onClick={() => { navigator.clipboard.writeText(generateLog()); alert('コピー完了！'); }}>ログをコピーする</button>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* ── TAB CONTENT 4: SETTINGS ── */}
+        {/* ── TAB CONTENT 3: SETTINGS ── */}
         <div class={`view-container ${activeTab === 'settings' ? 'active' : ''}`}>
           <div class="section-title">☁️ iCloud Drive 連動</div>
           <div class="card" style={{borderColor:'var(--blue)', background:'rgba(41,121,255,0.02)'}}>
@@ -928,7 +931,7 @@ function App() {
           </div>
         </div>
 
-        {/* BOTTOM NAV TABS BAR */}
+        {/* BOTTOM NAV TABS BAR (3タブ構成) */}
         <nav class="bottom-nav">
           <button class={`tab-btn ${activeTab === 'dashboard' ? 'active' : ''}`} onClick={() => setActiveTab('dashboard')}>
             <svg class="nav-icon" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><span>ホーム</span>
@@ -936,11 +939,8 @@ function App() {
           <button class={`tab-btn ${activeTab === 'calendar' ? 'active' : ''}`} onClick={() => setActiveTab('calendar')}>
             <svg class="nav-icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="18" y2="10"/></svg><span>カレンダー</span>
           </button>
-          <button class={`tab-btn ${activeTab === 'entries' ? 'active' : ''}`} onClick={() => setActiveTab('entries')}>
-            <svg class="nav-icon" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg><span>記録入力</span>
-          </button>
           <button class={`tab-btn ${activeTab === 'settings' ? 'active' : ''}`} onClick={() => setActiveTab('settings')}>
-            <svg class="nav-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg><span>設定</span>
+            <svg class="nav-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg><span>設定</span>
           </button>
         </nav>
       </div>

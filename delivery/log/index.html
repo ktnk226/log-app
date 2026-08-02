@@ -82,14 +82,19 @@
     .sum-val.teal { color: var(--teal); }
     .sum-row + .sum-row { border-top: 1px solid var(--border); padding-top: 8px; }
 
-    /* VISUAL TARGET POSITION PANEL */
+    /* VISUAL TARGET POSITION PANEL (目標金額・件数の2項目対応) */
     .goal-panel { background: var(--surface); border-bottom: 1px solid var(--border); padding: 14px 24px; }
-    .goal-header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .goal-inputs-container { display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
+    .goal-input-row { display: flex; justify-content: space-between; align-items: center; }
     .goal-title-flex { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted2); }
     .goal-input-wrapper { display: flex; align-items: center; gap: 4px; }
-    .goal-input { font-family: var(--font-mono); font-size: 14px; font-weight: 700; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; color: var(--text); padding: 4px 8px; width: 100px; text-align: right; }
-    .progress-track { width: 100%; height: 8px; background: rgba(255,255,255,0.04); border-radius: 4px; overflow: hidden; margin-bottom: 6px; border: 1px solid var(--border); }
+    .goal-input { font-family: var(--font-mono); font-size: 14px; font-weight: 700; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; color: var(--text); padding: 4px 8px; width: 90px; text-align: right; }
+    
+    .progress-section { margin-top: 6px; }
+    .progress-track { width: 100%; height: 8px; background: rgba(255,255,255,0.04); border-radius: 4px; overflow: hidden; margin-bottom: 4px; border: 1px solid var(--border); }
     .progress-bar { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); transition: width 0.3s ease; }
+    .progress-bar.green { background: linear-gradient(90deg, var(--teal), var(--green)); }
+    
     .goal-footer-row { display: flex; justify-content: space-between; font-size: 12px; font-family: var(--font-mono); flex-direction: column; gap: 4px; }
     .goal-footer-top { display: flex; justify-content: space-between; width: 100%; }
     .goal-footer-bottom { font-size: 11px; color: var(--teal); text-align: right; width: 100%; }
@@ -332,8 +337,14 @@ function App() {
     return `Y-${y}`;
   }, [date, period]);
 
-  const updatePeriodicGoal = (val) => {
-    setPeriodicGoals(prev => ({ ...prev, [goalStorageKey]: Number(val) }));
+  const updatePeriodicGoal = (field, val) => {
+    setPeriodicGoals(prev => {
+      const currentGoal = prev[goalStorageKey] || {};
+      const updated = typeof currentGoal === 'object' && currentGoal !== null 
+        ? { ...currentGoal, [field]: Number(val) }
+        : { amt: Number(currentGoal || 0), cnt: 0, [field]: Number(val) };
+      return { ...prev, [goalStorageKey]: updated };
+    });
   };
 
   const calced = useMemo(() => {
@@ -466,39 +477,51 @@ function App() {
 
   const activePeriodData = useMemo(() => {
     const data = periodicAnalysis[period];
-    const goal = periodicGoals[goalStorageKey] || 0;
-    const remain = goal > 0 ? goal - data.total : 0;
-    const percent = goal > 0 ? Math.min(Math.round((data.total / goal) * 100), 100) : 0;
+    const rawGoal = periodicGoals[goalStorageKey];
     
+    // オブジェクト/数値のパース互換処理
+    const goalAmt = typeof rawGoal === 'object' && rawGoal !== null ? (rawGoal.amt || 0) : Number(rawGoal || 0);
+    const goalCnt = typeof rawGoal === 'object' && rawGoal !== null ? (rawGoal.cnt || 0) : 0;
+
+    const remainAmt = goalAmt > 0 ? goalAmt - data.total : 0;
+    const percentAmt = goalAmt > 0 ? Math.min(Math.round((data.total / goalAmt) * 100), 100) : 0;
+    
+    const remainCnt = goalCnt > 0 ? goalCnt - data.cnt : 0;
+    const percentCnt = goalCnt > 0 ? Math.min(Math.round((data.cnt / goalCnt) * 100), 100) : 0;
+
     const tanka = data.cnt > 0 ? Math.round(data.total / data.cnt) : 0;
     const realTanka = data.cnt > 0 ? Math.round(data.real / data.cnt) : 0;
-    const needCnt = (remain > 0 && tanka > 0) ? Math.ceil(remain / tanka) : 0;
+    const needCnt = (remainAmt > 0 && tanka > 0) ? Math.ceil(remainAmt / tanka) : 0;
 
     let dailyNorma = 0;
-    if (remain > 0) {
+    if (remainAmt > 0) {
       const currentRef = new Date(date);
       if (period === 'day') {
-        dailyNorma = remain;
+        dailyNorma = remainAmt;
       } else if (period === 'week') {
         const dayIdx = currentRef.getDay(); 
         const remainDays = dayIdx === 0 ? 1 : 7 - dayIdx + 1; 
-        dailyNorma = Math.ceil(remain / remainDays);
+        dailyNorma = Math.ceil(remainAmt / remainDays);
       } else if (period === 'month') {
         const lastDayOfMonth = new Date(currentRef.getFullYear(), currentRef.getMonth() + 1, 0).getDate();
         const remainDays = lastDayOfMonth - currentRef.getDate() + 1;
-        dailyNorma = Math.ceil(remain / remainDays);
+        dailyNorma = Math.ceil(remainAmt / remainDays);
       } else if (period === 'year') {
         const lastDayOfYear = new Date(currentRef.getFullYear(), 11, 31);
         const diffTime = lastDayOfYear - currentRef;
         const remainDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
-        dailyNorma = Math.ceil(remain / remainDays);
+        dailyNorma = Math.ceil(remainAmt / remainDays);
       }
     }
 
     const periodJikyu = data.hours > 0 ? Math.round(data.total / data.hours) : 0;
     const uph = data.hours > 0 ? (data.cnt / data.hours).toFixed(1) : '0.0';
 
-    return { ...data, goal, remain, percent, needCnt, dailyNorma, periodJikyu, tanka, realTanka, uph };
+    return { 
+      ...data, 
+      goalAmt, goalCnt, remainAmt, percentAmt, remainCnt, percentCnt, 
+      needCnt, dailyNorma, periodJikyu, tanka, realTanka, uph 
+    };
   }, [periodicAnalysis, period, periodicGoals, goalStorageKey, date]);
 
   const handleStepPeriod = (direction) => {
@@ -741,42 +764,80 @@ function App() {
           </div>
         </div>
 
-        {/* 🎯 VISUAL GOAL & POSITION PANEL */}
+        {/* 🎯 VISUAL GOAL & POSITION PANEL (目標金額 ＆ 目標件数 入力欄) */}
         <div class="goal-panel">
-          <div class="goal-header-row">
-            <div class="goal-title-flex">
-              <span>🎯 {periodLabels[period]}目標設定</span>
+          <div class="goal-inputs-container">
+            {/* 目標金額 */}
+            <div class="goal-input-row">
+              <div class="goal-title-flex">
+                <span>🎯 {periodLabels[period]}目標金額</span>
+              </div>
+              <div class="goal-input-wrapper">
+                <input class="goal-input" type="number" value={activePeriodData.goalAmt || ''} onChange={e => updatePeriodicGoal('amt', e.target.value)} placeholder="未設定" />
+                <span style={{fontSize:'12px', color:'var(--muted)'}}>円</span>
+              </div>
             </div>
-            <div class="goal-input-wrapper">
-              <input class="goal-input" type="number" value={periodicGoals[goalStorageKey] || ''} onChange={e => updatePeriodicGoal(e.target.value)} placeholder="未設定" />
-              <span style={{fontSize:'12px', color:'var(--muted)'}}>円</span>
+
+            {/* 目標件数 */}
+            <div class="goal-input-row">
+              <div class="goal-title-flex">
+                <span>📦 {periodLabels[period]}目標件数</span>
+              </div>
+              <div class="goal-input-wrapper">
+                <input class="goal-input" type="number" value={activePeriodData.goalCnt || ''} onChange={e => updatePeriodicGoal('cnt', e.target.value)} placeholder="未設定" />
+                <span style={{fontSize:'12px', color:'var(--muted)'}}>件</span>
+              </div>
             </div>
           </div>
           
-          {activePeriodData.goal > 0 && (
-            <>
+          {/* 金額プログレスバー */}
+          {activePeriodData.goalAmt > 0 && (
+            <div class="progress-section">
               <div class="progress-track">
-                <div class="progress-bar" style={{ width: `${activePeriodData.percent}%` }}></div>
+                <div class="progress-bar" style={{ width: `${activePeriodData.percentAmt}%` }}></div>
               </div>
               <div class="goal-footer-row">
                 <div class="goal-footer-top">
-                  <div class="goal-status-text">達成率 <strong>{activePeriodData.percent}%</strong></div>
-                  {activePeriodData.remain <= 0 ? (
-                    <div class="goal-remain-text done">🎉 目標達成完了！</div>
+                  <div class="goal-status-text">金額達成率 <strong>{activePeriodData.percentAmt}%</strong></div>
+                  {activePeriodData.remainAmt <= 0 ? (
+                    <div class="goal-remain-text done">🎉 金額目標達成！</div>
                   ) : (
                     <div class="goal-remain-text remain">
-                      残り {activePeriodData.remain.toLocaleString()}円 
+                      残り {activePeriodData.remainAmt.toLocaleString()}円 
                       {activePeriodData.needCnt > 0 && ` (あと約 ${activePeriodData.needCnt} 件)`}
                     </div>
                   )}
                 </div>
-                {activePeriodData.remain > 0 && period !== 'day' && (
-                  <div class="goal-footer-bottom">
-                    📈 目標達成には今日を含めて1日平均 <strong>{activePeriodData.dailyNorma.toLocaleString()} 円</strong> の稼働が必要です
-                  </div>
-                )}
               </div>
-            </>
+            </div>
+          )}
+
+          {/* 件数プログレスバー */}
+          {activePeriodData.goalCnt > 0 && (
+            <div class="progress-section" style={{marginTop:'8px'}}>
+              <div class="progress-track">
+                <div class="progress-bar green" style={{ width: `${activePeriodData.percentCnt}%` }}></div>
+              </div>
+              <div class="goal-footer-row">
+                <div class="goal-footer-top">
+                  <div class="goal-status-text">件数達成率 <strong>{activePeriodData.percentCnt}%</strong></div>
+                  {activePeriodData.remainCnt <= 0 ? (
+                    <div class="goal-remain-text done">🎉 件数目標達成！</div>
+                  ) : (
+                    <div class="goal-remain-text remain">
+                      残り {activePeriodData.remainCnt} 件
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* 日別平均ノルマ表示 */}
+          {activePeriodData.remainAmt > 0 && period !== 'day' && (
+            <div class="goal-footer-bottom" style={{marginTop:'8px'}}>
+              📈 金額達成には今日を含めて1日平均 <strong>{activePeriodData.dailyNorma.toLocaleString()} 円</strong> の稼働が必要です
+            </div>
           )}
         </div>
 
@@ -795,7 +856,7 @@ function App() {
             </>
           )}
 
-          {/* 【プラットフォーム別内訳（1件単価を追加して入力欄の上に配置）】 */}
+          {/* 【プラットフォーム別内訳】 */}
           <div class="section-title">📊 {periodLabels[period]}のプラットフォーム別内訳</div>
           <div class="analysis-grid">
             <div class="analysis-card">
@@ -970,7 +1031,7 @@ function App() {
             <svg class="nav-icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="18" y2="10"/></svg><span>カレンダー</span>
           </button>
           <button class={`tab-btn ${activeTab === 'settings' ? 'active' : ''}`} onClick={() => setActiveTab('settings')}>
-            <svg class="nav-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg><span>設定</span>
+            <svg class="nav-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg><span>設定</span>
           </button>
         </nav>
       </div>

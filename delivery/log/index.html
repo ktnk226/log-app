@@ -118,15 +118,19 @@
     .analysis-grid { display: grid; grid-template-columns: 1fr; gap: 12px; margin-bottom: 16px; }
     .analysis-card { background: linear-gradient(135deg, #11141d, #161a26); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; }
 
+    /* SET CARD (ヘッダー領域をゆったりに拡張) */
     .set-card { background: rgba(255,255,255,0.02); border: 1.5px solid var(--border); border-radius: var(--radius); margin-bottom: 14px; overflow: hidden; }
-    .set-header { padding: 14px 18px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; user-select: none; }
+    .set-header { padding: 16px 18px; display: flex; flex-direction: column; gap: 6px; cursor: pointer; user-select: none; }
     .set-header:hover { background: rgba(255,255,255,0.02); }
-    .set-title { font-weight: 900; font-size: 14px; display: flex; align-items: center; gap: 8px; }
+    .set-header-top { display: flex; align-items: center; justify-content: space-between; }
+    .set-title { font-weight: 900; font-size: 15px; display: flex; align-items: center; gap: 8px; }
     .set-badge { font-size: 10px; padding: 2px 7px; border-radius: 4px; font-weight: 700; }
     .set-badge.active { background: rgba(255,92,26,0.2); color: var(--accent); }
     .set-badge.done { background: rgba(0,230,118,0.15); color: var(--green); }
-    .set-summary { font-size: 12px; color: var(--muted2); font-family: var(--font-mono); }
-    .set-body { padding: 0 18px 18px; border-top: 1px solid var(--border); }
+    
+    .set-summary-row1 { font-size: 14px; font-weight: 700; color: #fff; font-family: var(--font-mono); }
+    .set-summary-row2 { font-size: 11px; color: var(--muted2); font-family: var(--font-mono); display: flex; gap: 10px; flex-wrap: wrap; margin-top: 2px; }
+    .set-summary-tag { background: rgba(255,255,255,0.04); padding: 2px 6px; border-radius: 4px; border: 1px solid var(--border); }
 
     .time-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding-top: 14px; margin-bottom: 12px; }
     .time-field { display: flex; gap: 6px; }
@@ -336,12 +340,20 @@ function App() {
     const n = v => parseFloat(v) || 0;
     return sets.map((s, i) => {
       const p = sets[i-1] || { d_cum:0, u_cum:0, r_cum:0, m_cum:0, d_cnt_cum:0, u_cnt_cum:0, r_cnt_cum:0, m_cnt_cum:0, d_que_cum:0, u_que_cum:0, r_que_cum:0, m_que_cum:0, km_cum:0 };
+      
+      const sp = (n(s.d_cum)-n(p.d_cum)) + (n(s.u_cum)-n(p.u_cum)) + (n(s.r_cum)-n(p.r_cum)) + (n(s.m_cum)-n(p.m_cum)) + (n(s.d_que_cum)-n(p.d_que_cum)) + (n(s.u_que_cum)-n(p.u_que_cum)) + (n(s.r_que_cum)-n(p.r_que_cum)) + (n(s.m_que_cum)-n(p.m_que_cum));
+      const sc = (n(s.d_cnt_cum)-n(p.d_cnt_cum)) + (n(s.u_cnt_cum)-n(p.u_cnt_cum)) + (n(s.r_cnt_cum)-n(p.r_cnt_cum)) + (n(s.m_cnt_cum)-n(p.m_cnt_cum));
+      const dur = calcDuration(s.start, s.end);
+      
+      const setJikyu = (dur && dur.total > 0) ? Math.round(sp / dur.total) : 0;
+      const setTanka = sc > 0 ? Math.round(sp / sc) : 0;
+
       return {
         ...s,
         d_p: n(s.d_cum)-n(p.d_cum), u_p: n(s.u_cum)-n(p.u_cum), r_p: n(s.r_cum)-n(p.r_cum), m_p: n(s.m_cum)-n(p.m_cum),
         d_c: n(s.d_cnt_cum)-n(p.d_cnt_cum), u_c: n(s.u_cnt_cum)-n(p.u_cnt_cum), r_c: n(s.r_cnt_cum)-n(p.r_cnt_cum), m_c: n(s.m_cnt_cum)-n(p.m_cnt_cum),
         d_qp: n(s.d_que_cum)-n(p.d_que_cum), u_qp: n(s.u_que_cum)-n(p.u_que_cum), r_qp: n(s.r_que_cum)-n(p.r_que_cum), m_qp: n(s.m_que_cum)-n(p.m_que_cum),
-        km_p: n(s.km_cum)-n(p.km_cum), dur: calcDuration(s.start, s.end),
+        km_p: n(s.km_cum)-n(p.km_cum), dur, setJikyu, setTanka, sp, sc
       };
     });
   }, [sets]);
@@ -783,18 +795,29 @@ function App() {
 
               <div class="section-title">⏱️ 稼働セットごとの詳細入力</div>
               {calced.map((s, i) => {
-                const sp = s.d_p + s.u_p + s.r_p + s.m_p; const sc = s.d_c + s.u_c + s.r_c + s.m_c;
+                const durText = s.dur ? `${s.dur.h > 0 ? s.dur.h + '時間' : ''}${s.dur.m}分` : '時間未入力';
+
                 return (
                   <div key={i} class="set-card">
+                    {/* ヘッダー領域（折りたたみ時も時間・件数・売上・時給・単価を表示） */}
                     <div class="set-header" onClick={() => toggleOpen(i)}>
-                      <div class="set-title">
-                        <span>SET {i+1}</span>
-                        {s.start && !s.end && <span class="set-badge active">稼働中</span>}
-                        {s.start && s.end && <span class="set-badge done">完了</span>}
-                      </div>
-                      <div style={{display:'flex', alignItems:'center', gap:'10px'}}>
-                        {(sp > 0 || sc > 0) && <span class="set-summary">{sc}件 / {sp.toLocaleString()}円</span>}
+                      <div class="set-header-top">
+                        <div class="set-title">
+                          <span>SET {i+1}</span>
+                          {s.start && !s.end && <span class="set-badge active">稼働中</span>}
+                          {s.start && s.end && <span class="set-badge done">完了</span>}
+                        </div>
                         <span class={`chevron ${s.open ? 'open' : ''}`}>▼</span>
+                      </div>
+
+                      {/* 概要・実績表示エリア */}
+                      <div class="set-summary-row1">
+                        {s.sc} 件 / {s.sp.toLocaleString()} 円
+                      </div>
+                      <div class="set-summary-row2">
+                        <span class="set-summary-tag">⏱️ {durText}</span>
+                        <span class="set-summary-tag">💴 時給 {s.setJikyu > 0 ? s.setJikyu.toLocaleString() + '円' : '-'}</span>
+                        <span class="set-summary-tag">📦 単価 {s.setTanka > 0 ? s.setTanka.toLocaleString() + '円' : '-'}</span>
                       </div>
                     </div>
 
@@ -816,7 +839,7 @@ function App() {
                             </div>
                           </div>
                         </div>
-                        {s.dur && <div class="time-duration">セット稼働時間: {s.dur.h > 0 ? `${s.dur.h}時間` : ''}{s.dur.m}分</div>}
+                        {s.dur && <div class="time-duration">セット稼働時間: {durText}</div>}
 
                         {PLATFORMS.map(p => (
                           <div key={p.key} class="platform-block" style={{background: p.color+'05', borderColor: p.color+'20'}}>

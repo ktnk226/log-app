@@ -67,15 +67,16 @@
     .period-nav-btn:hover { color: #fff; }
     .period-nav-display { font-size: 13px; font-weight: 700; font-family: var(--font-mono); color: #fff; text-align: center; }
 
-    /* SUMMARY BAR (5段・各2項目構成) */
+    /* SUMMARY BAR (ご指定の全4段構成) */
     .summary-bar {
       background: var(--surface); border-bottom: 1px solid var(--border);
       padding: 12px 16px; display: flex; flex-direction: column; gap: 8px;
     }
     .sum-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .sum-row.col-3 { grid-template-columns: 1fr 1fr 1fr; }
     .sum-item { padding: 0; min-width: 0; }
     .sum-label { font-size: 10px; color: var(--muted); margin-bottom: 2px; white-space: nowrap; }
-    .sum-val { font-size: 18px; font-family: var(--font-mono); font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sum-val { font-size: 16px; font-family: var(--font-mono); font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .sum-val.accent { color: var(--accent); }
     .sum-val.green { color: var(--green); }
     .sum-val.yellow { color: var(--yellow); }
@@ -201,6 +202,7 @@
       .cal-header-container { flex-direction: column; align-items: flex-start; gap: 10px; }
       .cal-day-cell { min-height: 70px; padding: 5px 4px; }
       .cal-day-amt { font-size: 8.5px; } 
+      .sum-val { font-size: 14px; }
     }
   </style>
 </head>
@@ -734,37 +736,33 @@ function App() {
           </div>
         )}
 
-        {/* 📊 LIVE SUMMARY HEADER (5段・各2項目構成：総売上を追加) */}
+        {/* 📊 LIVE SUMMARY HEADER (ご指定の全4段構成) */}
         <div class="summary-bar">
-          {/* 【1段目】総売上 / 実質売上 */}
-          <div class="sum-row">
+          {/* 【1段目】総売上 / 実質売上 / クエ合計 */}
+          <div class="sum-row col-3">
             <div class="sum-item"><div class="sum-label">総売上</div><div class="sum-val accent">{activePeriodData.total.toLocaleString()}円</div></div>
             <div class="sum-item"><div class="sum-label">実質売上</div><div class="sum-val">{activePeriodData.real.toLocaleString()}円</div></div>
-          </div>
-          {/* 【2段目】クエ合計 / 件数 */}
-          <div class="sum-row">
             <div class="sum-item"><div class="sum-label">クエ合計</div><div class="sum-val teal">{activePeriodData.que.toLocaleString()}円</div></div>
+          </div>
+          {/* 【2段目】件数 / UPH */}
+          <div class="sum-row">
             <div class="sum-item"><div class="sum-label">件数</div><div class="sum-val green">{activePeriodData.cnt}件</div></div>
-          </div>
-          {/* 【3段目】UPH / 1件単価 */}
-          <div class="sum-row">
             <div class="sum-item"><div class="sum-label">UPH</div><div class="sum-val">{activePeriodData.uph}</div></div>
-            <div class="sum-item"><div class="sum-label">1件単価</div><div class="sum-val">{activePeriodData.cnt > 0 ? activePeriodData.tanka.toLocaleString()+'円' : '-'}</div></div>
           </div>
-          {/* 【4段目】クエ抜き単価 / 実働時間 */}
+          {/* 【3段目】1件単価 / クエ抜き単価 */}
           <div class="sum-row">
+            <div class="sum-item"><div class="sum-label">1件単価</div><div class="sum-val">{activePeriodData.cnt > 0 ? activePeriodData.tanka.toLocaleString()+'円' : '-'}</div></div>
             <div class="sum-item"><div class="sum-label">クエ抜き単価</div><div class="sum-val">{activePeriodData.cnt > 0 ? activePeriodData.realTanka.toLocaleString()+'円' : '-'}</div></div>
+          </div>
+          {/* 【4段目】実働時間 / 時給換算 */}
+          <div class="sum-row">
             <div class="sum-item">
               <div class="sum-label">実働時間</div>
               <div class="sum-val">
                 {activePeriodData.hours > 0 ? (() => { const hh = Math.floor(activePeriodData.hours); const mm = Math.round((activePeriodData.hours - hh) * 60); return hh+'h'+mm+'m'; })() : '-'}
               </div>
             </div>
-          </div>
-          {/* 【5段目】時給換算 */}
-          <div class="sum-row">
             <div class="sum-item"><div class="sum-label">時給換算</div><div class="sum-val yellow">{activePeriodData.hours > 0 ? activePeriodData.periodJikyu.toLocaleString()+'円' : '-'}</div></div>
-            <div class="sum-item"></div>
           </div>
         </div>
 

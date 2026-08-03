@@ -67,7 +67,7 @@
     .period-nav-btn:hover { color: #fff; }
     .period-nav-display { font-size: 13px; font-weight: 700; font-family: var(--font-mono); color: #fff; text-align: center; }
 
-    /* SUMMARY BAR (4段・各2項目構成) */
+    /* SUMMARY BAR (5段・各2項目構成) */
     .summary-bar {
       background: var(--surface); border-bottom: 1px solid var(--border);
       padding: 12px 16px; display: flex; flex-direction: column; gap: 8px;
@@ -82,7 +82,7 @@
     .sum-val.teal { color: var(--teal); }
     .sum-row + .sum-row { border-top: 1px solid var(--border); padding-top: 8px; }
 
-    /* VISUAL TARGET POSITION PANEL (目標金額・件数の2項目対応) */
+    /* VISUAL TARGET POSITION PANEL */
     .goal-panel { background: var(--surface); border-bottom: 1px solid var(--border); padding: 14px 24px; }
     .goal-inputs-container { display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
     .goal-input-row { display: flex; justify-content: space-between; align-items: center; }
@@ -479,7 +479,6 @@ function App() {
     const data = periodicAnalysis[period];
     const rawGoal = periodicGoals[goalStorageKey];
     
-    // オブジェクト/数値のパース互換処理
     const goalAmt = typeof rawGoal === 'object' && rawGoal !== null ? (rawGoal.amt || 0) : Number(rawGoal || 0);
     const goalCnt = typeof rawGoal === 'object' && rawGoal !== null ? (rawGoal.cnt || 0) : 0;
 
@@ -735,36 +734,41 @@ function App() {
           </div>
         )}
 
-        {/* 📊 LIVE SUMMARY HEADER (4段・各2項目構成) */}
+        {/* 📊 LIVE SUMMARY HEADER (5段・各2項目構成：総売上を追加) */}
         <div class="summary-bar">
-          {/* 【1段目】実質売上 / クエ合計 */}
+          {/* 【1段目】総売上 / 実質売上 */}
           <div class="sum-row">
-            <div class="sum-item"><div class="sum-label">実質売上</div><div class="sum-val accent">{activePeriodData.real.toLocaleString()}円</div></div>
+            <div class="sum-item"><div class="sum-label">総売上</div><div class="sum-val accent">{activePeriodData.total.toLocaleString()}円</div></div>
+            <div class="sum-item"><div class="sum-label">実質売上</div><div class="sum-val">{activePeriodData.real.toLocaleString()}円</div></div>
+          </div>
+          {/* 【2段目】クエ合計 / 件数 */}
+          <div class="sum-row">
             <div class="sum-item"><div class="sum-label">クエ合計</div><div class="sum-val teal">{activePeriodData.que.toLocaleString()}円</div></div>
-          </div>
-          {/* 【2段目】件数 / UPH */}
-          <div class="sum-row">
             <div class="sum-item"><div class="sum-label">件数</div><div class="sum-val green">{activePeriodData.cnt}件</div></div>
+          </div>
+          {/* 【3段目】UPH / 1件単価 */}
+          <div class="sum-row">
             <div class="sum-item"><div class="sum-label">UPH</div><div class="sum-val">{activePeriodData.uph}</div></div>
-          </div>
-          {/* 【3段目】1件単価 / クエ抜き単価 */}
-          <div class="sum-row">
             <div class="sum-item"><div class="sum-label">1件単価</div><div class="sum-val">{activePeriodData.cnt > 0 ? activePeriodData.tanka.toLocaleString()+'円' : '-'}</div></div>
-            <div class="sum-item"><div class="sum-label">クエ抜き単価</div><div class="sum-val">{activePeriodData.cnt > 0 ? activePeriodData.realTanka.toLocaleString()+'円' : '-'}</div></div>
           </div>
-          {/* 【4段目】実働時間 / 時給換算 */}
+          {/* 【4段目】クエ抜き単価 / 実働時間 */}
           <div class="sum-row">
+            <div class="sum-item"><div class="sum-label">クエ抜き単価</div><div class="sum-val">{activePeriodData.cnt > 0 ? activePeriodData.realTanka.toLocaleString()+'円' : '-'}</div></div>
             <div class="sum-item">
               <div class="sum-label">実働時間</div>
               <div class="sum-val">
                 {activePeriodData.hours > 0 ? (() => { const hh = Math.floor(activePeriodData.hours); const mm = Math.round((activePeriodData.hours - hh) * 60); return hh+'h'+mm+'m'; })() : '-'}
               </div>
             </div>
+          </div>
+          {/* 【5段目】時給換算 */}
+          <div class="sum-row">
             <div class="sum-item"><div class="sum-label">時給換算</div><div class="sum-val yellow">{activePeriodData.hours > 0 ? activePeriodData.periodJikyu.toLocaleString()+'円' : '-'}</div></div>
+            <div class="sum-item"></div>
           </div>
         </div>
 
-        {/* 🎯 VISUAL GOAL & POSITION PANEL (目標金額 ＆ 目標件数 入力欄) */}
+        {/* 🎯 VISUAL GOAL & POSITION PANEL */}
         <div class="goal-panel">
           <div class="goal-inputs-container">
             {/* 目標金額 */}
@@ -865,7 +869,7 @@ function App() {
                   const targetPf = activePeriodData.pf?.[p.key] || { s: 0, c: 0 };
                   const pfTanka = targetPf.c > 0 ? Math.round(targetPf.s / targetPf.c) : 0;
                   return (
-                    <div key={p.key} style={{display:'flex', justifycontent:'space-between', alignItems:'center', fontSize:'14px', borderBottom:'1px solid var(--border)', paddingBottom:'6px'}}>
+                    <div key={p.key} style={{display:'flex', justifyContent:'space-between', alignItems:'center', fontSize:'14px', borderBottom:'1px solid var(--border)', paddingBottom:'6px'}}>
                       <span style={{color: p.color, fontWeight:'bold', display:'flex', alignItems:'center', gap:'6px'}}>
                         <span>{p.label}</span>
                       </span>
@@ -1031,7 +1035,7 @@ function App() {
             <svg class="nav-icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="18" y2="10"/></svg><span>カレンダー</span>
           </button>
           <button class={`tab-btn ${activeTab === 'settings' ? 'active' : ''}`} onClick={() => setActiveTab('settings')}>
-            <svg class="nav-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg><span>設定</span>
+            <svg class="nav-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg><span>設定</span>
           </button>
         </nav>
       </div>

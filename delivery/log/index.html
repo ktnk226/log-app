@@ -96,23 +96,32 @@
       background: rgba(255,255,255,0.025);
       border: 1px solid var(--border);
       border-radius: var(--radius-sm);
-      padding: 10px 14px;
+      padding: 12px 14px;
       display: flex;
       flex-direction: column;
       gap: 6px;
     }
     .split-title {
-      font-size: 12px;
+      font-size: 13px;
       font-weight: 800;
       letter-spacing: 0.03em;
     }
     .split-title.weekday { color: var(--teal); }
     .split-title.weekend { color: var(--accent); }
+    
     .split-main-amt {
-      font-size: 18px;
+      font-size: 19px;
       font-weight: 700;
       font-family: var(--font-mono);
       color: #fff;
+    }
+    .split-sub-row {
+      font-size: 12px;
+      font-family: var(--font-mono);
+      color: var(--muted2);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px 10px;
     }
     .split-sub-metrics {
       display: flex;
@@ -121,8 +130,9 @@
       font-size: 12px;
       font-family: var(--font-mono);
       color: var(--muted2);
+      margin-top: 2px;
     }
-    .split-sub-metrics span { white-space: nowrap; }
+    .split-sub-metrics span, .split-sub-row span { white-space: nowrap; }
 
     /* VISUAL TARGET POSITION PANEL */
     .goal-panel { background: var(--surface); border-bottom: 1px solid var(--border); padding: 16px 24px; }
@@ -191,7 +201,7 @@
     .pf-inputs { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
 
     .del-btn { width: 100%; padding: 12px; background: rgba(255,50,50,0.15); color: #ff5555; border: 1px solid rgba(255,50,50,0.3); border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 12px; font-size: 14px; }
-    .add-btn { width: 100%; padding: 16px; background: rgba(255,255,255,0.05); color: #fff; border: 1px dashed var(--border2); border-radius: var(--radius); font-weight: bold; cursor: font-size: 16px; }
+    .add-btn { width: 100%; padding: 16px; background: rgba(255,255,255,0.05); color: #fff; border: 1px dashed var(--border2); border-radius: var(--radius); font-weight: bold; cursor: pointer; font-size: 16px; }
 
     .log-box { background: #000; border: 1px solid var(--border); border-radius: var(--radius); margin-top: 14px; padding: 16px; font-family: var(--font-mono); font-size: 13px; white-space: pre-wrap; line-height: 1.7; color: #ccc; }
     .copy-btn { width: 100%; margin-top: 10px; padding: 14px; background: var(--green); color: #000; font-weight: bold; border-radius: 8px; border: none; cursor: pointer; font-size: 16px; }
@@ -250,7 +260,8 @@
       .sum-val { font-size: 18px; }
       .sum-val.accent { font-size: 21px; }
       .sum-label { font-size: 12px; }
-      .split-main-amt { font-size: 16px; }
+      .split-main-amt { font-size: 17px; }
+      .split-sub-row { font-size: 11px; }
       .split-sub-metrics { font-size: 11px; }
       .section-title { font-size: 14px; }
     }
@@ -505,7 +516,7 @@ function App() {
         }
       }
 
-      // 週集計 & 月〜木・金〜日 分割集計判定
+      // 週集計 & 平日(月〜木)・週末(金〜日) 分割集計判定
       const thisDate = new Date(dKey + 'T00:00:00');
       const monMidnight = new Date(periodMeta.monRef);
       monMidnight.setHours(0,0,0,0);
@@ -553,12 +564,14 @@ function App() {
           ...weekMonThu,
           jikyu: weekMonThu.hours > 0 ? Math.round(weekMonThu.total / weekMonThu.hours) : 0,
           tanka: weekMonThu.cnt > 0 ? Math.round(weekMonThu.total / weekMonThu.cnt) : 0,
+          realTanka: weekMonThu.cnt > 0 ? Math.round(weekMonThu.real / weekMonThu.cnt) : 0,
           uph: weekMonThu.hours > 0 ? (weekMonThu.cnt / weekMonThu.hours).toFixed(1) : '0.0'
         },
         friSun: {
           ...weekFriSun,
           jikyu: weekFriSun.hours > 0 ? Math.round(weekFriSun.total / weekFriSun.hours) : 0,
           tanka: weekFriSun.cnt > 0 ? Math.round(weekFriSun.total / weekFriSun.cnt) : 0,
+          realTanka: weekFriSun.cnt > 0 ? Math.round(weekFriSun.real / weekFriSun.cnt) : 0,
           uph: weekFriSun.hours > 0 ? (weekFriSun.cnt / weekFriSun.hours).toFixed(1) : '0.0'
         }
       },
@@ -863,14 +876,18 @@ function App() {
           </div>
         </div>
 
-        {/* 🌓 週モード限定：【月〜木 (平日クエ)】＆【金〜日 (週末クエ)】分割集計パネル */}
+        {/* 🌓 週モード限定：【平日（月〜木）】＆【週末（金〜日）】分割集計パネル */}
         {activeTab === 'dashboard' && period === 'week' && (
           <div class="week-split-container">
-            {/* 月曜〜木曜日 */}
+            {/* 平日 (月〜木) */}
             <div class="split-card">
-              <div class="split-title weekday">📅 月〜木 (平日クエ)</div>
+              <div class="split-title weekday">📅 平日 (月〜木)</div>
               <div class="split-main-amt">
                 {periodicAnalysis.week.monThu.total.toLocaleString()} <span style={{fontSize:'12px', fontWeight:'normal', color:'var(--muted2)'}}>円</span>
+              </div>
+              <div class="split-sub-row">
+                <span>実質: <strong>{periodicAnalysis.week.monThu.real.toLocaleString()}</strong>円</span>
+                {periodicAnalysis.week.monThu.que > 0 && <span style={{color:'var(--teal)'}}>クエ: {periodicAnalysis.week.monThu.que.toLocaleString()}円</span>}
               </div>
               <div class="split-sub-metrics">
                 <span>📦 <strong>{periodicAnalysis.week.monThu.cnt}</strong>件</span>
@@ -878,15 +895,19 @@ function App() {
                 <span>⚡ UPH {periodicAnalysis.week.monThu.uph}</span>
                 <span>💴 時給 {periodicAnalysis.week.monThu.jikyu > 0 ? periodicAnalysis.week.monThu.jikyu.toLocaleString()+'円' : '-'}</span>
                 <span>🎯 単価 {periodicAnalysis.week.monThu.tanka > 0 ? periodicAnalysis.week.monThu.tanka.toLocaleString()+'円' : '-'}</span>
-                {periodicAnalysis.week.monThu.que > 0 && <span style={{color:'var(--teal)'}}>✨ クエ {periodicAnalysis.week.monThu.que.toLocaleString()}円</span>}
+                <span>💎 実質単価 {periodicAnalysis.week.monThu.realTanka > 0 ? periodicAnalysis.week.monThu.realTanka.toLocaleString()+'円' : '-'}</span>
               </div>
             </div>
 
-            {/* 金曜〜日曜日 */}
+            {/* 週末 (金〜日) */}
             <div class="split-card">
-              <div class="split-title weekend">🔥 金〜日 (週末クエ)</div>
+              <div class="split-title weekend">🔥 週末 (金〜日)</div>
               <div class="split-main-amt">
                 {periodicAnalysis.week.friSun.total.toLocaleString()} <span style={{fontSize:'12px', fontWeight:'normal', color:'var(--muted2)'}}>円</span>
+              </div>
+              <div class="split-sub-row">
+                <span>実質: <strong>{periodicAnalysis.week.friSun.real.toLocaleString()}</strong>円</span>
+                {periodicAnalysis.week.friSun.que > 0 && <span style={{color:'var(--teal)'}}>クエ: {periodicAnalysis.week.friSun.que.toLocaleString()}円</span>}
               </div>
               <div class="split-sub-metrics">
                 <span>📦 <strong>{periodicAnalysis.week.friSun.cnt}</strong>件</span>
@@ -894,7 +915,7 @@ function App() {
                 <span>⚡ UPH {periodicAnalysis.week.friSun.uph}</span>
                 <span>💴 時給 {periodicAnalysis.week.friSun.jikyu > 0 ? periodicAnalysis.week.friSun.jikyu.toLocaleString()+'円' : '-'}</span>
                 <span>🎯 単価 {periodicAnalysis.week.friSun.tanka > 0 ? periodicAnalysis.week.friSun.tanka.toLocaleString()+'円' : '-'}</span>
-                {periodicAnalysis.week.friSun.que > 0 && <span style={{color:'var(--teal)'}}>✨ クエ {periodicAnalysis.week.friSun.que.toLocaleString()}円</span>}
+                <span>💎 実質単価 {periodicAnalysis.week.friSun.realTanka > 0 ? periodicAnalysis.week.friSun.realTanka.toLocaleString()+'円' : '-'}</span>
               </div>
             </div>
           </div>

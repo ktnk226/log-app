@@ -83,6 +83,47 @@
     .sum-val.teal { color: var(--teal); }
     .sum-row + .sum-row { border-top: 1px solid var(--border); padding-top: 10px; }
 
+    /* SPLIT WEEK SUMMARY (月〜木 / 金〜日) */
+    .week-split-container {
+      background: var(--surface2);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 18px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .split-card {
+      background: rgba(255,255,255,0.025);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .split-title {
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.03em;
+    }
+    .split-title.weekday { color: var(--teal); }
+    .split-title.weekend { color: var(--accent); }
+    .split-main-amt {
+      font-size: 18px;
+      font-weight: 700;
+      font-family: var(--font-mono);
+      color: #fff;
+    }
+    .split-sub-metrics {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px 12px;
+      font-size: 12px;
+      font-family: var(--font-mono);
+      color: var(--muted2);
+    }
+    .split-sub-metrics span { white-space: nowrap; }
+
     /* VISUAL TARGET POSITION PANEL */
     .goal-panel { background: var(--surface); border-bottom: 1px solid var(--border); padding: 16px 24px; }
     .goal-inputs-container { display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px; }
@@ -150,7 +191,7 @@
     .pf-inputs { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
 
     .del-btn { width: 100%; padding: 12px; background: rgba(255,50,50,0.15); color: #ff5555; border: 1px solid rgba(255,50,50,0.3); border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 12px; font-size: 14px; }
-    .add-btn { width: 100%; padding: 16px; background: rgba(255,255,255,0.05); color: #fff; border: 1px dashed var(--border2); border-radius: var(--radius); font-weight: bold; cursor: pointer; font-size: 16px; }
+    .add-btn { width: 100%; padding: 16px; background: rgba(255,255,255,0.05); color: #fff; border: 1px dashed var(--border2); border-radius: var(--radius); font-weight: bold; cursor: font-size: 16px; }
 
     .log-box { background: #000; border: 1px solid var(--border); border-radius: var(--radius); margin-top: 14px; padding: 16px; font-family: var(--font-mono); font-size: 13px; white-space: pre-wrap; line-height: 1.7; color: #ccc; }
     .copy-btn { width: 100%; margin-top: 10px; padding: 14px; background: var(--green); color: #000; font-weight: bold; border-radius: 8px; border: none; cursor: pointer; font-size: 16px; }
@@ -191,24 +232,26 @@
 
     .gen-btn { width: 100%; padding: 18px; background: linear-gradient(135deg, var(--accent), var(--accent2)); border-radius: var(--radius); color: #fff; font-size: 18px; font-weight: 900; border: none; cursor: pointer; }
 
-    /* 📱 スマホ用スタイル調整（さらにワンサイズ大きく最適化） */
+    /* 📱 スマホ用スタイル調整 */
     @media (max-width: 768px) {
       .sidebar { display: none; }
       .bottom-nav { display: flex; }
       .topbar { padding: 16px; }
       .view-container { padding: 16px; }
       .summary-bar { padding: 14px 16px; gap: 10px; }
+      .week-split-container { padding: 12px 16px; gap: 8px; }
       .goal-panel { padding: 14px 16px; }
       .grid-3 { grid-template-columns: 1fr; gap: 12px; }
       .cal-header-container { flex-direction: column; align-items: flex-start; gap: 12px; }
       .cal-day-cell { min-height: 80px; padding: 6px 4px; }
       
-      /* スマホ視認性限界突破サイズ */
       .cal-day-num { font-size: 13px; }
       .cal-day-amt { font-size: 11px; } 
       .sum-val { font-size: 18px; }
       .sum-val.accent { font-size: 21px; }
       .sum-label { font-size: 12px; }
+      .split-main-amt { font-size: 16px; }
+      .split-sub-metrics { font-size: 11px; }
       .section-title { font-size: 14px; }
     }
   </style>
@@ -418,6 +461,9 @@ function App() {
     let weekTotal = 0; let weekReal = 0; let weekQue = 0; let weekCnt = 0; let weekHours = 0;
     let yearTotal = 0; let yearReal = 0; let yearQue = 0; let yearCnt = 0; let yearHours = 0;
 
+    let weekMonThu = { total: 0, real: 0, que: 0, cnt: 0, hours: 0, days: 0 };
+    let weekFriSun = { total: 0, real: 0, que: 0, cnt: 0, hours: 0, days: 0 };
+
     const createPfBuffer = () => ({ d: { s:0, c:0 }, u: { s:0, c:0 }, r: { s:0, c:0 }, m: { s:0, c:0 } });
     const weekPf = createPfBuffer();
     const monthPf = createPfBuffer();
@@ -459,13 +505,36 @@ function App() {
         }
       }
 
-      const thisDate = new Date(dKey);
-      if (thisDate >= periodMeta.monRef && thisDate <= periodMeta.sunRef) {
+      // 週集計 & 月〜木・金〜日 分割集計判定
+      const thisDate = new Date(dKey + 'T00:00:00');
+      const monMidnight = new Date(periodMeta.monRef);
+      monMidnight.setHours(0,0,0,0);
+      const sunMidnight = new Date(periodMeta.sunRef);
+      sunMidnight.setHours(23,59,59,999);
+
+      if (thisDate >= monMidnight && thisDate <= sunMidnight) {
         weekTotal += totalAmt; weekReal += sales; weekQue += que; weekCnt += cnt; weekHours += dayTotalHours;
         PLATFORMS.forEach(p => {
           const pData = getPfData(p.key);
           weekPf[p.key].s += pData.sales; weekPf[p.key].c += pData.cnt;
         });
+
+        const dayOfWeek = thisDate.getDay(); // 0:日, 1:月, 2:火, 3:水, 4:木, 5:金, 6:土
+        if (dayOfWeek >= 1 && dayOfWeek <= 4) {
+          weekMonThu.total += totalAmt;
+          weekMonThu.real += sales;
+          weekMonThu.que += que;
+          weekMonThu.cnt += cnt;
+          weekMonThu.hours += dayTotalHours;
+          weekMonThu.days += 1;
+        } else {
+          weekFriSun.total += totalAmt;
+          weekFriSun.real += sales;
+          weekFriSun.que += que;
+          weekFriSun.cnt += cnt;
+          weekFriSun.hours += dayTotalHours;
+          weekFriSun.days += 1;
+        }
       }
     });
 
@@ -478,7 +547,21 @@ function App() {
 
     return { 
       day: { total: daySummary.total_sales, real: daySummary.real_sales, que: daySummary.total_que, cnt: daySummary.total_cnt, hours: daySummary.total_h, pf: dayPf },
-      week: { total: weekTotal, real: weekReal, que: weekQue, cnt: weekCnt, hours: weekHours, pf: weekPf },
+      week: { 
+        total: weekTotal, real: weekReal, que: weekQue, cnt: weekCnt, hours: weekHours, pf: weekPf,
+        monThu: {
+          ...weekMonThu,
+          jikyu: weekMonThu.hours > 0 ? Math.round(weekMonThu.total / weekMonThu.hours) : 0,
+          tanka: weekMonThu.cnt > 0 ? Math.round(weekMonThu.total / weekMonThu.cnt) : 0,
+          uph: weekMonThu.hours > 0 ? (weekMonThu.cnt / weekMonThu.hours).toFixed(1) : '0.0'
+        },
+        friSun: {
+          ...weekFriSun,
+          jikyu: weekFriSun.hours > 0 ? Math.round(weekFriSun.total / weekFriSun.hours) : 0,
+          tanka: weekFriSun.cnt > 0 ? Math.round(weekFriSun.total / weekFriSun.cnt) : 0,
+          uph: weekFriSun.hours > 0 ? (weekFriSun.cnt / weekFriSun.hours).toFixed(1) : '0.0'
+        }
+      },
       month: { total: monthTotal, real: monthReal, que: monthQue, cnt: monthCnt, hours: monthHours, pf: monthPf },
       year: { total: yearTotal, real: yearReal, que: yearQue, cnt: yearCnt, hours: yearHours, pf: yearPf }
     };
@@ -690,6 +773,13 @@ function App() {
   const periodLabels = { day: '本日', week: '今週', month: '今月累計', year: '今年累計' };
   const currentNavText = { day: periodMeta.dayStr, week: periodMeta.weekStr, month: periodMeta.monthStr, year: periodMeta.yearStr }[period];
 
+  const formatHours = (h) => {
+    if (!h || h <= 0) return '0h';
+    const hh = Math.floor(h);
+    const mm = Math.round((h - hh) * 60);
+    return mm > 0 ? `${hh}h${mm}m` : `${hh}h`;
+  };
+
   return (
     <div class="app-shell">
       {/* SIDEBAR (PC PANEL) */}
@@ -766,12 +856,49 @@ function App() {
             <div class="sum-item">
               <div class="sum-label">実働時間</div>
               <div class="sum-val">
-                {activePeriodData.hours > 0 ? (() => { const hh = Math.floor(activePeriodData.hours); const mm = Math.round((activePeriodData.hours - hh) * 60); return hh+'h'+mm+'m'; })() : '-'}
+                {activePeriodData.hours > 0 ? formatHours(activePeriodData.hours) : '-'}
               </div>
             </div>
             <div class="sum-item"><div class="sum-label">時給換算</div><div class="sum-val yellow">{activePeriodData.hours > 0 ? activePeriodData.periodJikyu.toLocaleString()+'円' : '-'}</div></div>
           </div>
         </div>
+
+        {/* 🌓 週モード限定：【月〜木 (平日クエ)】＆【金〜日 (週末クエ)】分割集計パネル */}
+        {activeTab === 'dashboard' && period === 'week' && (
+          <div class="week-split-container">
+            {/* 月曜〜木曜日 */}
+            <div class="split-card">
+              <div class="split-title weekday">📅 月〜木 (平日クエ)</div>
+              <div class="split-main-amt">
+                {periodicAnalysis.week.monThu.total.toLocaleString()} <span style={{fontSize:'12px', fontWeight:'normal', color:'var(--muted2)'}}>円</span>
+              </div>
+              <div class="split-sub-metrics">
+                <span>📦 <strong>{periodicAnalysis.week.monThu.cnt}</strong>件</span>
+                <span>⏱️ {formatHours(periodicAnalysis.week.monThu.hours)}</span>
+                <span>⚡ UPH {periodicAnalysis.week.monThu.uph}</span>
+                <span>💴 時給 {periodicAnalysis.week.monThu.jikyu > 0 ? periodicAnalysis.week.monThu.jikyu.toLocaleString()+'円' : '-'}</span>
+                <span>🎯 単価 {periodicAnalysis.week.monThu.tanka > 0 ? periodicAnalysis.week.monThu.tanka.toLocaleString()+'円' : '-'}</span>
+                {periodicAnalysis.week.monThu.que > 0 && <span style={{color:'var(--teal)'}}>✨ クエ {periodicAnalysis.week.monThu.que.toLocaleString()}円</span>}
+              </div>
+            </div>
+
+            {/* 金曜〜日曜日 */}
+            <div class="split-card">
+              <div class="split-title weekend">🔥 金〜日 (週末クエ)</div>
+              <div class="split-main-amt">
+                {periodicAnalysis.week.friSun.total.toLocaleString()} <span style={{fontSize:'12px', fontWeight:'normal', color:'var(--muted2)'}}>円</span>
+              </div>
+              <div class="split-sub-metrics">
+                <span>📦 <strong>{periodicAnalysis.week.friSun.cnt}</strong>件</span>
+                <span>⏱️ {formatHours(periodicAnalysis.week.friSun.hours)}</span>
+                <span>⚡ UPH {periodicAnalysis.week.friSun.uph}</span>
+                <span>💴 時給 {periodicAnalysis.week.friSun.jikyu > 0 ? periodicAnalysis.week.friSun.jikyu.toLocaleString()+'円' : '-'}</span>
+                <span>🎯 単価 {periodicAnalysis.week.friSun.tanka > 0 ? periodicAnalysis.week.friSun.tanka.toLocaleString()+'円' : '-'}</span>
+                {periodicAnalysis.week.friSun.que > 0 && <span style={{color:'var(--teal)'}}>✨ クエ {periodicAnalysis.week.friSun.que.toLocaleString()}円</span>}
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* 🎯 VISUAL GOAL & POSITION PANEL */}
         <div class="goal-panel">
@@ -874,7 +1001,7 @@ function App() {
                   const targetPf = activePeriodData.pf?.[p.key] || { s: 0, c: 0 };
                   const pfTanka = targetPf.c > 0 ? Math.round(targetPf.s / targetPf.c) : 0;
                   return (
-                    <div key={p.key} style={{display:'flex', justifycontent:'space-between', alignItems:'center', fontSize:'14px', borderBottom:'1px solid var(--border)', paddingBottom:'6px'}}>
+                    <div key={p.key} style={{display:'flex', justifyContent:'space-between', alignItems:'center', fontSize:'14px', borderBottom:'1px solid var(--border)', paddingBottom:'6px'}}>
                       <span style={{color: p.color, fontWeight:'bold', display:'flex', alignItems:'center', gap:'6px'}}>
                         <span>{p.label}</span>
                       </span>

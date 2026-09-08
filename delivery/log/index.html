@@ -172,6 +172,21 @@
     }
     input:focus, select:focus, textarea:focus { border-color: var(--accent); outline: none; }
 
+    .daily-memo-textarea {
+      width: 100%;
+      min-height: 110px;
+      background: rgba(0,0,0,0.3);
+      border: 1.5px solid var(--border2);
+      border-radius: var(--radius-sm);
+      color: #fff;
+      font-size: 15px;
+      line-height: 1.6;
+      padding: 12px 14px;
+      font-family: var(--font-body);
+      resize: vertical;
+    }
+    .daily-memo-textarea:focus { border-color: var(--teal); outline: none; }
+
     .analysis-grid { display: grid; grid-template-columns: 1fr; gap: 12px; margin-bottom: 16px; }
     .analysis-card { background: linear-gradient(135deg, #11141d, #161a26); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; }
 
@@ -352,10 +367,10 @@ function App() {
   const [calMonth, setCalMonth] = useState(() => Number(loadInitialDate().split('-')[1]));
 
   const dayData = useMemo(() => {
-    return vault[date] || { weather: '晴', goalAmt: 0, sets: [EMPTY_SET()] };
+    return vault[date] || { weather: '晴', goalAmt: 0, dailyMemo: '', sets: [EMPTY_SET()] };
   }, [vault, date]);
 
-  const { weather, sets } = dayData;
+  const { weather, sets, dailyMemo = '' } = dayData;
 
   useEffect(() => { localStorage.setItem(SK.db, JSON.stringify(vault)); }, [vault]);
   useEffect(() => { localStorage.setItem(SK.goals, JSON.stringify(periodicGoals)); }, [periodicGoals]);
@@ -373,6 +388,7 @@ function App() {
       [date]: {
         weather: prev[date]?.weather || '晴',
         goalAmt: prev[date]?.goalAmt || 0,
+        dailyMemo: prev[date]?.dailyMemo || '',
         sets: prev[date]?.sets || [EMPTY_SET()],
         ...prev[date],
         [field]: value
@@ -649,7 +665,7 @@ function App() {
     if (date === targetDate) {
       if (!window.confirm('現在の最新営業日データを完全にクリアしてリセットしますか？')) return;
       setIsDirty(true);
-      setVault(prev => ({ ...prev, [targetDate]: { weather: '晴', goalAmt: 0, sets: [EMPTY_SET()] } }));
+      setVault(prev => ({ ...prev, [targetDate]: { weather: '晴', goalAmt: 0, dailyMemo: '', sets: [EMPTY_SET()] } }));
     } else { setDate(targetDate); }
     setActiveTab('dashboard');
     setPeriod('day');
@@ -780,6 +796,11 @@ function App() {
       if (s.memo) log += `  - **戦術**：${s.memo}\n`;
       log += '\n';
     });
+
+    if (dailyMemo && dailyMemo.trim()) {
+      log += `📝 本日の気づき・戦術メモ\n\n${dailyMemo.trim()}\n\n`;
+    }
+
     return log.trim();
   };
 
@@ -1009,6 +1030,17 @@ function App() {
                 <div><label>選択中営業日</label><input type="date" value={date} onChange={e => setDate(e.target.value)} style={{borderColor:'var(--teal)'}} /></div>
                 <div><label>天気状況</label><select value={weather} onChange={e => updateDayField('weather', e.target.value)}>{WEATHERS.map(w => <option key={w}>{w}</option>)}</select></div>
                 <div><label>総走行距離</label><div style={{padding:'11px 12px', background:'rgba(255,255,255,0.02)', border:'1.5px solid var(--border)', borderRadius:'var(--radius-sm)', fontSize:'14px', fontFamily:'var(--font-mono)'}}>{daySummary.total_km} km</div></div>
+              </div>
+
+              {/* 📝 新設：本日の気づき・メモ（日記・殴り書き） */}
+              <div class="section-title">📝 本日の気づき・メモ（日記・殴り書き）</div>
+              <div class="card" style={{padding:'16px'}}>
+                <textarea
+                  class="daily-memo-textarea"
+                  placeholder="現場での気づき、加盟店の状況、体調や感情、トラブル、明日の課題など何でも殴り書きしてください。"
+                  value={dailyMemo}
+                  onChange={e => updateDayField('dailyMemo', e.target.value)}
+                />
               </div>
             </>
           )}

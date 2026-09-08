@@ -67,7 +67,7 @@
     .period-nav-btn:hover { color: #fff; }
     .period-nav-display { font-size: 16px; font-weight: 800; font-family: var(--font-mono); color: #fff; text-align: center; }
 
-    /* SUMMARY BAR (文字サイズ大幅UP) */
+    /* SUMMARY BAR */
     .summary-bar {
       background: var(--surface); border-bottom: 1.5px solid var(--border);
       padding: 16px 20px; display: flex; flex-direction: column; gap: 12px;
@@ -83,7 +83,7 @@
     .sum-val.teal { color: var(--teal); }
     .sum-row + .sum-row { border-top: 1px solid var(--border); padding-top: 10px; }
 
-    /* SPLIT WEEK SUMMARY (月〜木 / 金〜日) */
+    /* SPLIT WEEK SUMMARY */
     .week-split-container {
       background: var(--surface2);
       border-bottom: 1.5px solid var(--border);
@@ -104,13 +104,12 @@
     .split-title { font-size: 14px; font-weight: 800; letter-spacing: 0.03em; }
     .split-title.weekday { color: var(--teal); }
     .split-title.weekend { color: var(--accent); }
-    
     .split-main-amt { font-size: 22px; font-weight: 800; font-family: var(--font-mono); color: #fff; }
     .split-sub-row { font-size: 13px; font-family: var(--font-mono); color: var(--muted2); display: flex; flex-wrap: wrap; gap: 4px 10px; }
     .split-sub-metrics { display: flex; flex-wrap: wrap; gap: 6px 12px; font-size: 13px; font-family: var(--font-mono); color: var(--muted2); margin-top: 4px; }
     .split-sub-metrics span, .split-sub-row span { white-space: nowrap; }
 
-    /* VISUAL TARGET POSITION PANEL */
+    /* GOAL PANEL */
     .goal-panel { background: var(--surface); border-bottom: 1.5px solid var(--border); padding: 18px 22px; }
     .goal-inputs-container { display: flex; flex-direction: column; gap: 12px; margin-bottom: 12px; }
     .goal-input-row { display: flex; justify-content: space-between; align-items: center; }
@@ -148,15 +147,12 @@
     }
     input:focus, select:focus, textarea:focus { border-color: var(--accent); outline: none; background: rgba(255,255,255,0.08); }
 
-    /* ⚡ CONDITION SELECTION */
     .condition-row { display: flex; gap: 8px; margin-top: 4px; }
     .cond-btn {
       flex: 1; padding: 12px 6px; background: rgba(255,255,255,0.04); border: 1.5px solid var(--border);
       border-radius: 8px; color: var(--muted2); font-size: 17px; font-weight: 800; cursor: pointer; text-align: center;
     }
-    .cond-btn.active {
-      border-color: var(--yellow); background: rgba(255,214,0,0.12); color: #fff; font-weight: 900;
-    }
+    .cond-btn.active { border-color: var(--yellow); background: rgba(255,214,0,0.12); color: #fff; font-weight: 900; }
 
     .daily-memo-textarea {
       width: 100%; min-height: 110px; background: rgba(0,0,0,0.3); border: 1.5px solid var(--border2);
@@ -195,7 +191,7 @@
     .log-box { background: #000; border: 1px solid var(--border); border-radius: var(--radius); margin-top: 14px; padding: 18px; font-family: var(--font-mono); font-size: 14px; white-space: pre-wrap; line-height: 1.7; color: #ccc; }
     .copy-btn { width: 100%; margin-top: 10px; padding: 16px; background: var(--green); color: #000; font-weight: 900; border-radius: 8px; border: none; cursor: pointer; font-size: 17px; }
 
-    /* 📅 CALENDAR (スマホ文字切れ完全解消版) */
+    /* CALENDAR */
     .cal-header-container { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
     .cal-title-nav { display: flex; align-items: center; gap: 14px; }
     .cal-nav-btn { background: rgba(255,255,255,0.08); border: 1px solid var(--border); color: #fff; padding: 9px 16px; border-radius: 8px; cursor: pointer; font-weight: 800; font-size: 16px; }
@@ -220,14 +216,13 @@
     .cal-day-num.current-month { color: #fff; }
     .cal-day-cond { font-size: 12px; line-height: 1; }
     
-    /* 家計簿アプリ風のスマート金額表示 */
     .cal-day-amt-box { text-align: right; width: 100%; margin-top: auto; }
     .cal-day-amt {
       font-size: 13px; font-family: var(--font-mono); font-weight: 800; color: var(--accent);
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block;
     }
 
-    /* 📝 MEMO / INBOX TAB STYLES */
+    /* 📝 MEMO / INBOX (ダイレクト即時編集対応) */
     .memo-cat-filter { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 14px; }
     .memo-cat-btn {
       padding: 8px 14px; background: rgba(255,255,255,0.05); border: 1.5px solid var(--border);
@@ -237,13 +232,38 @@
     
     .memo-item-card {
       background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--radius);
-      padding: 18px; margin-bottom: 12px; display: flex; flex-direction: column; gap: 8px;
+      padding: 16px; margin-bottom: 12px; display: flex; flex-direction: column; gap: 10px;
     }
     .memo-item-header { display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: var(--muted); }
-    .memo-item-body { font-size: 16px; line-height: 1.6; color: #f0f0f0; white-space: pre-wrap; }
-    .memo-tag-pill { font-size: 11px; padding: 2px 8px; border-radius: 4px; background: rgba(255,255,255,0.08); color: var(--teal); font-weight: 700; }
+    
+    /* そのままタップして直せるダイレクト編集テキストエリア */
+    .memo-direct-textarea {
+      width: 100%;
+      background: rgba(0,0,0,0.25);
+      border: 1.5px solid transparent;
+      border-radius: var(--radius-sm);
+      color: #fff;
+      font-size: 16px;
+      line-height: 1.6;
+      padding: 10px 12px;
+      font-family: var(--font-body);
+      resize: vertical;
+      min-height: 72px;
+      transition: all 0.2s;
+    }
+    .memo-direct-textarea:focus {
+      background: rgba(0,0,0,0.5);
+      border-color: var(--teal);
+      outline: none;
+    }
+    .memo-tag-pill {
+      font-size: 12px; padding: 4px 10px; border-radius: 6px; background: rgba(255,255,255,0.08);
+      color: var(--teal); font-weight: 800; cursor: pointer; border: 1px solid var(--border);
+      user-select: none;
+    }
+    .memo-tag-pill:hover { background: rgba(0,188,212,0.15); border-color: var(--teal); }
 
-    /* BOTTOM NAV TABS (4タブ化) */
+    /* BOTTOM NAV TABS */
     .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 76px; background: rgba(15,17,23,0.95); backdrop-filter: blur(20px); border-top: 1.5px solid var(--border); display: none; justify-content: space-around; align-items: center; z-index: 500; }
     .tab-btn { display: flex; flex-direction: column; align-items: center; justify-content: center; background: transparent; border: none; color: var(--muted); gap: 4px; font-size: 13px; font-weight: 700; cursor: pointer; width: 75px; }
     .tab-btn.active { color: var(--accent); font-weight: 900; }
@@ -303,6 +323,8 @@ const COND_ICONS = [
   { val: 4, label: '🙂 4' },
   { val: 5, label: '🔥 5' },
 ];
+
+const MEMO_CATEGORIES = ['🛵稼働', '💡アイデア', '📌タスク', '📓日記'];
 
 function getNow() {
   const d = new Date();
@@ -762,6 +784,18 @@ function App() {
     setIsDirty(true);
   };
 
+  const updateInboxMemoText = (id, newText) => {
+    setIsDirty(true);
+    setMemos(prev => prev.map(m => m.id === id ? { ...m, text: newText } : m));
+  };
+
+  const cycleInboxMemoCat = (id, currentCat) => {
+    setIsDirty(true);
+    const currentIdx = MEMO_CATEGORIES.indexOf(currentCat);
+    const nextCat = MEMO_CATEGORIES[(currentIdx + 1) % MEMO_CATEGORIES.length];
+    setMemos(prev => prev.map(m => m.id === id ? { ...m, cat: nextCat } : m));
+  };
+
   const deleteInboxMemo = (id) => {
     if (!window.confirm('このメモを削除しますか？')) return;
     setMemos(prev => prev.filter(m => m.id !== id));
@@ -1142,12 +1176,12 @@ function App() {
           )}
         </div>
 
-        {/* ── TAB 2: MEMOS / INBOX (NEW!) ── */}
+        {/* ── TAB 2: MEMOS / INBOX (ダイレクト即時編集版) ── */}
         <div class={`view-container ${activeTab === 'memos' ? 'active' : ''}`}>
-          <div class="section-title">💡 クイック投函 (Inbox)</div>
+          <div class="section-title">💡 クイック新規メモ (Inbox)</div>
           <div class="card">
             <div style={{display:'flex', gap:'8px', marginBottom:'10px'}}>
-              {['🛵稼働', '💡アイデア', '📌タスク', '📓日記'].map(c => (
+              {MEMO_CATEGORIES.map(c => (
                 <button key={c} class={`memo-cat-btn ${newMemoCat === c ? 'active' : ''}`} onClick={() => setNewMemoCat(c)}>{c}</button>
               ))}
             </div>
@@ -1161,13 +1195,13 @@ function App() {
             <button class="gen-btn" style={{marginTop:'10px', padding:'14px', fontSize:'16px'}} onClick={addInboxMemo}>メモを保存する</button>
           </div>
 
-          <div class="section-title">🔍 メモ検索 & 履歴</div>
+          <div class="section-title">🔍 メモ検索 & 一覧 (直接タップして編集可能)</div>
           <div style={{display:'flex', gap:'10px', marginBottom:'12px'}}>
             <input type="text" placeholder="キーワードで即座に検索..." value={memoSearch} onChange={e => setMemoSearch(e.target.value)} />
           </div>
 
           <div class="memo-cat-filter">
-            {['すべて', '🛵稼働', '💡アイデア', '📌タスク', '📓日記'].map(cat => (
+            {['すべて', ...MEMO_CATEGORIES].map(cat => (
               <button key={cat} class={`memo-cat-btn ${memoFilter === cat ? 'active' : ''}`} onClick={() => setMemoFilter(cat)}>{cat}</button>
             ))}
           </div>
@@ -1178,12 +1212,22 @@ function App() {
             filteredMemos.map(m => (
               <div key={m.id} class="memo-item-card">
                 <div class="memo-item-header">
-                  <span class="memo-tag-pill">{m.cat}</span>
+                  {/* タップでカテゴリが切り替わる */}
+                  <span class="memo-tag-pill" title="タップでカテゴリ切替" onClick={() => cycleInboxMemoCat(m.id, m.cat)}>
+                    {m.cat} 🔄
+                  </span>
                   <span>{m.date} {m.time}</span>
                 </div>
-                <div class="memo-item-body">{m.text}</div>
-                <div style={{display:'flex', justifyContent:'flex-end', gap:'8px', marginTop:'6px'}}>
-                  <button class="stamp-btn secondary" style={{minHeight:'36px', fontSize:'12px', padding:'0 10px'}} onClick={() => { navigator.clipboard.writeText(m.text); alert('コピーしました！'); }}>コピー</button>
+                
+                {/* 直接タップしてその場で編集できるテキストエリア */}
+                <textarea
+                  class="memo-direct-textarea"
+                  value={m.text}
+                  onChange={e => updateInboxMemoText(m.id, e.target.value)}
+                />
+
+                <div style={{display:'flex', justifyContent:'flex-end', gap:'8px'}}>
+                  <button class="stamp-btn secondary" style={{minHeight:'36px', fontSize:'12px', padding:'0 12px'}} onClick={() => { navigator.clipboard.writeText(m.text); alert('コピーしました！'); }}>コピー</button>
                   <button class="stamp-btn" style={{minHeight:'36px', fontSize:'12px', background:'rgba(255,50,50,0.2)', color:'#ff5555'}} onClick={() => deleteInboxMemo(m.id)}>削除</button>
                 </div>
               </div>
@@ -1191,7 +1235,7 @@ function App() {
           )}
         </div>
 
-        {/* ── TAB 3: CALENDAR (スマホ最適化) ── */}
+        {/* ── TAB 3: CALENDAR ── */}
         <div class={`view-container ${activeTab === 'calendar' ? 'active' : ''}`}>
           <div class="cal-header-container">
             <div class="cal-title-nav">
@@ -1239,7 +1283,7 @@ function App() {
           </div>
         </div>
 
-        {/* BOTTOM NAV TABS (4画面) */}
+        {/* BOTTOM NAV TABS */}
         <nav class="bottom-nav">
           <button class={`tab-btn ${activeTab === 'dashboard' ? 'active' : ''}`} onClick={() => setActiveTab('dashboard')}>
             <svg class="nav-icon" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><span>ホーム</span>
@@ -1251,7 +1295,7 @@ function App() {
             <svg class="nav-icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="18" y2="10"/></svg><span>カレンダー</span>
           </button>
           <button class={`tab-btn ${activeTab === 'settings' ? 'active' : ''}`} onClick={() => setActiveTab('settings')}>
-            <svg class="nav-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06-.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg><span>設定</span>
+            <svg class="nav-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg><span>設定</span>
           </button>
         </nav>
       </div>

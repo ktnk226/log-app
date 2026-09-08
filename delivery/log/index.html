@@ -13,8 +13,8 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
       --bg: #08090d; --surface: #0f1117; --surface2: #161820;
-      --border: rgba(255,255,255,0.08); --border2: rgba(255,255,255,0.14);
-      --text: #f0f0f0; --muted: rgba(255,255,255,0.38); --muted2: rgba(255,255,255,0.55);
+      --border: rgba(255,255,255,0.1); --border2: rgba(255,255,255,0.18);
+      --text: #f0f0f0; --muted: rgba(255,255,255,0.45); --muted2: rgba(255,255,255,0.7);
       --accent: #ff5c1a; --accent2: #e91e8c; --green: #00e676; --yellow: #ffd600;
       --blue: #2979ff; --teal: #00bcd4;
       --font-head: 'Bebas Neue', sans-serif;
@@ -22,11 +22,11 @@
       --font-mono: 'Space Mono', monospace;
       --radius: 14px; --radius-sm: 9px;
     }
-    html, body { height: 100%; background: var(--bg); color: var(--text); font-family: var(--font-body); overflow-x: hidden; }
+    html, body { height: 100%; background: var(--bg); color: var(--text); font-family: var(--font-body); overflow-x: hidden; font-size: 16px; }
     
     /* APP LAYOUT */
     .app-shell { display: flex; height: 100vh; width: 100vw; overflow: hidden; }
-    .main-content { flex: 1; display: flex; flex-direction: column; overflow-y: auto; padding-bottom: 100px; }
+    .main-content { flex: 1; display: flex; flex-direction: column; overflow-y: auto; padding-bottom: 110px; }
     
     /* SIDEBAR (PC用) */
     .sidebar {
@@ -34,50 +34,50 @@
       display: flex; flex-direction: column; padding: 20px; gap: 20px;
     }
     .brand { display: flex; align-items: center; gap: 12px; padding-bottom: 15px; border-bottom: 1px solid var(--border); }
-    .brand-mark { font-size: 24px; }
-    .brand-title { font-family: var(--font-head); font-size: 24px; letter-spacing: 0.05em; color: #fff; line-height: 1.1; }
+    .brand-mark { font-size: 28px; }
+    .brand-title { font-family: var(--font-head); font-size: 26px; letter-spacing: 0.05em; color: #fff; line-height: 1.1; }
     
     .nav-menu { display: flex; flex-direction: column; gap: 8px; }
     .nav-item {
-      display: flex; align-items: center; gap: 12px; padding: 12px 16px;
+      display: flex; align-items: center; gap: 12px; padding: 14px 18px;
       background: transparent; border: none; border-radius: var(--radius-sm);
-      color: var(--muted2); font-size: 15px; font-weight: 500; text-align: left; cursor: pointer; transition: all 0.2s;
+      color: var(--muted2); font-size: 16px; font-weight: 700; text-align: left; cursor: pointer; transition: all 0.2s;
     }
     .nav-item:hover { background: rgba(255,255,255,0.03); color: #fff; }
-    .nav-item.active { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; font-weight: 700; }
+    .nav-item.active { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; font-weight: 900; }
 
     /* HEADER TOPBAR */
     .topbar {
-      background: rgba(8,9,13,0.85); backdrop-filter: blur(20px);
+      background: rgba(8,9,13,0.9); backdrop-filter: blur(20px);
       border-bottom: 1px solid var(--border); padding: 16px 24px;
       display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100;
     }
-    .topbar h1 { font-size: 22px; font-weight: 900; letter-spacing: -0.02em; }
-    .topbar p { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+    .topbar h1 { font-size: 24px; font-weight: 900; letter-spacing: -0.02em; }
+    .topbar p { font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
 
     /* PERIOD SWITCHER TABS */
-    .period-switcher-container { padding: 16px 24px 0; background: var(--bg); display: flex; flex-direction: column; gap: 10px; }
-    .period-tabs { display: flex; background: var(--surface); border: 1px solid var(--border); padding: 4px; border-radius: var(--radius-sm); width: 100%; max-width: 400px; margin: 0 auto; }
-    .period-tab { flex: 1; background: transparent; border: none; color: var(--muted2); padding: 10px 0; font-size: 16px; font-weight: 700; cursor: pointer; border-radius: 6px; transition: all 0.2s; text-align: center; }
-    .period-tab.active { background: var(--surface2); color: var(--accent); border: 1px solid rgba(255,92,26,0.2); }
+    .period-switcher-container { padding: 16px 20px 0; background: var(--bg); display: flex; flex-direction: column; gap: 10px; }
+    .period-tabs { display: flex; background: var(--surface); border: 1px solid var(--border); padding: 5px; border-radius: var(--radius-sm); width: 100%; max-width: 440px; margin: 0 auto; }
+    .period-tab { flex: 1; background: transparent; border: none; color: var(--muted2); padding: 11px 0; font-size: 17px; font-weight: 800; cursor: pointer; border-radius: 6px; transition: all 0.2s; text-align: center; }
+    .period-tab.active { background: var(--surface2); color: var(--accent); border: 1px solid rgba(255,92,26,0.3); font-weight: 900; }
 
     /* ◀ PERIOD NAV BAR ▶ */
-    .period-nav-bar { display: flex; justify-content: space-between; align-items: center; width: 100%; max-width: 400px; margin: 0 auto; background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--radius-sm); padding: 8px 14px; }
-    .period-nav-btn { background: transparent; border: none; color: var(--accent); font-size: 18px; font-weight: 900; cursor: pointer; padding: 4px 12px; user-select: none; }
+    .period-nav-bar { display: flex; justify-content: space-between; align-items: center; width: 100%; max-width: 440px; margin: 0 auto; background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--radius-sm); padding: 9px 16px; }
+    .period-nav-btn { background: transparent; border: none; color: var(--accent); font-size: 20px; font-weight: 900; cursor: pointer; padding: 4px 14px; user-select: none; }
     .period-nav-btn:hover { color: #fff; }
-    .period-nav-display { font-size: 15px; font-weight: 700; font-family: var(--font-mono); color: #fff; text-align: center; }
+    .period-nav-display { font-size: 16px; font-weight: 800; font-family: var(--font-mono); color: #fff; text-align: center; }
 
-    /* SUMMARY BAR */
+    /* SUMMARY BAR (文字サイズ大幅UP) */
     .summary-bar {
-      background: var(--surface); border-bottom: 1px solid var(--border);
-      padding: 14px 18px; display: flex; flex-direction: column; gap: 10px;
+      background: var(--surface); border-bottom: 1.5px solid var(--border);
+      padding: 16px 20px; display: flex; flex-direction: column; gap: 12px;
     }
     .sum-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
     .sum-row.col-3 { grid-template-columns: 1fr 1fr 1fr; }
     .sum-item { padding: 0; min-width: 0; }
-    .sum-label { font-size: 12px; color: var(--muted); margin-bottom: 2px; white-space: nowrap; font-weight: bold; }
-    .sum-val { font-size: 18px; font-family: var(--font-mono); font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .sum-val.accent { color: var(--accent); font-size: 20px; }
+    .sum-label { font-size: 13px; color: var(--muted); margin-bottom: 2px; white-space: nowrap; font-weight: 700; }
+    .sum-val { font-size: 21px; font-family: var(--font-mono); font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sum-val.accent { color: var(--accent); font-size: 23px; }
     .sum-val.green { color: var(--green); }
     .sum-val.yellow { color: var(--yellow); }
     .sum-val.teal { color: var(--teal); }
@@ -86,199 +86,192 @@
     /* SPLIT WEEK SUMMARY (月〜木 / 金〜日) */
     .week-split-container {
       background: var(--surface2);
-      border-bottom: 1px solid var(--border);
-      padding: 14px 18px;
+      border-bottom: 1.5px solid var(--border);
+      padding: 16px 20px;
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 12px;
+      gap: 14px;
     }
     .split-card {
-      background: rgba(255,255,255,0.025);
-      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.03);
+      border: 1.5px solid var(--border);
       border-radius: var(--radius-sm);
-      padding: 12px 14px;
+      padding: 14px;
       display: flex;
       flex-direction: column;
       gap: 6px;
     }
-    .split-title {
-      font-size: 13px;
-      font-weight: 800;
-      letter-spacing: 0.03em;
-    }
+    .split-title { font-size: 14px; font-weight: 800; letter-spacing: 0.03em; }
     .split-title.weekday { color: var(--teal); }
     .split-title.weekend { color: var(--accent); }
     
-    .split-main-amt {
-      font-size: 19px;
-      font-weight: 700;
-      font-family: var(--font-mono);
-      color: #fff;
-    }
-    .split-sub-row {
-      font-size: 12px;
-      font-family: var(--font-mono);
-      color: var(--muted2);
-      display: flex;
-      flex-wrap: wrap;
-      gap: 4px 10px;
-    }
-    .split-sub-metrics {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px 12px;
-      font-size: 12px;
-      font-family: var(--font-mono);
-      color: var(--muted2);
-      margin-top: 2px;
-    }
+    .split-main-amt { font-size: 22px; font-weight: 800; font-family: var(--font-mono); color: #fff; }
+    .split-sub-row { font-size: 13px; font-family: var(--font-mono); color: var(--muted2); display: flex; flex-wrap: wrap; gap: 4px 10px; }
+    .split-sub-metrics { display: flex; flex-wrap: wrap; gap: 6px 12px; font-size: 13px; font-family: var(--font-mono); color: var(--muted2); margin-top: 4px; }
     .split-sub-metrics span, .split-sub-row span { white-space: nowrap; }
 
     /* VISUAL TARGET POSITION PANEL */
-    .goal-panel { background: var(--surface); border-bottom: 1px solid var(--border); padding: 16px 24px; }
-    .goal-inputs-container { display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px; }
+    .goal-panel { background: var(--surface); border-bottom: 1.5px solid var(--border); padding: 18px 22px; }
+    .goal-inputs-container { display: flex; flex-direction: column; gap: 12px; margin-bottom: 12px; }
     .goal-input-row { display: flex; justify-content: space-between; align-items: center; }
-    .goal-title-flex { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--muted2); font-weight: bold; }
-    .goal-input-wrapper { display: flex; align-items: center; gap: 4px; }
-    .goal-input { font-family: var(--font-mono); font-size: 16px; font-weight: 700; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; color: var(--text); padding: 6px 10px; width: 110px; text-align: right; }
+    .goal-title-flex { display: flex; align-items: center; gap: 8px; font-size: 15px; color: var(--muted2); font-weight: 800; }
+    .goal-input-wrapper { display: flex; align-items: center; gap: 6px; }
+    .goal-input { font-family: var(--font-mono); font-size: 18px; font-weight: 800; background: var(--bg); border: 1.5px solid var(--border); border-radius: 8px; color: var(--text); padding: 8px 12px; width: 130px; text-align: right; }
     
-    .progress-section { margin-top: 8px; }
-    .progress-track { width: 100%; height: 10px; background: rgba(255,255,255,0.04); border-radius: 5px; overflow: hidden; margin-bottom: 6px; border: 1px solid var(--border); }
+    .progress-section { margin-top: 10px; }
+    .progress-track { width: 100%; height: 12px; background: rgba(255,255,255,0.05); border-radius: 6px; overflow: hidden; margin-bottom: 6px; border: 1px solid var(--border); }
     .progress-bar { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); transition: width 0.3s ease; }
     .progress-bar.green { background: linear-gradient(90deg, var(--teal), var(--green)); }
     
-    .goal-footer-row { display: flex; justify-content: space-between; font-size: 13px; font-family: var(--font-mono); flex-direction: column; gap: 4px; }
+    .goal-footer-row { display: flex; justify-content: space-between; font-size: 14px; font-family: var(--font-mono); flex-direction: column; gap: 5px; }
     .goal-footer-top { display: flex; justify-content: space-between; width: 100%; }
-    .goal-footer-bottom { font-size: 12px; color: var(--teal); text-align: right; width: 100%; font-weight: bold; }
+    .goal-footer-bottom { font-size: 13px; color: var(--teal); text-align: right; width: 100%; font-weight: 800; }
     .goal-status-text { color: var(--muted); }
     .goal-status-text strong { color: #fff; }
-    .goal-remain-text { font-weight: 700; }
+    .goal-remain-text { font-weight: 800; }
     .goal-remain-text.done { color: var(--green); }
     .goal-remain-text.remain { color: var(--accent); }
 
     /* VIEW MANAGEMENT */
-    .view-container { padding: 24px; max-width: 700px; width: 100%; margin: 0 auto; display: none; }
+    .view-container { padding: 22px; max-width: 760px; width: 100%; margin: 0 auto; display: none; }
     .view-container.active { display: block; }
-    .section-title { font-size: 13px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px; margin-top: 18px; }
+    .section-title { font-size: 15px; font-weight: 800; color: var(--muted2); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 12px; margin-top: 20px; }
 
     /* CARDS & FORMS */
     .card { background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--radius); padding: 20px; margin-bottom: 16px; }
     .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
     .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    label { font-size: 13px; color: var(--muted); display: block; margin-bottom: 6px; font-weight: bold; }
+    label { font-size: 14px; color: var(--muted2); display: block; margin-bottom: 6px; font-weight: 700; }
     input, select, textarea {
-      width: 100%; padding: 12px 14px; background: rgba(255,255,255,0.04);
-      border: 1.5px solid var(--border); border-radius: var(--radius-sm); color: #fff; font-size: 16px; font-family: var(--font-body);
+      width: 100%; padding: 13px 15px; background: rgba(255,255,255,0.05);
+      border: 1.5px solid var(--border2); border-radius: var(--radius-sm); color: #fff; font-size: 16px; font-family: var(--font-body);
     }
-    input:focus, select:focus, textarea:focus { border-color: var(--accent); outline: none; }
+    input:focus, select:focus, textarea:focus { border-color: var(--accent); outline: none; background: rgba(255,255,255,0.08); }
+
+    /* ⚡ CONDITION SELECTION */
+    .condition-row { display: flex; gap: 8px; margin-top: 4px; }
+    .cond-btn {
+      flex: 1; padding: 12px 6px; background: rgba(255,255,255,0.04); border: 1.5px solid var(--border);
+      border-radius: 8px; color: var(--muted2); font-size: 17px; font-weight: 800; cursor: pointer; text-align: center;
+    }
+    .cond-btn.active {
+      border-color: var(--yellow); background: rgba(255,214,0,0.12); color: #fff; font-weight: 900;
+    }
 
     .daily-memo-textarea {
-      width: 100%;
-      min-height: 110px;
-      background: rgba(0,0,0,0.3);
-      border: 1.5px solid var(--border2);
-      border-radius: var(--radius-sm);
-      color: #fff;
-      font-size: 15px;
-      line-height: 1.6;
-      padding: 12px 14px;
-      font-family: var(--font-body);
-      resize: vertical;
+      width: 100%; min-height: 110px; background: rgba(0,0,0,0.3); border: 1.5px solid var(--border2);
+      border-radius: var(--radius-sm); color: #fff; font-size: 16px; line-height: 1.6; padding: 14px;
+      font-family: var(--font-body); resize: vertical;
     }
-    .daily-memo-textarea:focus { border-color: var(--teal); outline: none; }
-
-    .analysis-grid { display: grid; grid-template-columns: 1fr; gap: 12px; margin-bottom: 16px; }
-    .analysis-card { background: linear-gradient(135deg, #11141d, #161a26); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; }
 
     /* SET CARD */
     .set-card { background: rgba(255,255,255,0.02); border: 1.5px solid var(--border); border-radius: var(--radius); margin-bottom: 14px; overflow: hidden; }
     .set-header { padding: 18px 20px; display: flex; flex-direction: column; gap: 8px; cursor: pointer; user-select: none; }
-    .set-header:hover { background: rgba(255,255,255,0.02); }
+    .set-header:hover { background: rgba(255,255,255,0.03); }
     .set-header-top { display: flex; align-items: center; justify-content: space-between; }
-    .set-title { font-weight: 900; font-size: 17px; display: flex; align-items: center; gap: 8px; }
-    .set-badge { font-size: 11px; padding: 3px 8px; border-radius: 4px; font-weight: 700; }
+    .set-title { font-weight: 900; font-size: 18px; display: flex; align-items: center; gap: 8px; }
+    .set-badge { font-size: 12px; padding: 4px 9px; border-radius: 4px; font-weight: 800; }
     .set-badge.active { background: rgba(255,92,26,0.2); color: var(--accent); }
     .set-badge.done { background: rgba(0,230,118,0.15); color: var(--green); }
     
-    .set-summary-row1 { font-size: 18px; font-weight: 700; color: #fff; font-family: var(--font-mono); }
-    .set-summary-row2 { font-size: 13px; color: var(--muted2); font-family: var(--font-mono); display: flex; gap: 10px; flex-wrap: wrap; margin-top: 4px; }
-    .set-summary-tag { background: rgba(255,255,255,0.04); padding: 3px 8px; border-radius: 4px; border: 1px solid var(--border); }
+    .set-summary-row1 { font-size: 20px; font-weight: 800; color: #fff; font-family: var(--font-mono); }
+    .set-summary-row2 { font-size: 14px; color: var(--muted2); font-family: var(--font-mono); display: flex; gap: 10px; flex-wrap: wrap; margin-top: 4px; }
+    .set-summary-tag { background: rgba(255,255,255,0.05); padding: 4px 10px; border-radius: 6px; border: 1px solid var(--border); }
 
     .time-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding-top: 14px; margin-bottom: 12px; }
     .time-field { display: flex; gap: 6px; }
-    .stamp-btn { padding: 0 14px; background: var(--accent); color: #fff; border-radius: 6px; font-size: 13px; font-weight: 900; border: none; cursor: pointer; min-height: 46px; }
+    .stamp-btn { padding: 0 16px; background: var(--accent); color: #fff; border-radius: 6px; font-size: 14px; font-weight: 900; border: none; cursor: pointer; min-height: 48px; }
     .stamp-btn.secondary { background: rgba(255,255,255,0.15); }
-    .time-duration { font-size: 13px; color: var(--teal); font-family: var(--font-mono); margin-top: 4px; font-weight: bold; }
+    .time-duration { font-size: 14px; color: var(--teal); font-family: var(--font-mono); margin-top: 4px; font-weight: 800; }
 
-    .platform-block { border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px; margin-bottom: 12px; }
-    .platform-title { font-weight: 700; font-size: 15px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
-    .diff-badge { font-size: 13px; font-family: var(--font-mono); opacity: 0.9; }
+    .platform-block { border: 1.5px solid var(--border); border-radius: var(--radius-sm); padding: 14px; margin-bottom: 12px; }
+    .platform-title { font-weight: 800; font-size: 16px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+    .diff-badge { font-size: 14px; font-family: var(--font-mono); opacity: 0.9; }
     .pf-inputs { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
 
-    .del-btn { width: 100%; padding: 12px; background: rgba(255,50,50,0.15); color: #ff5555; border: 1px solid rgba(255,50,50,0.3); border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 12px; font-size: 14px; }
-    .add-btn { width: 100%; padding: 16px; background: rgba(255,255,255,0.05); color: #fff; border: 1px dashed var(--border2); border-radius: var(--radius); font-weight: bold; cursor: pointer; font-size: 16px; }
+    .del-btn { width: 100%; padding: 14px; background: rgba(255,50,50,0.15); color: #ff5555; border: 1px solid rgba(255,50,50,0.3); border-radius: 8px; font-weight: 800; cursor: pointer; margin-top: 12px; font-size: 15px; }
+    .add-btn { width: 100%; padding: 18px; background: rgba(255,255,255,0.05); color: #fff; border: 1.5px dashed var(--border2); border-radius: var(--radius); font-weight: 800; cursor: pointer; font-size: 17px; }
 
-    .log-box { background: #000; border: 1px solid var(--border); border-radius: var(--radius); margin-top: 14px; padding: 16px; font-family: var(--font-mono); font-size: 13px; white-space: pre-wrap; line-height: 1.7; color: #ccc; }
-    .copy-btn { width: 100%; margin-top: 10px; padding: 14px; background: var(--green); color: #000; font-weight: bold; border-radius: 8px; border: none; cursor: pointer; font-size: 16px; }
-    .chevron { font-size: 14px; color: var(--muted); transition: transform 0.2s; }
-    .chevron.open { transform: rotate(180deg); }
+    .log-box { background: #000; border: 1px solid var(--border); border-radius: var(--radius); margin-top: 14px; padding: 18px; font-family: var(--font-mono); font-size: 14px; white-space: pre-wrap; line-height: 1.7; color: #ccc; }
+    .copy-btn { width: 100%; margin-top: 10px; padding: 16px; background: var(--green); color: #000; font-weight: 900; border-radius: 8px; border: none; cursor: pointer; font-size: 17px; }
 
-    .history-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 20px; margin-bottom: 12px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; }
-    .history-card:hover { background: var(--surface2); border-color: var(--muted2); }
-    .history-date { font-weight: 700; font-size: 16px; }
-    .history-summary { font-family: var(--font-mono); font-size: 15px; color: var(--muted2); }
-
+    /* 📅 CALENDAR (スマホ文字切れ完全解消版) */
     .cal-header-container { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
-    .cal-title-nav { display: flex; align-items: center; gap: 16px; }
-    .cal-nav-btn { background: rgba(255,255,255,0.06); border: 1px solid var(--border); color: #fff; padding: 8px 14px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 15px; }
-    .cal-nav-btn:hover { background: rgba(255,255,255,0.12); }
-    .cal-title-text { font-size: 20px; font-weight: 900; }
-    .cal-monthly-total { font-family: var(--font-mono); font-size: 18px; font-weight: 700; color: var(--accent); background: rgba(255,92,26,0.08); padding: 8px 16px; border-radius: 20px; border: 1px solid rgba(255,92,26,0.2); }
+    .cal-title-nav { display: flex; align-items: center; gap: 14px; }
+    .cal-nav-btn { background: rgba(255,255,255,0.08); border: 1px solid var(--border); color: #fff; padding: 9px 16px; border-radius: 8px; cursor: pointer; font-weight: 800; font-size: 16px; }
+    .cal-nav-btn:hover { background: rgba(255,255,255,0.15); }
+    .cal-title-text { font-size: 22px; font-weight: 900; }
+    .cal-monthly-total { font-family: var(--font-mono); font-size: 19px; font-weight: 800; color: var(--accent); background: rgba(255,92,26,0.1); padding: 8px 18px; border-radius: 20px; border: 1px solid rgba(255,92,26,0.25); }
 
-    .cal-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 5px; margin-top: 12px; width: 100%; }
-    .cal-head-cell { text-align: center; font-size: 13px; color: var(--muted); font-weight: 700; padding: 6px 0; }
-    .cal-day-cell { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; min-height: 90px; padding: 8px 6px; cursor: pointer; display: flex; flex-direction: column; justify-content: space-between; min-width: 0; word-break: break-all; }
+    .cal-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; margin-top: 12px; width: 100%; }
+    .cal-head-cell { text-align: center; font-size: 14px; color: var(--muted); font-weight: 800; padding: 6px 0; }
+    
+    .cal-day-cell {
+      background: var(--surface); border: 1.5px solid var(--border); border-radius: 8px;
+      min-height: 96px; padding: 6px 4px; cursor: pointer; display: flex; flex-direction: column;
+      justify-content: space-between; min-width: 0; position: relative; overflow: hidden;
+    }
     .cal-day-cell:hover { background: var(--surface2); border-color: var(--muted2); }
     .cal-day-cell.empty { background: transparent; border: none; cursor: default; }
-    .cal-day-cell.selected { border-color: var(--accent); background: rgba(255,92,26,0.05); }
-    .cal-day-num { font-size: 14px; font-weight: 700; font-family: var(--font-mono); color: var(--muted2); }
-    .cal-day-num.current-month { color: #fff; }
-    .cal-day-amt { font-size: 12px; font-family: var(--font-mono); font-weight: 700; text-align: right; color: var(--accent); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: auto; padding-top: 4px; width: 100%; }
-
-    .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 72px; background: rgba(15,17,23,0.92); backdrop-filter: blur(20px); border-top: 1px solid var(--border); display: none; justify-content: space-around; align-items: center; z-index: 500; }
-    .tab-btn { display: flex; flex-direction: column; align-items: center; justify-content: center; background: transparent; border: none; color: var(--muted); gap: 6px; font-size: 12px; font-weight: 500; cursor: pointer; width: 85px; }
-    .tab-btn.active { color: var(--accent); font-weight: 700; }
+    .cal-day-cell.selected { border-color: var(--accent); background: rgba(255,92,26,0.08); }
     
-    .nav-icon { width: 24px; height: 24px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; transition: color 0.2s; }
+    .cal-day-top { display: flex; justify-content: space-between; align-items: flex-start; }
+    .cal-day-num { font-size: 15px; font-weight: 800; font-family: var(--font-mono); color: var(--muted2); }
+    .cal-day-num.current-month { color: #fff; }
+    .cal-day-cond { font-size: 12px; line-height: 1; }
+    
+    /* 家計簿アプリ風のスマート金額表示 */
+    .cal-day-amt-box { text-align: right; width: 100%; margin-top: auto; }
+    .cal-day-amt {
+      font-size: 13px; font-family: var(--font-mono); font-weight: 800; color: var(--accent);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block;
+    }
+
+    /* 📝 MEMO / INBOX TAB STYLES */
+    .memo-cat-filter { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 14px; }
+    .memo-cat-btn {
+      padding: 8px 14px; background: rgba(255,255,255,0.05); border: 1.5px solid var(--border);
+      border-radius: 20px; color: var(--muted2); font-size: 14px; font-weight: 700; white-space: nowrap; cursor: pointer;
+    }
+    .memo-cat-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); font-weight: 900; }
+    
+    .memo-item-card {
+      background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--radius);
+      padding: 18px; margin-bottom: 12px; display: flex; flex-direction: column; gap: 8px;
+    }
+    .memo-item-header { display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: var(--muted); }
+    .memo-item-body { font-size: 16px; line-height: 1.6; color: #f0f0f0; white-space: pre-wrap; }
+    .memo-tag-pill { font-size: 11px; padding: 2px 8px; border-radius: 4px; background: rgba(255,255,255,0.08); color: var(--teal); font-weight: 700; }
+
+    /* BOTTOM NAV TABS (4タブ化) */
+    .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 76px; background: rgba(15,17,23,0.95); backdrop-filter: blur(20px); border-top: 1.5px solid var(--border); display: none; justify-content: space-around; align-items: center; z-index: 500; }
+    .tab-btn { display: flex; flex-direction: column; align-items: center; justify-content: center; background: transparent; border: none; color: var(--muted); gap: 4px; font-size: 13px; font-weight: 700; cursor: pointer; width: 75px; }
+    .tab-btn.active { color: var(--accent); font-weight: 900; }
+    .nav-icon { width: 24px; height: 24px; stroke: currentColor; fill: none; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; transition: color 0.2s; }
     .tab-btn.active .nav-icon { stroke: var(--accent); }
 
-    .cloud-indicator { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: bold; padding: 6px 14px; border-radius: 20px; background: rgba(41,121,255,0.1); color: var(--blue); }
+    .cloud-indicator { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 800; padding: 6px 14px; border-radius: 20px; background: rgba(41,121,255,0.1); color: var(--blue); }
     .cloud-indicator.unsaved { background: rgba(255,214,0,0.1); color: var(--yellow); }
+    .gen-btn { width: 100%; padding: 18px; background: linear-gradient(135deg, var(--accent), var(--accent2)); border-radius: var(--radius); color: #fff; font-size: 19px; font-weight: 900; border: none; cursor: pointer; }
 
-    .gen-btn { width: 100%; padding: 18px; background: linear-gradient(135deg, var(--accent), var(--accent2)); border-radius: var(--radius); color: #fff; font-size: 18px; font-weight: 900; border: none; cursor: pointer; }
-
-    /* 📱 スマホ用スタイル調整 */
+    /* 📱 スマホ最適化 */
     @media (max-width: 768px) {
       .sidebar { display: none; }
       .bottom-nav { display: flex; }
-      .topbar { padding: 16px; }
+      .topbar { padding: 14px 16px; }
       .view-container { padding: 16px; }
       .summary-bar { padding: 14px 16px; gap: 10px; }
-      .week-split-container { padding: 12px 16px; gap: 8px; }
+      .week-split-container { padding: 12px 16px; gap: 10px; }
       .goal-panel { padding: 14px 16px; }
       .grid-3 { grid-template-columns: 1fr; gap: 12px; }
-      .cal-header-container { flex-direction: column; align-items: flex-start; gap: 12px; }
-      .cal-day-cell { min-height: 80px; padding: 6px 4px; }
       
+      .cal-day-cell { min-height: 82px; padding: 4px 2px; }
       .cal-day-num { font-size: 13px; }
-      .cal-day-amt { font-size: 11px; } 
-      .sum-val { font-size: 18px; }
-      .sum-val.accent { font-size: 21px; }
-      .sum-label { font-size: 12px; }
-      .split-main-amt { font-size: 17px; }
-      .split-sub-row { font-size: 11px; }
-      .split-sub-metrics { font-size: 11px; }
-      .section-title { font-size: 14px; }
+      .cal-day-amt { font-size: 12px; font-weight: 800; } 
+      
+      .sum-val { font-size: 19px; }
+      .sum-val.accent { font-size: 22px; }
+      .split-main-amt { font-size: 19px; }
     }
   </style>
 </head>
@@ -289,9 +282,10 @@
 const { useState, useMemo, useEffect, useCallback } = React;
 
 const SK = {
-  db: 'delivery_log_vault_v9',
-  currentDate: 'delivery_log_current_date_v9',
-  goals: 'delivery_log_periodic_goals_v12', 
+  db: 'delivery_log_vault_v13',
+  currentDate: 'delivery_log_current_date_v13',
+  goals: 'delivery_log_periodic_goals_v13',
+  memos: 'delivery_log_inbox_memos_v13'
 };
 
 const PLATFORMS = [
@@ -302,6 +296,13 @@ const PLATFORMS = [
 ];
 
 const WEATHERS = ['晴','曇','雨','雪','晴→雨','雨→晴','曇→雨'];
+const COND_ICONS = [
+  { val: 1, label: '😫 1' },
+  { val: 2, label: '😕 2' },
+  { val: 3, label: '😐 3' },
+  { val: 4, label: '🙂 4' },
+  { val: 5, label: '🔥 5' },
+];
 
 function getNow() {
   const d = new Date();
@@ -316,6 +317,15 @@ function getBusinessDateStr() {
 
 function formatDateToParam(d) {
   return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+function formatSmartAmt(amt) {
+  if (!amt || amt === 0) return '';
+  if (amt >= 10000) {
+    const man = (amt / 10000).toFixed(1);
+    return `${man.endsWith('.0') ? Math.floor(amt/10000) : man}万`;
+  }
+  return `¥${amt.toLocaleString()}`;
 }
 
 function calcDuration(start, end) {
@@ -342,6 +352,11 @@ function loadInitialGoals() {
   return saved ? JSON.parse(saved) : {}; 
 }
 
+function loadInitialMemos() {
+  const saved = localStorage.getItem(SK.memos);
+  return saved ? JSON.parse(saved) : [];
+}
+
 function getYearWeekStr(dateStr) {
   const d = new Date(dateStr);
   const day = d.getDay();
@@ -360,6 +375,12 @@ function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [period, setPeriod] = useState('day'); 
   const [periodicGoals, setPeriodicGoals] = useState(loadInitialGoals);
+  const [memos, setMemos] = useState(loadInitialMemos);
+  const [memoFilter, setMemoFilter] = useState('すべて');
+  const [memoSearch, setMemoSearch] = useState('');
+  const [newMemoText, setNewMemoText] = useState('');
+  const [newMemoCat, setNewMemoCat] = useState('🛵稼働');
+
   const [showLog, setShowLog] = useState(false);
   const [isDirty, setIsDirty] = useState(false);
 
@@ -367,13 +388,14 @@ function App() {
   const [calMonth, setCalMonth] = useState(() => Number(loadInitialDate().split('-')[1]));
 
   const dayData = useMemo(() => {
-    return vault[date] || { weather: '晴', goalAmt: 0, dailyMemo: '', sets: [EMPTY_SET()] };
+    return vault[date] || { weather: '晴', condition: 4, sleepHours: 7, goalAmt: 0, dailyMemo: '', sets: [EMPTY_SET()] };
   }, [vault, date]);
 
-  const { weather, sets, dailyMemo = '' } = dayData;
+  const { weather, sets, dailyMemo = '', condition = 4, sleepHours = 7 } = dayData;
 
   useEffect(() => { localStorage.setItem(SK.db, JSON.stringify(vault)); }, [vault]);
   useEffect(() => { localStorage.setItem(SK.goals, JSON.stringify(periodicGoals)); }, [periodicGoals]);
+  useEffect(() => { localStorage.setItem(SK.memos, JSON.stringify(memos)); }, [memos]);
   useEffect(() => { localStorage.setItem(SK.currentDate, date); setShowLog(false); }, [date]);
 
   useEffect(() => {
@@ -387,6 +409,8 @@ function App() {
       ...prev,
       [date]: {
         weather: prev[date]?.weather || '晴',
+        condition: prev[date]?.condition || 4,
+        sleepHours: prev[date]?.sleepHours || 7,
         goalAmt: prev[date]?.goalAmt || 0,
         dailyMemo: prev[date]?.dailyMemo || '',
         sets: prev[date]?.sets || [EMPTY_SET()],
@@ -430,11 +454,9 @@ function App() {
     const n = v => parseFloat(v) || 0;
     return sets.map((s, i) => {
       const p = sets[i-1] || { d_cum:0, u_cum:0, r_cum:0, m_cum:0, d_cnt_cum:0, u_cnt_cum:0, r_cnt_cum:0, m_cnt_cum:0, d_que_cum:0, u_que_cum:0, r_que_cum:0, m_que_cum:0, km_cum:0 };
-      
       const sp = (n(s.d_cum)-n(p.d_cum)) + (n(s.u_cum)-n(p.u_cum)) + (n(s.r_cum)-n(p.r_cum)) + (n(s.m_cum)-n(p.m_cum)) + (n(s.d_que_cum)-n(p.d_que_cum)) + (n(s.u_que_cum)-n(p.u_que_cum)) + (n(s.r_que_cum)-n(p.r_que_cum)) + (n(s.m_que_cum)-n(p.m_que_cum));
       const sc = (n(s.d_cnt_cum)-n(p.d_cnt_cum)) + (n(s.u_cnt_cum)-n(p.u_cnt_cum)) + (n(s.r_cnt_cum)-n(p.r_cnt_cum)) + (n(s.m_cnt_cum)-n(p.m_cnt_cum));
       const dur = calcDuration(s.start, s.end);
-      
       const setJikyu = (dur && dur.total > 0) ? Math.round(sp / dur.total) : 0;
       const setTanka = sc > 0 ? Math.round(sp / sc) : 0;
 
@@ -463,10 +485,8 @@ function App() {
     const current = new Date(date);
     const day = current.getDay();
     const mondayOffset = day === 0 ? -6 : 1 - day;
-    
     const mon = new Date(current.getTime() + mondayOffset * 86400000);
     const sun = new Date(mon.getTime() + 6 * 86400000);
-    
     const [y, m, d] = date.split('-');
     const dayJa = ['日','月','火','水','木','金','土'][current.getDay()];
 
@@ -475,8 +495,7 @@ function App() {
       weekStr: `${mon.getFullYear()}年 第${getYearWeekStr(date).split('-W')[1]}週 (${String(mon.getMonth()+1).padStart(2,'0')}/${String(mon.getDate()).padStart(2,'0')}〜${String(sun.getMonth()+1).padStart(2,'0')}/${String(sun.getDate()).padStart(2,'0')})`,
       monthStr: `${y}年 ${m}月 累計`,
       yearStr: `${y}年 年間累計`,
-      monRef: mon,
-      sunRef: sun
+      monRef: mon, sunRef: sun
     };
   }, [date]);
 
@@ -488,8 +507,8 @@ function App() {
     let weekTotal = 0; let weekReal = 0; let weekQue = 0; let weekCnt = 0; let weekHours = 0;
     let yearTotal = 0; let yearReal = 0; let yearQue = 0; let yearCnt = 0; let yearHours = 0;
 
-    let weekMonThu = { total: 0, real: 0, que: 0, cnt: 0, hours: 0, days: 0 };
-    let weekFriSun = { total: 0, real: 0, que: 0, cnt: 0, hours: 0, days: 0 };
+    let weekMonThu = { total: 0, real: 0, que: 0, cnt: 0, hours: 0 };
+    let weekFriSun = { total: 0, real: 0, que: 0, cnt: 0, hours: 0 };
 
     const createPfBuffer = () => ({ d: { s:0, c:0 }, u: { s:0, c:0 }, r: { s:0, c:0 }, m: { s:0, c:0 } });
     const weekPf = createPfBuffer();
@@ -506,9 +525,7 @@ function App() {
       const cnt = n(lastS.d_cnt_cum) + n(lastS.u_cnt_cum) + n(lastS.r_cnt_cum) + n(lastS.m_cnt_cum);
       const totalAmt = sales + que;
 
-      const dayCalced = sList.map((s) => {
-        return { dur: calcDuration(s.start, s.end) };
-      });
+      const dayCalced = sList.map(s => ({ dur: calcDuration(s.start, s.end) }));
       const dayTotalHours = dayCalced.reduce((a, s) => a + (s.dur ? s.dur.total : 0), 0);
 
       const getPfData = (k) => ({
@@ -532,12 +549,9 @@ function App() {
         }
       }
 
-      // 週集計 & 平日(月〜木)・週末(金〜日) 分割集計判定
       const thisDate = new Date(dKey + 'T00:00:00');
-      const monMidnight = new Date(periodMeta.monRef);
-      monMidnight.setHours(0,0,0,0);
-      const sunMidnight = new Date(periodMeta.sunRef);
-      sunMidnight.setHours(23,59,59,999);
+      const monMidnight = new Date(periodMeta.monRef); monMidnight.setHours(0,0,0,0);
+      const sunMidnight = new Date(periodMeta.sunRef); sunMidnight.setHours(23,59,59,999);
 
       if (thisDate >= monMidnight && thisDate <= sunMidnight) {
         weekTotal += totalAmt; weekReal += sales; weekQue += que; weekCnt += cnt; weekHours += dayTotalHours;
@@ -546,21 +560,11 @@ function App() {
           weekPf[p.key].s += pData.sales; weekPf[p.key].c += pData.cnt;
         });
 
-        const dayOfWeek = thisDate.getDay(); // 0:日, 1:月, 2:火, 3:水, 4:木, 5:金, 6:土
+        const dayOfWeek = thisDate.getDay();
         if (dayOfWeek >= 1 && dayOfWeek <= 4) {
-          weekMonThu.total += totalAmt;
-          weekMonThu.real += sales;
-          weekMonThu.que += que;
-          weekMonThu.cnt += cnt;
-          weekMonThu.hours += dayTotalHours;
-          weekMonThu.days += 1;
+          weekMonThu.total += totalAmt; weekMonThu.real += sales; weekMonThu.que += que; weekMonThu.cnt += cnt; weekMonThu.hours += dayTotalHours;
         } else {
-          weekFriSun.total += totalAmt;
-          weekFriSun.real += sales;
-          weekFriSun.que += que;
-          weekFriSun.cnt += cnt;
-          weekFriSun.hours += dayTotalHours;
-          weekFriSun.days += 1;
+          weekFriSun.total += totalAmt; weekFriSun.real += sales; weekFriSun.que += que; weekFriSun.cnt += cnt; weekFriSun.hours += dayTotalHours;
         }
       }
     });
@@ -599,16 +603,12 @@ function App() {
   const activePeriodData = useMemo(() => {
     const data = periodicAnalysis[period];
     const rawGoal = periodicGoals[goalStorageKey];
-    
     const goalAmt = typeof rawGoal === 'object' && rawGoal !== null ? (rawGoal.amt || 0) : Number(rawGoal || 0);
     const goalCnt = typeof rawGoal === 'object' && rawGoal !== null ? (rawGoal.cnt || 0) : 0;
-
     const remainAmt = goalAmt > 0 ? goalAmt - data.total : 0;
     const percentAmt = goalAmt > 0 ? Math.min(Math.round((data.total / goalAmt) * 100), 100) : 0;
-    
     const remainCnt = goalCnt > 0 ? goalCnt - data.cnt : 0;
     const percentCnt = goalCnt > 0 ? Math.min(Math.round((data.cnt / goalCnt) * 100), 100) : 0;
-
     const tanka = data.cnt > 0 ? Math.round(data.total / data.cnt) : 0;
     const realTanka = data.cnt > 0 ? Math.round(data.real / data.cnt) : 0;
     const needCnt = (remainAmt > 0 && tanka > 0) ? Math.ceil(remainAmt / tanka) : 0;
@@ -616,40 +616,32 @@ function App() {
     let dailyNorma = 0;
     if (remainAmt > 0) {
       const currentRef = new Date(date);
-      if (period === 'day') {
-        dailyNorma = remainAmt;
-      } else if (period === 'week') {
-        const dayIdx = currentRef.getDay(); 
-        const remainDays = dayIdx === 0 ? 1 : 7 - dayIdx + 1; 
+      if (period === 'day') dailyNorma = remainAmt;
+      else if (period === 'week') {
+        const dayIdx = currentRef.getDay();
+        const remainDays = dayIdx === 0 ? 1 : 7 - dayIdx + 1;
         dailyNorma = Math.ceil(remainAmt / remainDays);
       } else if (period === 'month') {
-        const lastDayOfMonth = new Date(currentRef.getFullYear(), currentRef.getMonth() + 1, 0).getDate();
-        const remainDays = lastDayOfMonth - currentRef.getDate() + 1;
-        dailyNorma = Math.ceil(remainAmt / remainDays);
+        const lastDay = new Date(currentRef.getFullYear(), currentRef.getMonth() + 1, 0).getDate();
+        dailyNorma = Math.ceil(remainAmt / (lastDay - currentRef.getDate() + 1));
       } else if (period === 'year') {
-        const lastDayOfYear = new Date(currentRef.getFullYear(), 11, 31);
-        const diffTime = lastDayOfYear - currentRef;
-        const remainDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+        const lastDay = new Date(currentRef.getFullYear(), 11, 31);
+        const remainDays = Math.ceil((lastDay - currentRef) / (1000 * 60 * 60 * 24)) + 1;
         dailyNorma = Math.ceil(remainAmt / remainDays);
       }
     }
-
     const periodJikyu = data.hours > 0 ? Math.round(data.total / data.hours) : 0;
     const uph = data.hours > 0 ? (data.cnt / data.hours).toFixed(1) : '0.0';
 
-    return { 
-      ...data, 
-      goalAmt, goalCnt, remainAmt, percentAmt, remainCnt, percentCnt, 
-      needCnt, dailyNorma, periodJikyu, tanka, realTanka, uph 
-    };
+    return { ...data, goalAmt, goalCnt, remainAmt, percentAmt, remainCnt, percentCnt, needCnt, dailyNorma, periodJikyu, tanka, realTanka, uph };
   }, [periodicAnalysis, period, periodicGoals, goalStorageKey, date]);
 
   const handleStepPeriod = (direction) => {
     const current = new Date(date);
-    if (period === 'day') { current.setDate(current.getDate() + direction); } 
-    else if (period === 'week') { current.setDate(current.getDate() + (direction * 7)); } 
-    else if (period === 'month') { current.setMonth(current.getMonth() + direction); } 
-    else if (period === 'year') { current.setFullYear(current.getFullYear() + direction); }
+    if (period === 'day') current.setDate(current.getDate() + direction);
+    else if (period === 'week') current.setDate(current.getDate() + (direction * 7));
+    else if (period === 'month') current.setMonth(current.getMonth() + direction);
+    else if (period === 'year') current.setFullYear(current.getFullYear() + direction);
     setDate(formatDateToParam(current));
   };
 
@@ -665,10 +657,9 @@ function App() {
     if (date === targetDate) {
       if (!window.confirm('現在の最新営業日データを完全にクリアしてリセットしますか？')) return;
       setIsDirty(true);
-      setVault(prev => ({ ...prev, [targetDate]: { weather: '晴', goalAmt: 0, dailyMemo: '', sets: [EMPTY_SET()] } }));
+      setVault(prev => ({ ...prev, [targetDate]: { weather: '晴', condition: 4, sleepHours: 7, goalAmt: 0, dailyMemo: '', sets: [EMPTY_SET()] } }));
     } else { setDate(targetDate); }
-    setActiveTab('dashboard');
-    setPeriod('day');
+    setActiveTab('dashboard'); setPeriod('day');
   };
 
   const deleteSet = (i) => {
@@ -706,18 +697,6 @@ function App() {
     }]);
   };
 
-  const historyList = useMemo(() => {
-    const n = v => parseFloat(v) || 0;
-    return Object.keys(vault).sort().reverse().map(dKey => {
-      const day = vault[dKey]; const sList = day.sets || []; const lastS = sList[sList.length - 1] || {};
-      return {
-        dateKey: dKey,
-        total: (n(lastS.d_cum) + n(lastS.u_cum) + n(lastS.r_cum) + n(lastS.m_cum)) + (n(lastS.d_que_cum) + n(lastS.u_que_cum) + n(lastS.r_que_cum) + n(lastS.m_que_cum)),
-        count: n(lastS.d_cnt_cum) + n(lastS.u_cnt_cum) + n(lastS.r_cnt_cum) + n(lastS.m_cnt_cum)
-      };
-    });
-  }, [vault]);
-
   const calendarDays = useMemo(() => {
     const firstDayIndex = new Date(calYear, calMonth - 1, 1).getDay();
     const totalDays = new Date(calYear, calMonth, 0).getDate();
@@ -727,21 +706,25 @@ function App() {
     for (let i = 0; i < mondayBasedStartIndex; i++) { cells.push({ empty: true }); }
     for (let dayNum = 1; dayNum <= totalDays; dayNum++) {
       const currentKey = `${calYear}-${String(calMonth).padStart(2,'0')}-${String(dayNum).padStart(2,'0')}`;
-      const dayVault = vault[currentKey]; let totalSales = 0;
-      if (dayVault && dayVault.sets && dayVault.sets.length > 0) {
-        const n = v => parseFloat(v) || 0; const lastS = dayVault.sets[dayVault.sets.length - 1];
-        totalSales = (n(lastS.d_cum) + n(lastS.u_cum) + n(lastS.r_cum) + n(lastS.m_cum)) + (n(lastS.d_que_cum) + n(lastS.u_que_cum) + n(lastS.r_que_cum) + n(lastS.m_que_cum));
+      const dayVault = vault[currentKey]; let totalSales = 0; let dayCond = null;
+      if (dayVault) {
+        dayCond = dayVault.condition;
+        if (dayVault.sets && dayVault.sets.length > 0) {
+          const n = v => parseFloat(v) || 0; const lastS = dayVault.sets[dayVault.sets.length - 1];
+          totalSales = (n(lastS.d_cum) + n(lastS.u_cum) + n(lastS.r_cum) + n(lastS.m_cum)) + (n(lastS.d_que_cum) + n(lastS.u_que_cum) + n(lastS.r_que_cum) + n(lastS.m_que_cum));
+        }
       }
-      cells.push({ empty: false, dayNum, dateKey: currentKey, amt: totalSales });
+      cells.push({ empty: false, dayNum, dateKey: currentKey, amt: totalSales, cond: dayCond });
     }
     return cells;
   }, [vault, calYear, calMonth]);
 
   const saveToiCloudJSON = () => {
-    const dataStr = JSON.stringify(vault, null, 2);
+    const backup = { vault, periodicGoals, memos, version: 13 };
+    const dataStr = JSON.stringify(backup, null, 2);
     const blob = new Blob([dataStr], { type: "application/json" });
     const url = URL.createObjectURL(blob); const link = document.createElement("a");
-    link.setAttribute("href", url); link.setAttribute("download", "delilog_data.json");
+    link.setAttribute("href", url); link.setAttribute("download", "delilog_master_backup.json");
     document.body.appendChild(link); link.click(); document.body.removeChild(link);
     setIsDirty(false);
   };
@@ -751,13 +734,47 @@ function App() {
     const reader = new FileReader();
     reader.onload = (event) => {
       try {
-        const importedData = JSON.parse(event.target.result);
-        if (typeof importedData === "object" && importedData !== null) { setVault(importedData); setIsDirty(false); alert("iCloudから同期しました！"); } 
-        else { alert("不正な形式です。"); }
-      } catch (err) { alert("失敗しました。"); }
+        const data = JSON.parse(event.target.result);
+        if (data.vault) {
+          setVault(data.vault);
+          if (data.periodicGoals) setPeriodicGoals(data.periodicGoals);
+          if (data.memos) setMemos(data.memos);
+        } else {
+          setVault(data);
+        }
+        setIsDirty(false); alert("iCloudバックアップから同期しました！");
+      } catch (err) { alert("同期に失敗しました。形式をご確認ください。"); }
     };
     reader.readAsText(file); e.target.value = '';
   };
+
+  const addInboxMemo = () => {
+    if (!newMemoText.trim()) return;
+    const newEntry = {
+      id: Date.now(),
+      date: getBusinessDateStr(),
+      time: getNow(),
+      cat: newMemoCat,
+      text: newMemoText.trim()
+    };
+    setMemos(prev => [newEntry, ...prev]);
+    setNewMemoText('');
+    setIsDirty(true);
+  };
+
+  const deleteInboxMemo = (id) => {
+    if (!window.confirm('このメモを削除しますか？')) return;
+    setMemos(prev => prev.filter(m => m.id !== id));
+    setIsDirty(true);
+  };
+
+  const filteredMemos = useMemo(() => {
+    return memos.filter(m => {
+      const matchCat = memoFilter === 'すべて' || m.cat === memoFilter;
+      const matchText = !memoSearch.trim() || m.text.toLowerCase().includes(memoSearch.toLowerCase());
+      return matchCat && matchText;
+    });
+  }, [memos, memoFilter, memoSearch]);
 
   const generateLog = () => {
     const n = v => parseFloat(v) || 0;
@@ -769,11 +786,13 @@ function App() {
     const d_total = n(last.d_cum); const u_total = n(last.u_cum); const r_total = n(last.r_cum); const m_total = n(last.m_cum);
     const d_cnt   = n(last.d_cnt_cum); const u_cnt   = n(last.u_cnt_cum); const r_cnt   = n(last.r_cnt_cum); const m_cnt   = n(last.m_cnt_cum);
     const d_que = n(last.d_que_cum); const u_que = n(last.u_que_cum); const r_que = n(last.r_que_cum); const m_que = n(last.m_que_cum);
+    const condLabel = COND_ICONS.find(c => c.val === condition)?.label || condition;
 
     const hm = (h) => { const hh = Math.floor(h); const mm = Math.round((h - hh) * 60); return mm > 0 ? `${hh}時間${mm}分` : `${hh}時間`; };
     
     let log = `${dateStr} (${dayJa})\n📊 本日累計リザルト\n\n| 項目 | 内容 | 備考 |\n| :-- | --: | :-- |\n`;
     log += `| **天気** | ${weather} | ${total_que > 0 ? 'クエあり' : 'クエなし'} |\n`;
+    log += `| **体調** | ${condLabel} | 睡眠: ${sleepHours}h |\n`;
     log += `| **総売上** | **${(real_sales + total_que).toLocaleString()} 円** | |\n`;
     log += `| **実質売上** | **${real_sales.toLocaleString()} 円** | クエスト含まず |\n`;
     log += `| **クエ合計** | **${total_que.toLocaleString()} 円** | |\n`;
@@ -822,13 +841,14 @@ function App() {
           <div class="brand-mark">🛵</div>
           <div>
             <div class="brand-title">DELIVERY LOG</div>
-            <p style={{fontSize:'9px', color:'var(--muted)'}}>デリログ // V12</p>
+            <p style={{fontSize:'10px', color:'var(--muted)'}}>デリログ // V13 PRO</p>
           </div>
         </div>
         <nav class="nav-menu">
           <button class={`nav-item ${activeTab === 'dashboard' ? 'active' : ''}`} onClick={() => setActiveTab('dashboard')}>📊 ホーム</button>
+          <button class={`nav-item ${activeTab === 'memos' ? 'active' : ''}`} onClick={() => setActiveTab('memos')}>📝 メモ / Inbox</button>
           <button class={`nav-item ${activeTab === 'calendar' ? 'active' : ''}`} onClick={() => setActiveTab('calendar')}>📅 カレンダー</button>
-          <button class={`nav-item ${activeTab === 'settings' ? 'active' : ''}`} onClick={() => setActiveTab('settings')}>⚙️ 設定・データ</button>
+          <button class={`nav-item ${activeTab === 'settings' ? 'active' : ''}`} onClick={() => setActiveTab('settings')}>⚙️ 設定・同期</button>
         </nav>
       </aside>
 
@@ -836,7 +856,7 @@ function App() {
       <div class="main-content">
         <header class="topbar">
           <div>
-            <p>Target Date // {date.replace(/-/g,'/')}</p>
+            <p>Target // {date.replace(/-/g,'/')}</p>
             <h1>🛵 DELIVERY LOG</h1>
           </div>
           <div style={{display:'flex', gap:'10px'}}>
@@ -858,7 +878,6 @@ function App() {
               <button class={`period-tab ${period === 'year' ? 'active' : ''}`} onClick={() => setPeriod('year')}>年</button>
             </div>
             
-            {/* ◀ 連動ナビゲーションバー ▶ */}
             <div class="period-nav-bar">
               <button class="period-nav-btn" onClick={() => handleStepPeriod(-1)}>◀</button>
               <div class="period-nav-display">{currentNavText}</div>
@@ -868,44 +887,37 @@ function App() {
         )}
 
         {/* 📊 LIVE SUMMARY HEADER */}
-        <div class="summary-bar">
-          {/* 【1段目】総売上 / 実質売上 / クエ合計 */}
-          <div class="sum-row col-3">
-            <div class="sum-item"><div class="sum-label">総売上</div><div class="sum-val accent">{activePeriodData.total.toLocaleString()}円</div></div>
-            <div class="sum-item"><div class="sum-label">実質売上</div><div class="sum-val">{activePeriodData.real.toLocaleString()}円</div></div>
-            <div class="sum-item"><div class="sum-label">クエ合計</div><div class="sum-val teal">{activePeriodData.que.toLocaleString()}円</div></div>
-          </div>
-          {/* 【2段目】件数 / UPH */}
-          <div class="sum-row">
-            <div class="sum-item"><div class="sum-label">件数</div><div class="sum-val green">{activePeriodData.cnt}件</div></div>
-            <div class="sum-item"><div class="sum-label">UPH</div><div class="sum-val">{activePeriodData.uph}</div></div>
-          </div>
-          {/* 【3段目】1件単価 / クエ抜き単価 */}
-          <div class="sum-row">
-            <div class="sum-item"><div class="sum-label">1件単価</div><div class="sum-val">{activePeriodData.cnt > 0 ? activePeriodData.tanka.toLocaleString()+'円' : '-'}</div></div>
-            <div class="sum-item"><div class="sum-label">クエ抜き単価</div><div class="sum-val">{activePeriodData.cnt > 0 ? activePeriodData.realTanka.toLocaleString()+'円' : '-'}</div></div>
-          </div>
-          {/* 【4段目】実働時間 / 時給換算 */}
-          <div class="sum-row">
-            <div class="sum-item">
-              <div class="sum-label">実働時間</div>
-              <div class="sum-val">
-                {activePeriodData.hours > 0 ? formatHours(activePeriodData.hours) : '-'}
-              </div>
+        {activeTab === 'dashboard' && (
+          <div class="summary-bar">
+            <div class="sum-row col-3">
+              <div class="sum-item"><div class="sum-label">総売上</div><div class="sum-val accent">{activePeriodData.total.toLocaleString()}円</div></div>
+              <div class="sum-item"><div class="sum-label">実質売上</div><div class="sum-val">{activePeriodData.real.toLocaleString()}円</div></div>
+              <div class="sum-item"><div class="sum-label">クエ合計</div><div class="sum-val teal">{activePeriodData.que.toLocaleString()}円</div></div>
             </div>
-            <div class="sum-item"><div class="sum-label">時給換算</div><div class="sum-val yellow">{activePeriodData.hours > 0 ? activePeriodData.periodJikyu.toLocaleString()+'円' : '-'}</div></div>
+            <div class="sum-row">
+              <div class="sum-item"><div class="sum-label">件数</div><div class="sum-val green">{activePeriodData.cnt}件</div></div>
+              <div class="sum-item"><div class="sum-label">UPH</div><div class="sum-val">{activePeriodData.uph}</div></div>
+            </div>
+            <div class="sum-row">
+              <div class="sum-item"><div class="sum-label">1件単価</div><div class="sum-val">{activePeriodData.cnt > 0 ? activePeriodData.tanka.toLocaleString()+'円' : '-'}</div></div>
+              <div class="sum-item"><div class="sum-label">クエ抜き単価</div><div class="sum-val">{activePeriodData.cnt > 0 ? activePeriodData.realTanka.toLocaleString()+'円' : '-'}</div></div>
+            </div>
+            <div class="sum-row">
+              <div class="sum-item">
+                <div class="sum-label">実働時間</div>
+                <div class="sum-val">{activePeriodData.hours > 0 ? formatHours(activePeriodData.hours) : '-'}</div>
+              </div>
+              <div class="sum-item"><div class="sum-label">時給換算</div><div class="sum-val yellow">{activePeriodData.hours > 0 ? activePeriodData.periodJikyu.toLocaleString()+'円' : '-'}</div></div>
+            </div>
           </div>
-        </div>
+        )}
 
-        {/* 🌓 週モード限定：【平日（月〜木）】＆【週末（金〜日）】分割集計パネル */}
+        {/* 🌓 週モード限定：【平日】＆【週末】分割集計 */}
         {activeTab === 'dashboard' && period === 'week' && (
           <div class="week-split-container">
-            {/* 平日 (月〜木) */}
             <div class="split-card">
               <div class="split-title weekday">📅 平日 (月〜木)</div>
-              <div class="split-main-amt">
-                {periodicAnalysis.week.monThu.total.toLocaleString()} <span style={{fontSize:'12px', fontWeight:'normal', color:'var(--muted2)'}}>円</span>
-              </div>
+              <div class="split-main-amt">{periodicAnalysis.week.monThu.total.toLocaleString()} <span style={{fontSize:'13px', fontWeight:'normal', color:'var(--muted2)'}}>円</span></div>
               <div class="split-sub-row">
                 <span>実質: <strong>{periodicAnalysis.week.monThu.real.toLocaleString()}</strong>円</span>
                 {periodicAnalysis.week.monThu.que > 0 && <span style={{color:'var(--teal)'}}>クエ: {periodicAnalysis.week.monThu.que.toLocaleString()}円</span>}
@@ -915,17 +927,12 @@ function App() {
                 <span>⏱️ {formatHours(periodicAnalysis.week.monThu.hours)}</span>
                 <span>⚡ UPH {periodicAnalysis.week.monThu.uph}</span>
                 <span>💴 時給 {periodicAnalysis.week.monThu.jikyu > 0 ? periodicAnalysis.week.monThu.jikyu.toLocaleString()+'円' : '-'}</span>
-                <span>🎯 単価 {periodicAnalysis.week.monThu.tanka > 0 ? periodicAnalysis.week.monThu.tanka.toLocaleString()+'円' : '-'}</span>
-                <span>💎 実質単価 {periodicAnalysis.week.monThu.realTanka > 0 ? periodicAnalysis.week.monThu.realTanka.toLocaleString()+'円' : '-'}</span>
               </div>
             </div>
 
-            {/* 週末 (金〜日) */}
             <div class="split-card">
               <div class="split-title weekend">🔥 週末 (金〜日)</div>
-              <div class="split-main-amt">
-                {periodicAnalysis.week.friSun.total.toLocaleString()} <span style={{fontSize:'12px', fontWeight:'normal', color:'var(--muted2)'}}>円</span>
-              </div>
+              <div class="split-main-amt">{periodicAnalysis.week.friSun.total.toLocaleString()} <span style={{fontSize:'13px', fontWeight:'normal', color:'var(--muted2)'}}>円</span></div>
               <div class="split-sub-row">
                 <span>実質: <strong>{periodicAnalysis.week.friSun.real.toLocaleString()}</strong>円</span>
                 {periodicAnalysis.week.friSun.que > 0 && <span style={{color:'var(--teal)'}}>クエ: {periodicAnalysis.week.friSun.que.toLocaleString()}円</span>}
@@ -935,109 +942,94 @@ function App() {
                 <span>⏱️ {formatHours(periodicAnalysis.week.friSun.hours)}</span>
                 <span>⚡ UPH {periodicAnalysis.week.friSun.uph}</span>
                 <span>💴 時給 {periodicAnalysis.week.friSun.jikyu > 0 ? periodicAnalysis.week.friSun.jikyu.toLocaleString()+'円' : '-'}</span>
-                <span>🎯 単価 {periodicAnalysis.week.friSun.tanka > 0 ? periodicAnalysis.week.friSun.tanka.toLocaleString()+'円' : '-'}</span>
-                <span>💎 実質単価 {periodicAnalysis.week.friSun.realTanka > 0 ? periodicAnalysis.week.friSun.realTanka.toLocaleString()+'円' : '-'}</span>
               </div>
             </div>
           </div>
         )}
 
-        {/* 🎯 VISUAL GOAL & POSITION PANEL */}
-        <div class="goal-panel">
-          <div class="goal-inputs-container">
-            {/* 目標金額 */}
-            <div class="goal-input-row">
-              <div class="goal-title-flex">
-                <span>🎯 {periodLabels[period]}目標金額</span>
+        {/* 🎯 GOAL PANEL */}
+        {activeTab === 'dashboard' && (
+          <div class="goal-panel">
+            <div class="goal-inputs-container">
+              <div class="goal-input-row">
+                <div class="goal-title-flex"><span>🎯 {periodLabels[period]}目標金額</span></div>
+                <div class="goal-input-wrapper">
+                  <input class="goal-input" type="number" value={activePeriodData.goalAmt || ''} onChange={e => updatePeriodicGoal('amt', e.target.value)} placeholder="未設定" />
+                  <span style={{fontSize:'14px', color:'var(--muted)'}}>円</span>
+                </div>
               </div>
-              <div class="goal-input-wrapper">
-                <input class="goal-input" type="number" value={activePeriodData.goalAmt || ''} onChange={e => updatePeriodicGoal('amt', e.target.value)} placeholder="未設定" />
-                <span style={{fontSize:'12px', color:'var(--muted)'}}>円</span>
+              <div class="goal-input-row">
+                <div class="goal-title-flex"><span>📦 {periodLabels[period]}目標件数</span></div>
+                <div class="goal-input-wrapper">
+                  <input class="goal-input" type="number" value={activePeriodData.goalCnt || ''} onChange={e => updatePeriodicGoal('cnt', e.target.value)} placeholder="未設定" />
+                  <span style={{fontSize:'14px', color:'var(--muted)'}}>件</span>
+                </div>
               </div>
             </div>
+            
+            {activePeriodData.goalAmt > 0 && (
+              <div class="progress-section">
+                <div class="progress-track"><div class="progress-bar" style={{ width: `${activePeriodData.percentAmt}%` }}></div></div>
+                <div class="goal-footer-row">
+                  <div class="goal-footer-top">
+                    <div class="goal-status-text">金額達成率 <strong>{activePeriodData.percentAmt}%</strong></div>
+                    {activePeriodData.remainAmt <= 0 ? (
+                      <div class="goal-remain-text done">🎉 金額目標達成！</div>
+                    ) : (
+                      <div class="goal-remain-text remain">残り {activePeriodData.remainAmt.toLocaleString()}円</div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
 
-            {/* 目標件数 */}
-            <div class="goal-input-row">
-              <div class="goal-title-flex">
-                <span>📦 {periodLabels[period]}目標件数</span>
+            {activePeriodData.goalCnt > 0 && (
+              <div class="progress-section" style={{marginTop:'8px'}}>
+                <div class="progress-track"><div class="progress-bar green" style={{ width: `${activePeriodData.percentCnt}%` }}></div></div>
+                <div class="goal-footer-row">
+                  <div class="goal-footer-top">
+                    <div class="goal-status-text">件数達成率 <strong>{activePeriodData.percentCnt}%</strong></div>
+                    {activePeriodData.remainCnt <= 0 ? (
+                      <div class="goal-remain-text done">🎉 件数目標達成！</div>
+                    ) : (
+                      <div class="goal-remain-text remain">残り {activePeriodData.remainCnt} 件</div>
+                    )}
+                  </div>
+                </div>
               </div>
-              <div class="goal-input-wrapper">
-                <input class="goal-input" type="number" value={activePeriodData.goalCnt || ''} onChange={e => updatePeriodicGoal('cnt', e.target.value)} placeholder="未設定" />
-                <span style={{fontSize:'12px', color:'var(--muted)'}}>件</span>
-              </div>
-            </div>
+            )}
           </div>
-          
-          {/* 金額プログレスバー */}
-          {activePeriodData.goalAmt > 0 && (
-            <div class="progress-section">
-              <div class="progress-track">
-                <div class="progress-bar" style={{ width: `${activePeriodData.percentAmt}%` }}></div>
-              </div>
-              <div class="goal-footer-row">
-                <div class="goal-footer-top">
-                  <div class="goal-status-text">金額達成率 <strong>{activePeriodData.percentAmt}%</strong></div>
-                  {activePeriodData.remainAmt <= 0 ? (
-                    <div class="goal-remain-text done">🎉 金額目標達成！</div>
-                  ) : (
-                    <div class="goal-remain-text remain">
-                      残り {activePeriodData.remainAmt.toLocaleString()}円 
-                      {activePeriodData.needCnt > 0 && ` (あと約 ${activePeriodData.needCnt} 件)`}
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
+        )}
 
-          {/* 件数プログレスバー */}
-          {activePeriodData.goalCnt > 0 && (
-            <div class="progress-section" style={{marginTop:'8px'}}>
-              <div class="progress-track">
-                <div class="progress-bar green" style={{ width: `${activePeriodData.percentCnt}%` }}></div>
-              </div>
-              <div class="goal-footer-row">
-                <div class="goal-footer-top">
-                  <div class="goal-status-text">件数達成率 <strong>{activePeriodData.percentCnt}%</strong></div>
-                  {activePeriodData.remainCnt <= 0 ? (
-                    <div class="goal-remain-text done">🎉 件数目標達成！</div>
-                  ) : (
-                    <div class="goal-remain-text remain">
-                      残り {activePeriodData.remainCnt} 件
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* 日別平均ノルマ表示 */}
-          {activePeriodData.remainAmt > 0 && period !== 'day' && (
-            <div class="goal-footer-bottom" style={{marginTop:'8px'}}>
-              📈 金額達成には今日を含めて1日平均 <strong>{activePeriodData.dailyNorma.toLocaleString()} 円</strong> の稼働が必要です
-            </div>
-          )}
-        </div>
-
-        {/* ── TAB CONTENT 1: DASHBOARD ── */}
+        {/* ── TAB 1: DASHBOARD (HOME) ── */}
         <div class={`view-container ${activeTab === 'dashboard' ? 'active' : ''}`}>
-          
-          {/* 【日モード選択時：基本概要設定】 */}
           {period === 'day' && (
             <>
-              <div class="section-title">📝 本日の基本概要設定</div>
+              <div class="section-title">📝 本日の概要 & コンディション</div>
               <div class="card grid-3">
-                <div><label>選択中営業日</label><input type="date" value={date} onChange={e => setDate(e.target.value)} style={{borderColor:'var(--teal)'}} /></div>
-                <div><label>天気状況</label><select value={weather} onChange={e => updateDayField('weather', e.target.value)}>{WEATHERS.map(w => <option key={w}>{w}</option>)}</select></div>
-                <div><label>総走行距離</label><div style={{padding:'11px 12px', background:'rgba(255,255,255,0.02)', border:'1.5px solid var(--border)', borderRadius:'var(--radius-sm)', fontSize:'14px', fontFamily:'var(--font-mono)'}}>{daySummary.total_km} km</div></div>
+                <div><label>営業日</label><input type="date" value={date} onChange={e => setDate(e.target.value)} style={{borderColor:'var(--teal)'}} /></div>
+                <div><label>天気</label><select value={weather} onChange={e => updateDayField('weather', e.target.value)}>{WEATHERS.map(w => <option key={w}>{w}</option>)}</select></div>
+                <div><label>睡眠時間 (h)</label><input type="number" step="0.5" value={sleepHours} onChange={e => updateDayField('sleepHours', e.target.value)} /></div>
               </div>
 
-              {/* 📝 新設：本日の気づき・メモ（日記・殴り書き） */}
-              <div class="section-title">📝 本日の気づき・メモ（日記・殴り書き）</div>
-              <div class="card" style={{padding:'16px'}}>
+              {/* ⚡ 体調直感タップ */}
+              <div class="card" style={{padding:'14px 18px', marginTop:'-6px'}}>
+                <label>本日の体調レベル (直感タップ)</label>
+                <div class="condition-row">
+                  {COND_ICONS.map(c => (
+                    <button key={c.val} class={`cond-btn ${condition === c.val ? 'active' : ''}`} onClick={() => updateDayField('condition', c.val)}>
+                      {c.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* 📝 日次メモ */}
+              <div class="section-title">📝 本日の気づき・日記メモ</div>
+              <div class="card" style={{padding:'14px'}}>
                 <textarea
                   class="daily-memo-textarea"
-                  placeholder="現場での気づき、加盟店の状況、体調や感情、トラブル、明日の課題など何でも殴り書きしてください。"
+                  placeholder="現場での気づき、加盟店の状況、感情、トラブル、明日の課題など何でも殴り書き。"
                   value={dailyMemo}
                   onChange={e => updateDayField('dailyMemo', e.target.value)}
                 />
@@ -1045,38 +1037,33 @@ function App() {
             </>
           )}
 
-          {/* 【プラットフォーム別内訳】 */}
-          <div class="section-title">📊 {periodLabels[period]}のプラットフォーム別内訳</div>
-          <div class="analysis-grid">
-            <div class="analysis-card">
-              <div style={{display:'flex', flexDirection:'column', gap:'12px'}}>
-                {PLATFORMS.map(p => {
-                  const targetPf = activePeriodData.pf?.[p.key] || { s: 0, c: 0 };
-                  const pfTanka = targetPf.c > 0 ? Math.round(targetPf.s / targetPf.c) : 0;
-                  return (
-                    <div key={p.key} style={{display:'flex', justifyContent:'space-between', alignItems:'center', fontSize:'14px', borderBottom:'1px solid var(--border)', paddingBottom:'6px'}}>
-                      <span style={{color: p.color, fontWeight:'bold', display:'flex', alignItems:'center', gap:'6px'}}>
-                        <span>{p.label}</span>
-                      </span>
-                      <span class="font-mono" style={{fontWeight: '700'}}>
-                        {targetPf.s.toLocaleString()} 円 
-                        <span style={{fontSize:'11px', color:'var(--muted2)', marginLeft:'6px'}}>{targetPf.c} 件</span>
-                        <span style={{fontSize:'11px', color:'var(--teal)', marginLeft:'8px'}}>(単価: {pfTanka > 0 ? pfTanka.toLocaleString() + '円' : '-'})</span>
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
+          {/* プラットフォーム内訳 */}
+          <div class="section-title">📊 プラットフォーム別内訳</div>
+          <div class="card" style={{padding:'14px 18px'}}>
+            <div style={{display:'flex', flexDirection:'column', gap:'12px'}}>
+              {PLATFORMS.map(p => {
+                const targetPf = activePeriodData.pf?.[p.key] || { s: 0, c: 0 };
+                const pfTanka = targetPf.c > 0 ? Math.round(targetPf.s / targetPf.c) : 0;
+                return (
+                  <div key={p.key} style={{display:'flex', justifyContent:'space-between', alignItems:'center', fontSize:'15px', borderBottom:'1px solid var(--border)', paddingBottom:'8px'}}>
+                    <span style={{color: p.color, fontWeight:'800'}}>{p.label}</span>
+                    <span class="font-mono" style={{fontWeight: '800'}}>
+                      {targetPf.s.toLocaleString()} 円 
+                      <span style={{fontSize:'12px', color:'var(--muted2)', marginLeft:'6px'}}>{targetPf.c} 件</span>
+                      <span style={{fontSize:'12px', color:'var(--teal)', marginLeft:'8px'}}>(単価: {pfTanka > 0 ? pfTanka.toLocaleString() + '円' : '-'})</span>
+                    </span>
+                  </div>
+                );
+              })}
             </div>
           </div>
 
-          {/* 【日モード選択時：稼働セットごとの詳細入力】 */}
+          {/* セット詳細 */}
           {period === 'day' && (
             <>
               <div class="section-title">⏱️ 稼働セットごとの詳細入力</div>
               {calced.map((s, i) => {
                 const durText = s.dur ? `${s.dur.h > 0 ? s.dur.h + '時間' : ''}${s.dur.m}分` : '時間未入力';
-
                 return (
                   <div key={i} class="set-card">
                     <div class="set-header" onClick={() => toggleOpen(i)}>
@@ -1086,21 +1073,17 @@ function App() {
                           {s.start && !s.end && <span class="set-badge active">稼働中</span>}
                           {s.start && s.end && <span class="set-badge done">完了</span>}
                         </div>
-                        <span class={`chevron ${s.open ? 'open' : ''}`}>▼</span>
+                        <span class="chevron">{s.open ? '▲' : '▼'}</span>
                       </div>
-
-                      <div class="set-summary-row1">
-                        {s.sc} 件 / {s.sp.toLocaleString()} 円
-                      </div>
+                      <div class="set-summary-row1">{s.sc} 件 / {s.sp.toLocaleString()} 円</div>
                       <div class="set-summary-row2">
                         <span class="set-summary-tag">⏱️ {durText}</span>
                         <span class="set-summary-tag">💴 時給 {s.setJikyu > 0 ? s.setJikyu.toLocaleString() + '円' : '-'}</span>
-                        <span class="set-summary-tag">📦 単価 {s.setTanka > 0 ? s.setTanka.toLocaleString() + '円' : '-'}</span>
                       </div>
                     </div>
 
                     {s.open && (
-                      <div class="set-body">
+                      <div style={{padding:'16px'}}>
                         <div class="time-row">
                           <div>
                             <label>開始時刻</label>
@@ -1117,25 +1100,24 @@ function App() {
                             </div>
                           </div>
                         </div>
-                        {s.dur && <div class="time-duration">セット稼働時間: {durText}</div>}
 
                         {PLATFORMS.map(p => (
-                          <div key={p.key} class="platform-block" style={{background: p.color+'05', borderColor: p.color+'20'}}>
+                          <div key={p.key} class="platform-block" style={{background: p.color+'06', borderColor: p.color+'25'}}>
                             <div class="platform-title" style={{color: p.color}}>
                               <span>{p.label}</span>
                               <span class="diff-badge">+{s[p.key+'_p'].toLocaleString()}円 / {s[p.key+'_c']}件</span>
                             </div>
                             <div class="pf-inputs">
-                              <div><label>売上(累積)</label><input type="number" placeholder="0" value={sets[i][p.key+'_cum'] || ''} onChange={e => updateSet(i, p.key+'_cum', e.target.value)} /></div>
-                              <div><label>件数(累積)</label><input type="number" placeholder="0" value={sets[i][p.key+'_cnt_cum'] || ''} onChange={e => updateSet(i, p.key+'_cnt_cum', e.target.value)} /></div>
-                              <div><label>クエ累積</label><input type="number" placeholder="0" value={sets[i][p.key+'_que_cum'] || ''} onChange={e => updateSet(i, p.key+'_que_cum', e.target.value)} /></div>
+                              <div><label>売上(累)</label><input type="number" placeholder="0" value={sets[i][p.key+'_cum'] || ''} onChange={e => updateSet(i, p.key+'_cum', e.target.value)} /></div>
+                              <div><label>件数(累)</label><input type="number" placeholder="0" value={sets[i][p.key+'_cnt_cum'] || ''} onChange={e => updateSet(i, p.key+'_cnt_cum', e.target.value)} /></div>
+                              <div><label>クエ(累)</label><input type="number" placeholder="0" value={sets[i][p.key+'_que_cum'] || ''} onChange={e => updateSet(i, p.key+'_que_cum', e.target.value)} /></div>
                             </div>
                           </div>
                         ))}
 
                         <div class="grid-2" style={{margin: '12px 0'}}>
                           <div><label>走行距離累積 (km)</label><input type="number" placeholder="0" value={sets[i].km_cum} onChange={e => updateSet(i,'km_cum',e.target.value)} /></div>
-                          <div><label>走行距離</label><div style={{paddingTop: '12px', color: s.km_p > 0 ? 'var(--teal)' : 'var(--muted)', fontWeight:'bold', fontFamily:'var(--font-mono)'}}>{s.km_p > 0 ? `+${s.km_p} km` : '-'}</div></div>
+                          <div><label>区間距離</label><div style={{paddingTop:'14px', color:'var(--teal)', fontWeight:'800', fontFamily:'var(--font-mono)'}}>{s.km_p > 0 ? `+${s.km_p} km` : '-'}</div></div>
                         </div>
 
                         <div style={{marginTop:'10px'}}><label>戦術メモ</label><textarea rows="2" placeholder="メモ記入" value={sets[i].memo} onChange={e => updateSet(i,'memo',e.target.value)} /></div>
@@ -1158,69 +1140,118 @@ function App() {
               </div>
             </>
           )}
-
         </div>
 
-        {/* ── TAB CONTENT 2: CALENDAR ── */}
-        <div class={`view-container ${activeTab === 'calendar' ? 'active' : ''}`}>
-          <div class="cal-header-container">
-            <div class="cal-title-nav">
-              <button class="cal-nav-btn" onClick={() => handleCalendarMonthChange(-1)}>◀ 前月</button>
-              <span class="cal-title-text">📅 {calYear}年 {calMonth}月</span>
-              <button class="cal-nav-btn" onClick={() => handleCalendarMonthChange(1)}>次月 ▶</button>
-            </div>
-            <div class="cal-monthly-total">月間累計: {currentCalendarMonthTotal.toLocaleString()} 円</div>
-          </div>
-
-          <div class="card" style={{padding:'8px', marginBottom: '24px'}}>
-            <div class="cal-grid">
-              {['月','火','水','木','金','土','日'].map(w => <div key={w} class="cal-head-cell">{w}</div>)}
-              {calendarDays.map((c, idx) => c.empty ? <div key={idx} class="cal-day-cell empty" /> : (
-                <div key={idx} class={`cal-day-cell ${date === c.dateKey ? 'selected' : ''}`} onClick={() => { setDate(c.dateKey); setPeriod('day'); setActiveTab('dashboard'); }}>
-                  <span class="cal-day-num current-month">{c.dayNum}</span>
-                  {c.amt > 0 && <span class="cal-day-amt">¥{c.amt.toLocaleString()}</span>}
-                </div>
+        {/* ── TAB 2: MEMOS / INBOX (NEW!) ── */}
+        <div class={`view-container ${activeTab === 'memos' ? 'active' : ''}`}>
+          <div class="section-title">💡 クイック投函 (Inbox)</div>
+          <div class="card">
+            <div style={{display:'flex', gap:'8px', marginBottom:'10px'}}>
+              {['🛵稼働', '💡アイデア', '📌タスク', '📓日記'].map(c => (
+                <button key={c} class={`memo-cat-btn ${newMemoCat === c ? 'active' : ''}`} onClick={() => setNewMemoCat(c)}>{c}</button>
               ))}
             </div>
+            <textarea
+              class="daily-memo-textarea"
+              placeholder="思いついたアイデア、買出し、備忘録などをパッと入力..."
+              value={newMemoText}
+              onChange={e => setNewMemoText(e.target.value)}
+              style={{minHeight:'90px'}}
+            />
+            <button class="gen-btn" style={{marginTop:'10px', padding:'14px', fontSize:'16px'}} onClick={addInboxMemo}>メモを保存する</button>
           </div>
 
-          <div class="section-title">📜 過去の営業日データ履歴</div>
-          {historyList.length === 0 ? <div style={{textAlign:'center', padding:'20px', fontSize:'13px', color:'var(--muted)'}}>データがありません</div> : (
-            historyList.map(h => (
-              <div key={h.dateKey} class="history-card" style={{borderColor: date === h.dateKey ? 'var(--accent)' : ''}} onClick={() => { setDate(h.dateKey); setPeriod('day'); setActiveTab('dashboard'); }}>
-                <span class="history-date">{h.dateKey.replace(/-/g,'/')}</span>
-                <span class="history-summary">{h.count} 件 / {h.total.toLocaleString()} 円</span>
+          <div class="section-title">🔍 メモ検索 & 履歴</div>
+          <div style={{display:'flex', gap:'10px', marginBottom:'12px'}}>
+            <input type="text" placeholder="キーワードで即座に検索..." value={memoSearch} onChange={e => setMemoSearch(e.target.value)} />
+          </div>
+
+          <div class="memo-cat-filter">
+            {['すべて', '🛵稼働', '💡アイデア', '📌タスク', '📓日記'].map(cat => (
+              <button key={cat} class={`memo-cat-btn ${memoFilter === cat ? 'active' : ''}`} onClick={() => setMemoFilter(cat)}>{cat}</button>
+            ))}
+          </div>
+
+          {filteredMemos.length === 0 ? (
+            <div style={{textAlign:'center', padding:'30px', color:'var(--muted)'}}>該当するメモがありません</div>
+          ) : (
+            filteredMemos.map(m => (
+              <div key={m.id} class="memo-item-card">
+                <div class="memo-item-header">
+                  <span class="memo-tag-pill">{m.cat}</span>
+                  <span>{m.date} {m.time}</span>
+                </div>
+                <div class="memo-item-body">{m.text}</div>
+                <div style={{display:'flex', justifyContent:'flex-end', gap:'8px', marginTop:'6px'}}>
+                  <button class="stamp-btn secondary" style={{minHeight:'36px', fontSize:'12px', padding:'0 10px'}} onClick={() => { navigator.clipboard.writeText(m.text); alert('コピーしました！'); }}>コピー</button>
+                  <button class="stamp-btn" style={{minHeight:'36px', fontSize:'12px', background:'rgba(255,50,50,0.2)', color:'#ff5555'}} onClick={() => deleteInboxMemo(m.id)}>削除</button>
+                </div>
               </div>
             ))
           )}
         </div>
 
-        {/* ── TAB CONTENT 3: SETTINGS ── */}
+        {/* ── TAB 3: CALENDAR (スマホ最適化) ── */}
+        <div class={`view-container ${activeTab === 'calendar' ? 'active' : ''}`}>
+          <div class="cal-header-container">
+            <div class="cal-title-nav">
+              <button class="cal-nav-btn" onClick={() => handleCalendarMonthChange(-1)}>◀</button>
+              <span class="cal-title-text">{calYear}年 {calMonth}月</span>
+              <button class="cal-nav-btn" onClick={() => handleCalendarMonthChange(1)}>▶</button>
+            </div>
+            <div class="cal-monthly-total">{currentCalendarMonthTotal.toLocaleString()} 円</div>
+          </div>
+
+          <div class="card" style={{padding:'6px', marginBottom: '24px'}}>
+            <div class="cal-grid">
+              {['月','火','水','木','金','土','日'].map(w => <div key={w} class="cal-head-cell">{w}</div>)}
+              {calendarDays.map((c, idx) => c.empty ? <div key={idx} class="cal-day-cell empty" /> : (
+                <div key={idx} class={`cal-day-cell ${date === c.dateKey ? 'selected' : ''}`} onClick={() => { setDate(c.dateKey); setPeriod('day'); setActiveTab('dashboard'); }}>
+                  <div class="cal-day-top">
+                    <span class="cal-day-num current-month">{c.dayNum}</span>
+                    {c.cond && <span class="cal-day-cond">{COND_ICONS.find(icon => icon.val === c.cond)?.label.split(' ')[0]}</span>}
+                  </div>
+                  <div class="cal-day-amt-box">
+                    <span class="cal-day-amt">{formatSmartAmt(c.amt)}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* ── TAB 4: SETTINGS ── */}
         <div class={`view-container ${activeTab === 'settings' ? 'active' : ''}`}>
-          <div class="section-title">☁️ iCloud Drive 連動</div>
-          <div class="card" style={{borderColor:'var(--blue)', background:'rgba(41,121,255,0.02)'}}>
+          <div class="section-title">☁️ iCloud Drive バックアップ / 同期</div>
+          <div class="card" style={{borderColor:'var(--blue)', background:'rgba(41,121,255,0.03)'}}>
+            <p style={{fontSize:'14px', color:'var(--muted2)', marginBottom:'14px'}}>
+              稼働ログ、メモ、目標設定を含む全データを一括で保存・復元します。
+            </p>
             <div class="grid-2">
-              <button class="gen-btn" style={{background:'var(--blue)', fontWeight:'900'}} onClick={saveToiCloudJSON}>💾 iCloudへ書き出し保存</button>
-              <button class="gen-btn" style={{background:'rgba(255,255,255,0.1)', color:'#fff', border:'1px solid var(--border)'}} onClick={() => document.getElementById('settingsCloudLoad').click()}>📥 iCloudから読み込み同期</button>
+              <button class="gen-btn" style={{background:'var(--blue)'}} onClick={saveToiCloudJSON}>💾 iCloudへ完全保存</button>
+              <button class="gen-btn" style={{background:'rgba(255,255,255,0.1)', color:'#fff', border:'1.5px solid var(--border)'}} onClick={() => document.getElementById('settingsCloudLoad').click()}>📥 iCloudから同期</button>
             </div>
             <input type="file" id="settingsCloudLoad" accept=".json" style={{display:'none'}} onChange={loadFromiCloudJSON} />
           </div>
           <div class="section-title">データコントロール</div>
           <div class="card">
-            <button class="gen-btn" style={{background:'var(--blue)'}} onClick={startNewDay}>新しい営業日を開始する (4時起点判定)</button>
+            <button class="gen-btn" style={{background:'rgba(255,92,26,0.2)', color:'var(--accent)', border:'1.5px solid var(--accent)'}} onClick={startNewDay}>新しい営業日を開始する (4時起点)</button>
           </div>
         </div>
 
-        {/* BOTTOM NAV TABS BAR */}
+        {/* BOTTOM NAV TABS (4画面) */}
         <nav class="bottom-nav">
           <button class={`tab-btn ${activeTab === 'dashboard' ? 'active' : ''}`} onClick={() => setActiveTab('dashboard')}>
             <svg class="nav-icon" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><span>ホーム</span>
+          </button>
+          <button class={`tab-btn ${activeTab === 'memos' ? 'active' : ''}`} onClick={() => setActiveTab('memos')}>
+            <svg class="nav-icon" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg><span>メモ</span>
           </button>
           <button class={`tab-btn ${activeTab === 'calendar' ? 'active' : ''}`} onClick={() => setActiveTab('calendar')}>
             <svg class="nav-icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="18" y2="10"/></svg><span>カレンダー</span>
           </button>
           <button class={`tab-btn ${activeTab === 'settings' ? 'active' : ''}`} onClick={() => setActiveTab('settings')}>
-            <svg class="nav-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg><span>設定</span>
+            <svg class="nav-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06-.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg><span>設定</span>
           </button>
         </nav>
       </div>
